@@ -12,7 +12,11 @@
     - [ ] Android (interaction)
     - [ ] Android (animated)
 - [ ] Volume
-- [ ] Mouse jitter (e.g. robot.js)
+- [ ] Mouse jitter (e.g. robot.js) 
 
 ## Issues
 - Every once in a while, the brightness stops responding...
+- Robot.js [will not run on Electron](https://github.com/octalmage/robotjs/issues/675)
+
+## Notes
+- [rebuild.js](./rebuild.js) is used to build the correct version of robot.js for Electron

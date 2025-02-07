@@ -20,6 +20,11 @@ const setIgnoreMouseEvents = async (ignore: boolean) => {
   setIgnoreMouseEvents(ignore)
 }
 
+const setMouseNoise = async (level: number) => {
+  const { levels: { setMouseNoise } } = await READY
+  setMouseNoise(level)
+}
+
 const getRenderedLevel = () => parseFloat(rangeSlider.value) // Between 0 and 1
 
 const updateAppBrightness = async (level = getRenderedLevel()) => document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
@@ -37,6 +42,7 @@ const setGeneralLevel = async (level: number) => {
 
   // Forward the level to a system-level service
   if (DESKTOP) {
+    setMouseNoise(level)
     const volumeResult = await desktop.setVolume(level)
     const brightnessResult = await desktop.setBrightness(level)
     const error = volumeResult.error || brightnessResult.error
@@ -79,7 +85,7 @@ const animateSlider = () => {
 }
 
 let runAnimation = false
-toggleAnimationButton && toggleAnimationButton.addEventListener('click', () => {
+toggleAnimationButton.addEventListener('click', async () => {
   runAnimation = !runAnimation
   if (runAnimation) animateSlider()
 })

@@ -37,7 +37,6 @@ const server = http.createServer((
     return;
   }
 
-
   // Fail on all other requests
   res.writeHead(404, { 'Content-Type': "application/json" });
   res.end(JSON.stringify({ error: "Not Found" }));

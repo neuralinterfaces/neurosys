@@ -1,30 +1,24 @@
-const { DESKTOP, SERVICES } = commoners
+const { DESKTOP, READY } = commoners
+
+export const runRobot = async () => {
+    const { systemService } = await READY
+    const result = await systemService.get('robot')
+    return result
+}
 
 
 export const setBrightness = async (value: number) => {
 
     if (!DESKTOP) return
-    const endpoint = new URL('brightness', SERVICES.systemService.url)
-    const result = await fetch(endpoint.href, {
-        method: 'POST',
-        body: JSON.stringify({ value })
-    })
 
-    const json = await result.json()
-
-    return json
+    const { systemService } = await READY
+    const result = await systemService.post('brightness', { value })
+    return result
 }
 
 export const setVolume = async (value: number) => {
     if (!DESKTOP) return
-    const endpoint = new URL('volume', SERVICES.systemService.url)
-    const result = await fetch(endpoint.href, {
-        method: 'POST',
-        body: JSON.stringify({ value })
-    })
-
-    const json = await result.json()
-
-    return json
-
+    const { systemService } = await READY
+    const result = await systemService.post('volume', { value })
+    return result
 }
