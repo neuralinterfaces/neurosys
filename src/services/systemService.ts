@@ -3,22 +3,15 @@ import http from 'node:http';
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
-import os from "os";
-
-let __brightnessModule: any;
-const getBrightnessModuleName = async () => __brightnessModule = __brightnessModule || import("brightness");
-
+import brightness from 'brightness';
 
 export async function setBrightness(value: number) {
 
   try {
-    const brightnessModule = await getBrightnessModuleName();
-    await brightnessModule.set(value);
-    console.log(`Brightness set to ${value}`);
+    await brightness.set(value);
     return { success: true };
   } catch (error) {
-    console.error("Failed to set brightness:", error);
-    return { success: false, error };
+    return { success: false, error: error.message };
   }
 }
 
@@ -35,28 +28,19 @@ const server = http.createServer((
   if (req.method === 'POST') {
     let body = '';
     req.on('data', (chunk) => body += chunk.toString());
-    req.on('end', () => {
-
-      res.writeHead(200, { 'Content-Type': req.headers['content-type'] || 'text/plain' });
-      res.end(body);
-      return;
-
+    req.on('end', async () => {
       res.writeHead(200, { 'Content-Type': "application/json" });
-      
-      // Set Brightness
       const json = JSON.parse(body);
-      console.log("Setting brightness to", json);
-      const result = setBrightness(json.value);
+      const result = await setBrightness(json.value);
       res.end(JSON.stringify(result));
     });
     return;
   }
 
-  // Default Response
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Hello World\n');
-  return;
 
+  // Fail on all other requests
+  res.writeHead(404, { 'Content-Type': "application/json" });
+  res.end(JSON.stringify({ error: "Not Found" }));
 });
 
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));

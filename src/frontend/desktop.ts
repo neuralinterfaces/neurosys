@@ -2,6 +2,7 @@ const { DESKTOP, SERVICES } = commoners
 
 
 export const setBrightness = async (value: number) => {
+
     if (!DESKTOP) return
     const endpoint = new URL('brightness', SERVICES.systemService.url)
     const result = await fetch(endpoint.href, {

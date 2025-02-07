@@ -3,14 +3,15 @@ import './style.css'
 import { ScreenBrightness } from '@capacitor-community/screen-brightness';
 
 import * as capacitorVolume from '@ottimis/capacitor-volumes'
+console.log('capacitorVolume', capacitorVolume)
 
 import * as desktop from './desktop'
 
 const rangeSlider = document.querySelector("input[type='range']") as HTMLInputElement
 const toggleAnimationButton = document.querySelector("button") as HTMLButtonElement
+const errorDisplay = document.querySelector("#error") as HTMLElement
 
-
-const { WEB, DESKTOP, MOBILE, READY, PLUGINS, SERVICES } = commoners
+const { DESKTOP, MOBILE, READY } = commoners
 
 let canIgnoreMouseEvents = true
 
@@ -38,7 +39,8 @@ const setGeneralLevel = async (level: number) => {
   if (DESKTOP) {
     const volumeResult = await desktop.setVolume(level)
     const brightnessResult = await desktop.setBrightness(level)
-    console.log(volumeResult, brightnessResult)
+    const error = volumeResult.error || brightnessResult.error
+    errorDisplay.innerText = error ? `Error: ${error}` : ''
     return
   }
 
@@ -72,11 +74,11 @@ const animateSlider = () => {
   if (!runAnimation) return
   const level = (Math.sin(Date.now() / 1000) + 1) / 2
   rangeSlider.value = level.toString()
-  updateAppBrightness(level)
+  setGeneralLevel(level)
   requestAnimationFrame(animateSlider)
 }
 
-let runAnimation = true
+let runAnimation = false
 toggleAnimationButton && toggleAnimationButton.addEventListener('click', () => {
   runAnimation = !runAnimation
   if (runAnimation) animateSlider()
