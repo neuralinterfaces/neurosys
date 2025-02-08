@@ -135,9 +135,7 @@ export default {
                         {
                           label: 'Options',
                           submenu: [
-                            { label: 'Toggle Animation', click: () => {
-                                this.send("toggle-animation")
-                            } }
+                            { label: 'Toggle Animation', click: () => this.send("toggle-animation") }
                           ],
                         },
                         { type: 'separator' },
@@ -151,7 +149,7 @@ export default {
                     tray.setContextMenu(menu);
                     tray.setToolTip('System Neurofeedback');
 
-                    if (isMacOS) tray.on('click', () => tray.popUpContextMenu());
+                    tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
                 }
             }
         },
