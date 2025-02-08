@@ -55,10 +55,10 @@ const setGeneralLevel = async (level: number) => {
 
     await ScreenBrightness.setBrightness({ brightness: level });
 
-    capacitorVolume.setVolumeLevel({ 
-      value: level, 
-      type: 'system' 
-    })
+    // capacitorVolume.setVolumeLevel({ 
+    //   value: level, 
+    //   type: 'system' 
+    // })
   }
 
   // Cannot handle system-level volume control on the web

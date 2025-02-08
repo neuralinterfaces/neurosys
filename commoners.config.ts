@@ -108,7 +108,7 @@ export default {
                     // Ensure you can always exit the app
                     this.electron.globalShortcut.register('CommandOrControl+Q', () =>  this.electron.app.quit())
 
-                    win.webContents.openDevTools()
+                    // win.webContents.openDevTools()
                 },
             },
         }
