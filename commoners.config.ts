@@ -2,12 +2,22 @@
 export default {
     name: "System Neurofeedback",
 
+    pages: {
+        settings: './src/pages/settings/settings.html'
+    },
+
     electron: {
         window: {
             frame: false, 
             transparent: true,
             focusable: false,
             hasShadow: false,
+
+            // Windows
+            thickFrame: false,
+
+            // MacOS
+            roundedCorners: false
         },
         // win: { requestedExecutionLevel: 'requireAdministrator' }
     },
@@ -81,6 +91,67 @@ export default {
                         const json = await result.json()
                         return json
                     }
+                }
+            }
+        },
+
+
+        menu: {
+            assets: {
+                macTrayIcon: "./src/tray/macIcon.png",
+                trayIcon: "./src/tray/trayIcon.png"
+            },
+
+            load: function () {
+                return {
+                    onAnimationToggled: (callback) => this.on("toggle-animation", callback)
+                }
+            },
+
+            desktop: {
+                load: function () {
+
+                    const { plugin: { assets: { trayIcon, macTrayIcon } }, electron, utils: { platform: { isMacOS }} } = this
+
+                    const { Menu, BrowserWindow, Tray } = electron
+
+                    const menu = Menu.buildFromTemplate([
+
+                        // NOTE: Not able to properly reference the location and load it simply
+                        // {
+                        //     label: 'Open Settings',
+                        //     click: () => {
+                        //         const settingsWindow = new BrowserWindow({
+                        //             width: 400,
+                        //             height: 300,
+                        //             title: 'Settings',
+                        //         });
+
+                        //         settingsWindow.loadURL(fileURL);
+                        //     },
+                        // },
+                        // { type: 'separator' },
+
+                        {
+                          label: 'Options',
+                          submenu: [
+                            { label: 'Toggle Animation', click: () => {
+                                this.send("toggle-animation")
+                            } }
+                          ],
+                        },
+                        { type: 'separator' },
+                        { label: 'Quit', role: 'quit' }
+                      ]);
+                    
+                    //   Menu.setApplicationMenu(menu);
+
+                    const tray = new Tray(isMacOS ? macTrayIcon : trayIcon);
+
+                    tray.setContextMenu(menu);
+                    tray.setToolTip('System Neurofeedback');
+
+                    if (isMacOS) tray.on('click', () => tray.popUpContextMenu());
                 }
             }
         },

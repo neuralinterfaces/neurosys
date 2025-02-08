@@ -3,12 +3,15 @@ import http from 'node:http';
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
-import brightness from 'brightness';
+type LevelUpdate = {
+  value: number;
+  type?: "level" ;
+}
 
-export async function setBrightness(value: number) {
+export async function setLevel({ value, type = "level" }: LevelUpdate) {
 
   try {
-    await brightness.set(value);
+    console.log(`Setting ${type} to ${value}`);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -31,7 +34,7 @@ const server = http.createServer((
     req.on('end', async () => {
       res.writeHead(200, { 'Content-Type': "application/json" });
       const json = JSON.parse(body);
-      const result = await setBrightness(json.value);
+      const result = await setLevel(json);
       res.end(JSON.stringify(result));
     });
     return;

@@ -7,8 +7,6 @@ console.log('capacitorVolume', capacitorVolume)
 
 import * as desktop from './desktop'
 
-const rangeSlider = document.querySelector("input[type='range']") as HTMLInputElement
-const toggleAnimationButton = document.querySelector("button") as HTMLButtonElement
 const errorDisplay = document.querySelector("#error") as HTMLElement
 
 const { DESKTOP, MOBILE, READY } = commoners
@@ -25,10 +23,13 @@ const setMouseNoise = async (level: number) => {
   setMouseNoise(level)
 }
 
-const getRenderedLevel = () => parseFloat(rangeSlider.value) // Between 0 and 1
+const onAnimationToggled = async (fn: Function) => {
+  const { menu: { onAnimationToggled } } = await READY
+  onAnimationToggled(fn)
+}
 
-const updateAppBrightness = async (level = getRenderedLevel()) => document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
-updateAppBrightness()
+const updateAppBrightness = async (level: number) => document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
+updateAppBrightness(0)
 
 
 const registerAsInteractive = async (element: HTMLElement) => {
@@ -67,29 +68,17 @@ const setGeneralLevel = async (level: number) => {
 }
 
 
-// Manually set the level and interrupt the animation
-rangeSlider.addEventListener('input', async (e) => {
-  runAnimation = false
-  const level = getRenderedLevel()
-  setGeneralLevel(level)
-})
-
-
 // Animate range slider in a sine wave loop
 const animateSlider = () => {
   if (!runAnimation) return
   const level = (Math.sin(Date.now() / 1000) + 1) / 2
-  rangeSlider.value = level.toString()
-  setGeneralLevel(level)
+  setGeneralLevel(level) // Set the level displayed on the system
   requestAnimationFrame(animateSlider)
 }
 
 let runAnimation = false
-toggleAnimationButton.addEventListener('click', async () => {
+
+onAnimationToggled(() => {
   runAnimation = !runAnimation
   if (runAnimation) animateSlider()
 })
-
-
-registerAsInteractive(rangeSlider)
-registerAsInteractive(toggleAnimationButton)
