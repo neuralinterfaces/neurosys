@@ -12,6 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 body {
   margin: 0;
   display: flex;
@@ -43,4 +44,29 @@ h1 {
 
 #error:empty {
   background: transparent;
+}
+
+/* NO FOCUS on the dialog */
+dialog {
+  outline: none;
+}
+
+
+dialog ul {
+  list-style: none;
+  padding: 0;
+}
+
+dialog ul li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+ /* Add a top border to all items except the first one */
+dialog ul li:not(:first-child) {
+  border-top: 1px solid #333;
 }

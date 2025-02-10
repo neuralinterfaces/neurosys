@@ -20,7 +20,9 @@
     "@capacitor-community/screen-brightness": "^7.0.0",
     "@electron/rebuild": "^3.7.1",
     "@ottimis/capacitor-volumes": "^6.1.0",
+    "bcijs": "^1.8.0",
     "brightness": "^3.0.0",
+    "muse-js": "^3.3.0",
     "robotjs": "^0.6.0"
   },
   "main": ".commoners/.temp/main.cjs"

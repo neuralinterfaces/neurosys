@@ -1,3 +1,16 @@
+import * as bluetoothPlugin from './src/plugins/ble/index'
+
+// const SHOW = true
+const SHOW = false
+
+const ELECTRON_WINDOW_SETTINGS = {
+    frame: false,
+    transparent: true,
+    focusable: false,
+    hasShadow: false,
+    thickFrame: false, // Windows
+    roundedCorners: false // MacOS
+}
 
 export default {
     name: "System Neurofeedback",
@@ -7,18 +20,7 @@ export default {
     },
 
     electron: {
-        window: {
-            frame: false, 
-            transparent: true,
-            focusable: false,
-            hasShadow: false,
-
-            // Windows
-            thickFrame: false,
-
-            // MacOS
-            roundedCorners: false
-        },
+        window: SHOW ? {} : ELECTRON_WINDOW_SETTINGS,
         // win: { requestedExecutionLevel: 'requireAdministrator' }
     },
 
@@ -27,6 +29,8 @@ export default {
     },
 
     plugins: {
+
+        bluetooth: bluetoothPlugin,
 
         levels: {
             load: function () {
@@ -104,7 +108,8 @@ export default {
 
             load: function () {
                 return {
-                    onAnimationToggled: (callback) => this.on("toggle-animation", callback)
+                    onAnimationToggled: (callback) => this.on("toggle-animation", () => callback()),
+                    showDeviceSelector: (callback) => this.on("devices.show", () => callback())
                 }
             },
 
@@ -117,20 +122,12 @@ export default {
 
                     const menu = Menu.buildFromTemplate([
 
-                        // NOTE: Not able to properly reference the location and load it simply
-                        // {
-                        //     label: 'Open Settings',
-                        //     click: () => {
-                        //         const settingsWindow = new BrowserWindow({
-                        //             width: 400,
-                        //             height: 300,
-                        //             title: 'Settings',
-                        //         });
+                        {
+                            label: 'Connect to Device',
+                            click: () =>  this.send("devices.show")
+                        },
 
-                        //         settingsWindow.loadURL(fileURL);
-                        //     },
-                        // },
-                        // { type: 'separator' },
+                        { type: 'separator' },
 
                         {
                           label: 'Options',
@@ -138,7 +135,7 @@ export default {
                             { label: 'Toggle Animation', click: () => this.send("toggle-animation") }
                           ],
                         },
-                        { type: 'separator' },
+
                         { label: 'Quit', role: 'quit' }
                       ]);
                     
@@ -163,6 +160,9 @@ export default {
             },
             desktop: {
                 load: function (win) {
+
+                    if (SHOW) return
+
                     const mainScreen = this.electron.screen.getPrimaryDisplay()
 
                     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
