@@ -49,6 +49,7 @@ h1 {
 /* NO FOCUS on the dialog */
 dialog {
   outline: none;
+  width: clamp(0px, 100%, 400px);
 }
 
 
@@ -69,4 +70,59 @@ dialog ul li {
  /* Add a top border to all items except the first one */
 dialog ul li:not(:first-child) {
   border-top: 1px solid #333;
+}
+
+#channels-container {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  gap: 10px;
+  top: 50px;
+  right: 50px;
+  padding: 10px;
+  background: #262626;
+}
+
+#channels-container .channel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+#channels-container .channel strong {
+  font-size: 90%;
+} 
+
+#channels-container .bands {
+  display: flex;
+  width: 150px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: gainsboro;
+}
+
+.band {
+  height: 100%;
+}
+
+.band.delta {
+  background: #ff6969;
+}
+
+.band.theta {
+  background: #fff569;
+}
+
+.band.alpha {
+  background: #6cff69;
+}
+
+.band.beta {
+  background: #69a3ff;
+}
+
+.band.gamma {
+  background: #ff69f3;
 }

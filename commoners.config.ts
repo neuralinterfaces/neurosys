@@ -44,6 +44,8 @@ export default {
             desktop: {
                 load: async function() {
 
+                    return // Mouse movement is disabled
+
                     let mouseNoise = 0
                     const MAX_RADIAL_DISPLACEMENT = 10
 

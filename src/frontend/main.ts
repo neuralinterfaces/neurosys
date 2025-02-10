@@ -12,12 +12,6 @@ import * as bci from 'bcijs/browser.js'
 
 const { DESKTOP, MOBILE, READY } = commoners
 
-// Event Listeners
-const onAnimationToggled = async (fn: Function) => {
-  const { menu: { onAnimationToggled } } = await READY
-  onAnimationToggled(fn)
-}
-
 const onShowDevices = async (fn: Function) => {
   const { menu: { showDeviceSelector } } = await READY
   showDeviceSelector(fn)
@@ -35,8 +29,12 @@ const setMouseNoise = async (level: number) => {
   setMouseNoise(level)
 }
 
-const updateAppBrightness = async (level: number) => document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
-updateAppBrightness(0)
+const updateAppBrightness = async (score: number) => {
+  const level = (1 - score)
+  document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
+}
+
+updateAppBrightness(1)
 
 
 const registerAsInteractive = async (element: HTMLElement) => {
@@ -44,24 +42,24 @@ const registerAsInteractive = async (element: HTMLElement) => {
   element.onmouseout = () => setIgnoreMouseEvents(canIgnoreMouseEvents)
 }
 
-const setGeneralLevel = async (level: number) => {
+const setGeneralScore = async (score: number) => {
 
-  updateAppBrightness(level)
+  updateAppBrightness(score)
 
   // Forward the level to a system-level service
   if (DESKTOP) {
-    setMouseNoise(level)
-    const volumeResult = await desktop.setVolume(level)
-    const brightnessResult = await desktop.setBrightness(level)
+    setMouseNoise(score)
+    const volumeResult = await desktop.setVolume(score)
+    const brightnessResult = await desktop.setBrightness(score)
     const error = volumeResult.error || brightnessResult.error
-    console.error(error)
+    if (error) console.error(error)
     return
   }
 
   // Forward the level to a system-level Capacitor plugin
   if (MOBILE) {
 
-    await ScreenBrightness.setBrightness({ brightness: level });
+    await ScreenBrightness.setBrightness({ brightness: score });
 
     // capacitorVolume.setVolumeLevel({ 
     //   value: level, 
@@ -74,39 +72,57 @@ const setGeneralLevel = async (level: number) => {
   console.error('No volume control available')
 }
 
-
-// Animate range slider in a sine wave loop
-const animateSlider = () => {
-  if (!runAnimation) return
-  const level = (Math.sin(Date.now() / 1000) + 1) / 2
-  setGeneralLevel(level) // Set the level displayed on the system
-  requestAnimationFrame(animateSlider)
-}
-
-let runAnimation = false
-
-onAnimationToggled(() => {
-  runAnimation = !runAnimation
-  if (runAnimation) animateSlider()
-})
-
-
 const BAND_CALCULATION_INTERVAL = 250
 
-const calculateScore = (features) => {
+const calculateScore = (features: any) => {
 
   const averageAlphaRatio = Object.values(features).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(features).length
   
-  return averageAlphaRatio
+  return averageAlphaRatio 
 }
 
+
 const BANDS = [
+  'delta', 
+  'theta', 
   'alpha', 
   'beta', 
-  // 'delta', 
-  // 'theta', 
-  // 'gamma'
+  'gamma'
 ]
+
+const channelsContainer = document.createElement('div')
+channelsContainer.id = 'channels-container'
+
+const bandElementsByChannel = channelNames.reduce((acc, name) => {
+  const channelElement = document.createElement('div')
+  channelElement.id = name
+  channelElement.classList.add('channel')
+
+  const bandElements = BANDS.reduce((acc, band) => {
+    const bandElement = document.createElement('div')
+    bandElement.id = `${name}-${band}`
+    bandElement.className = `band ${band}`
+    acc[band] = bandElement
+    return acc
+  }, {})
+
+  const header = document.createElement('strong')
+  header.innerText = name
+
+  const bandsContainer = document.createElement('div')
+  bandsContainer.classList.add('bands')
+  bandsContainer.append(...Object.values(bandElements))
+  channelElement.append(header, bandsContainer)
+
+  channelsContainer.appendChild(channelElement)
+
+  acc[name] = bandElements
+
+  return acc
+
+}, {})
+
+document.body.appendChild(channelsContainer)
 
 const DEVICES = {
   muse: {
@@ -161,12 +177,18 @@ const DEVICES = {
             return acc
           }, {})
 
+          BANDS.forEach((band) => {
+            const el = bandElementsByChannel[key][band]
+            console.log('band',key, band, powers[BANDS.indexOf(band)])
+            el.style.width = `${powers[BANDS.indexOf(band)] * 100}%`
+          })
+
           return acc
         }, {})
 
-
-        const level = calculateScore(bandpowers)
-        setGeneralLevel(level)
+        const score = calculateScore(bandpowers)
+        
+        setGeneralScore(score)
 
       }, BAND_CALCULATION_INTERVAL)
   
