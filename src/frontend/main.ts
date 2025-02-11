@@ -1,60 +1,66 @@
 import './style.css'
 
-import * as desktop from './desktop'
-
 import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 import * as bci from 'bcijs/browser.js'
 
 const { DESKTOP, READY } = commoners
+
+
+const registerAllFeedbackPlugins = async () => {
+  const PLUGINS = await READY
+  const { menu: { registerFeedback, onToggle } } = PLUGINS
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+    const { feedbackInfo, enabled, set } = plugin
+
+    if (!feedbackInfo) return acc
+    
+    registerFeedback(key, { feedbackInfo, enabled })
+
+    const ref = acc[key] = { enabled, set, __score: 1 }
+
+    onToggle(key, (enabled) => {
+      ref.enabled = enabled
+      ref.set(ref.__score) // Set the plugin score immediately when toggled
+    })
+
+    return acc
+  }, {})
+}
+
+const feedbackOptionsPromise = registerAllFeedbackPlugins()
 
 const onShowDevices = async (fn: Function) => {
   const { menu: { showDeviceSelector } } = await READY
   showDeviceSelector(fn)
 }
 
+const toggleDeviceConnection = async (on: boolean = true) => {
+  const { menu: { toggleDeviceConnection } } = await READY
+  toggleDeviceConnection(on)
+}
+
+const onDeviceDisconnect = async (fn: Function) => {
+  const { menu: { onDeviceDisconnect } } = await READY
+  onDeviceDisconnect(fn)
+}
+
 let canIgnoreMouseEvents = true
 
 const setIgnoreMouseEvents = async (ignore: boolean) => {
-  const { transparent: { setIgnoreMouseEvents } } = await READY
+  const { systemOverlay } = await READY
+  if (!systemOverlay) return
+  const { setIgnoreMouseEvents } = systemOverlay
   setIgnoreMouseEvents(ignore)
 }
-
-const setMouseNoise = async (level: number) => {
-  const { levels: { setMouseNoise } } = await READY
-  setMouseNoise(level)
-}
-
-const updateAppBrightness = async (score: number) => {
-  const level = (1 - score)
-  document.body.style.backgroundColor = `rgba(0, 0, 0, ${level})`
-}
-
-updateAppBrightness(1)
-
 
 const registerAsInteractive = async (element: HTMLElement) => {
   element.onmouseover = () => setIgnoreMouseEvents(false)
   element.onmouseout = () => setIgnoreMouseEvents(canIgnoreMouseEvents)
 }
 
-const setGeneralScore = async (score: number) => {
-
-  updateAppBrightness(score)
-
-  // Forward the level to a system-level service
-  if (DESKTOP) {
-    setMouseNoise(score)
-    const volumeResult = await desktop.setVolume(score)
-    const brightnessResult = await desktop.setBrightness(score)
-    const error = volumeResult.error || brightnessResult.error
-    if (error) console.error(error)
-    return
-  }
-
-
-  // Cannot handle system-level volume control on the web
-
-  console.error('No volume control available')
+const setFeedback = async (score: number) => {
+  const feedbackOptions = await feedbackOptionsPromise
+  for (const [ key, plugin ] of Object.entries(feedbackOptions)) plugin.set(plugin.__score = score)
 }
 
 const BAND_CALCULATION_INTERVAL = 250
@@ -108,14 +114,22 @@ const bandElementsByChannel = channelNames.reduce((acc, name) => {
 
 document.body.appendChild(channelsContainer)
 
+
+// ------------ Handle Devices ------------
+
+let client;
+onDeviceDisconnect(async () => {
+  await client?.disconnect()
+  toggleDeviceConnection(true)
+})
+
 const DEVICES = {
   muse: {
     name: 'Muse 2',
-    protocols: [ 'BLE' ],
+    protocols: [ 'Bluetooth' ],
     connect: async () => {
 
-      let client = new MuseClient();
-
+      client = new MuseClient();
 
       const previousDevice = null
       if (DESKTOP && previousDevice) {
@@ -126,6 +140,8 @@ const DEVICES = {
       // options.device = previousDevice
   
       await client.connect();
+      toggleDeviceConnection(false)
+      
       await client.start();
   
 
@@ -155,9 +171,6 @@ const DEVICES = {
             BANDS,
             { relative: true }
           );
-
-          console.log(powers)
-
           
           acc[key] = BANDS.reduce((acc, band, idx) => {
             acc[band] = powers[idx]
@@ -166,7 +179,6 @@ const DEVICES = {
 
           BANDS.forEach((band) => {
             const el = bandElementsByChannel[key][band]
-            console.log('band',key, band, powers[BANDS.indexOf(band)])
             el.style.width = `${powers[BANDS.indexOf(band)] * 100}%`
           })
 
@@ -175,7 +187,7 @@ const DEVICES = {
 
         const score = calculateScore(bandpowers)
         
-        setGeneralScore(score)
+        setFeedback(score)
 
       }, BAND_CALCULATION_INTERVAL)
   
@@ -246,7 +258,7 @@ const handleBluetoothPluginEvents = async () => {
 
   const { bluetooth: { onOpen, onUpdate, select } } = await READY
 
-  const modal = createModal({ title: 'Discovered BLE Devices' })
+  const modal = createModal({ title: 'Discovered Bluetooth Devices' })
   document.body.append(modal)
 
   const ul = modal.querySelector('ul') as HTMLUListElement

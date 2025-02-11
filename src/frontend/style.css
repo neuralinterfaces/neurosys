@@ -26,14 +26,6 @@ h1 {
   line-height: 1.1;
 }
 
-#app {
-  position: fixed;
-  top: 0;
-  right: 0;
-  padding: 50px;
-}
-
-
 #error {
   margin: 15px;
   display: block;
@@ -78,7 +70,7 @@ dialog ul li:not(:first-child) {
   position: fixed;
   gap: 10px;
   top: 50px;
-  right: 50px;
+  left: 20px;
   padding: 10px;
   background: #262626;
 }

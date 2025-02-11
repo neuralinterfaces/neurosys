@@ -1,9 +1,16 @@
 import * as bluetoothPlugin from './src/plugins/ble/index'
+import * as systemOverlayPlugin from './src/plugins/systemOverlay/index'
+import * as menuPlugin from './src/plugins/menu/index'
 
-// const SHOW = true
-const SHOW = false
+// Feedback
+import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
+import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
+import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
 
-const ELECTRON_WINDOW_SETTINGS = {
+const OVERLAY = true
+// const OVERLAY = false
+
+const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
     transparent: true,
     focusable: false,
@@ -12,7 +19,7 @@ const ELECTRON_WINDOW_SETTINGS = {
     roundedCorners: false // MacOS
 }
 
-export default {
+const config = {
     name: "System Neurofeedback",
     target: "electron",
 
@@ -21,164 +28,46 @@ export default {
     },
 
     electron: {
-        window: SHOW ? {} : ELECTRON_WINDOW_SETTINGS,
+        window: OVERLAY ? TRANSPARENT_WINDOW_SETTINGS : {},
         // win: { requestedExecutionLevel: 'requireAdministrator' }
     },
 
-    services: {
-        systemService: "./src/services/systemService.ts",
-    },
+    // services: {
+    //     brainflow: "./src/services/brainflow.py",
+    // },
 
     plugins: {
-
         bluetooth: bluetoothPlugin,
+        menu: menuPlugin,
 
-        levels: {
-            load: function () {
+        textFeedback: textFeedbackPlugin,
+        brightnessFeedback: BrightnessFeedbackPlugin,
+        // robotFeedback: robotPlugin,
 
-                return {
-                    setMouseNoise: (level) => this.send("robot.mouseNoise", level)
-                }
-
-            },
-
-            desktop: {
-                load: async function() {
-
-                    return // Mouse movement is disabled
-
-                    let mouseNoise = 0
-                    const MAX_RADIAL_DISPLACEMENT = 10
-
-                    // Move the mouse across the screen as a sine wave.
-                    const robot = require('robotjs');
-
-                    // Track the displacement so that the mouse is always centered around a user-defined point
-                    const animationFunction = () => {
-        
-                        const { x: currentX, y: currentY } = robot.getMousePos()
-
-                        const radialDisplacement = mouseNoise * MAX_RADIAL_DISPLACEMENT
-                        const angularDisplacement = Math.random() * Math.PI * 2
-
-                        const xDisp = radialDisplacement * Math.cos(angularDisplacement)
-                        const yDisp = radialDisplacement * Math.sin(angularDisplacement)
-
-                        const x = currentX + xDisp
-                        const y = currentY + yDisp
-
-                        robot.moveMouse(x, y);
-                        setTimeout(animationFunction, 1000 / 60);
-                    }
-
-                    // Start the animation
-                    animationFunction()
-    
-                    // Allow for the noise level to be set from the main thread
-                    this.on("robot.mouseNoise", (event, level) => mouseNoise = level)
-
-                }
-            }
-        },
-
-        systemService: {
-            load: function () {
-                const { SERVICES: { systemService : { url }} } = commoners
+        // brainflow {
+        //     load: function () {
+        //         const { SERVICES: { brainflow : { url }} } = commoners
                 
-                return {
-                    get: async (path) => {
-                        const endpoint = new URL(path, url)
-                        const result = await fetch(endpoint.href)
-                        const json = await result.json()
-                        return json
-                    },
-                    post: async (path, body) => {
-                        const endpoint = new URL(path, url)
-                        const result = await fetch(endpoint.href, { method: 'POST', body: JSON.stringify(body) })
-                        const json = await result.json()
-                        return json
-                    }
-                }
-            }
-        },
+        //         return {
+        //             get: async (path) => {
+        //                 const endpoint = new URL(path, url)
+        //                 const result = await fetch(endpoint.href)
+        //                 const json = await result.json()
+        //                 return json
+        //             },
+        //             post: async (path, body) => {
+        //                 const endpoint = new URL(path, url)
+        //                 const result = await fetch(endpoint.href, { method: 'POST', body: JSON.stringify(body) })
+        //                 const json = await result.json()
+        //                 return json
+        //             }
+        //         }
+        //     }
+        // },
 
-
-        menu: {
-            assets: {
-                icon: "./src/tray/iconTemplate.png",
-                icon2x: "./src/tray/iconTemplate@2x.png"
-            },
-
-            load: function () {
-                return {
-                    showDeviceSelector: (callback) => this.on("devices.show", () => callback())
-                }
-            },
-
-            desktop: {
-                load: function () {
-
-                    const { plugin: { assets: { trayIcon, macTrayIcon, icon } }, electron, utils: { platform: { isMacOS }} } = this
-
-                    const { Menu, BrowserWindow, Tray } = electron
-
-                    const menu = Menu.buildFromTemplate([
-
-                        {
-                            label: 'Connect to Device',
-                            click: () =>  this.send("devices.show")
-                        },
-
-                        { type: 'separator' },
-
-                        { label: 'Quit', role: 'quit' }
-                      ]);
-                    
-                    //   Menu.setApplicationMenu(menu);
-
-                    const tray = new Tray(icon);
-
-                    tray.setContextMenu(menu);
-                    tray.setToolTip('System Neurofeedback');
-
-                    tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
-                }
-            }
-        },
-
-
-        transparent: {
-            load: function () {
-                return {
-                    setIgnoreMouseEvents: (ignore) => this.send("set-ignore-mouse-events", ignore)
-                }
-            },
-            desktop: {
-                load: function (win) {
-
-                    if (SHOW) return
-
-                    const mainScreen = this.electron.screen.getPrimaryDisplay()
-
-                    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
-                    win.setAlwaysOnTop(true, 'screen-saver', 1)
-                    win.setFullScreenable(false);
-                    win.setResizable(false); // Ensure over the dock on MacOS
-                    win.moveTop();
-                    
-                    win.setPosition(mainScreen.bounds.x, mainScreen.bounds.y)
-                    win.setSize(mainScreen.bounds.width, mainScreen.bounds.height)
-
-                    // Ensure the window cannot be interacted with unless exceptions are specified
-                    win.setIgnoreMouseEvents(true, { forward: true });
-                    this.on("set-ignore-mouse-events", (event, ignore) => win.setIgnoreMouseEvents(ignore, { forward: true }));
-
-                    // Ensure you can always exit the app
-                    this.electron.globalShortcut.register('CommandOrControl+Q', () =>  this.electron.app.quit())
-
-                    // win.webContents.openDevTools()
-                },
-            },
-        }
     }
 }
+
+if (OVERLAY) config.plugins.systemOverlay = systemOverlayPlugin
+
+export default config
