@@ -16,6 +16,15 @@ Beware that you might get stuck with your brightness very low! To force the appl
 
 ## Development
 ### Improvements
+- Fix bandpower visualization and show on demand
+- Document plugin controls and adding a new one
+- Properly handle cancelled BLE request
+- Baseline your features with the first 5s + allow Reset Baseline
+- Integrate with Spotify for volume control
+    - Add login with spotify option 
+    - Use refresh token…
+- Integrate Brainflow robustly
+- Test Linux
 - Create multiple windows for different screens in a multi-monitor setup
 
 ### Issues
