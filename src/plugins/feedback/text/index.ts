@@ -12,7 +12,7 @@ export function load () {
     const scoreEl = element.querySelector(".score") as HTMLSpanElement
 
     return {
-        feedbackInfo: { name: 'Text' },
+        feedback: { label: 'Text' },
         set: function (score) {
             element.style.display = this.enabled ? "block" : "none"
             scoreEl.innerText = score.toFixed(3)

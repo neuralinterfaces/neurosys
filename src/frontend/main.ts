@@ -5,20 +5,40 @@ import * as bci from 'bcijs/browser.js'
 
 const { DESKTOP, READY } = commoners
 
+type DataRange = [number, number]
+
+let data = {} as Record<string, number[]>
+let PREV_DATA_RANGE_FOR_FEATURES = [0, 0] as DataRange
+
+const SCORE_INTERVAL = 250
+
+setInterval(async () => {
+
+  const signalLength = Object.values(data)?.[0]?.length || 0
+  const lastDataIdx = PREV_DATA_RANGE_FOR_FEATURES[1]
+  const dataSlice = [ lastDataIdx, signalLength ] as DataRange
+  PREV_DATA_RANGE_FOR_FEATURES = dataSlice
+
+  const score = await calculateScore(dataSlice)
+  if (score === null) return
+  setFeedback(score)
+
+}, SCORE_INTERVAL)
+
 
 const registerAllFeedbackPlugins = async () => {
   const PLUGINS = await READY
-  const { menu: { registerFeedback, onToggle } } = PLUGINS
+  const { menu: { registerFeedback, onFeedbackToggle } } = PLUGINS
   return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
-    const { feedbackInfo, enabled, set } = plugin
+    const { feedback, enabled, set } = plugin
 
-    if (!feedbackInfo) return acc
+    if (!feedback) return acc
     
-    registerFeedback(key, { feedbackInfo, enabled })
+    registerFeedback(key, { feedback, enabled })
 
     const ref = acc[key] = { enabled, set, __score: 1 }
 
-    onToggle(key, (enabled) => {
+    onFeedbackToggle(key, (enabled) => {
       ref.enabled = enabled
       ref.set(ref.__score) // Set the plugin score immediately when toggled
     })
@@ -27,7 +47,30 @@ const registerAllFeedbackPlugins = async () => {
   }, {})
 }
 
+const registerAllScorePlugins = async () => {
+  const PLUGINS = await READY
+  const { menu: { registerScore, onScoreToggle } } = PLUGINS
+
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+    const { score, enabled, features, get } = plugin
+
+    if (!score) return acc
+
+    registerScore(key, { score, enabled })
+
+    const ref = acc[key] = { enabled, get, features,  __features: {} }
+
+    onScoreToggle(key, async (enabled) => {
+      ref.enabled = enabled
+      setFeedback(await calculateScore(PREV_DATA_RANGE_FOR_FEATURES)) // Set the plugin score immediately when toggled
+    })
+
+    return acc
+  }, {})
+}
+
 const feedbackOptionsPromise = registerAllFeedbackPlugins()
+const scoreOptionsPromise = registerAllScorePlugins()
 
 const onShowDevices = async (fn: Function) => {
   const { menu: { showDeviceSelector } } = await READY
@@ -59,16 +102,26 @@ const registerAsInteractive = async (element: HTMLElement) => {
 }
 
 const setFeedback = async (score: number) => {
+
+  if (score === null) return // No active score plugin
+
   const feedbackOptions = await feedbackOptionsPromise
   for (const [ key, plugin ] of Object.entries(feedbackOptions)) plugin.set(plugin.__score = score)
 }
 
-const BAND_CALCULATION_INTERVAL = 250
+type UserFeatures = {
+  bands: string[]
+}
 
-const calculateScore = (features: any) => {
-  const averageAlphaRatio = Object.values(features).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(features).length
-  const score = 10 * averageAlphaRatio // Lots of frequencies outside of alpha band. Blinks make this go wild...
-  return Math.min(1, Math.max(0, score))
+type FeaturesByChannel<T> = Record<string, T>
+
+type CalculatedFeatures = {
+  bands?: FeaturesByChannel<Record<string, number>>
+}
+
+const getActiveScorePlugin = async () => {
+  const scoreOptions = await scoreOptionsPromise
+  return Object.values(scoreOptions).find(({ enabled }) => enabled)
 }
 
 
@@ -115,6 +168,49 @@ const bandElementsByChannel = channelNames.reduce((acc, name) => {
 document.body.appendChild(channelsContainer)
 
 
+// ------------ Calculate Score ------------
+const getFeatures = (features: UserFeatures, dataRange: DataRange): CalculatedFeatures => {
+
+  return Object.entries(features).reduce((acc, [ key, value ]) => {
+
+    if (key === 'bands') {
+
+      acc.bands = Object.entries(data).reduce((acc, [ ch, chData ]) => {
+
+          const sliced = chData.slice(...dataRange)
+
+          const powers = bci.bandpower(
+            sliced,
+            EEG_FREQUENCY,
+            value,
+            { relative: true }
+          )
+
+          acc[ch] = value.reduce((acc, band, idx) => {
+            acc[band] = powers[idx]
+            return acc
+          }, {})
+
+          return acc
+
+        }, {})
+
+    }
+
+    return acc
+  }, {})
+
+}
+
+const calculateScore = async (dataRange: DataRange) => {
+  const plugin = await getActiveScorePlugin()
+  if (!plugin) return null
+  const { get, features = {} } = plugin
+  const calculatedFeatures = getFeatures(features, dataRange)
+  return get(calculatedFeatures)
+}
+
+
 // ------------ Handle Devices ------------
 
 let client;
@@ -138,14 +234,14 @@ const DEVICES = {
       }
   
       // options.device = previousDevice
-  
+
+      data = {} // Reset data
       await client.connect();
       toggleDeviceConnection(false)
       
       await client.start();
   
 
-      const data = {} as Record<string, number[]>
       client.eegReadings.subscribe(({ electrode, samples }) => {
         const chName = channelNames[electrode]
         const signal = data[chName] || ( data[chName] = [])
@@ -153,43 +249,10 @@ const DEVICES = {
       });
 
 
-      let lastIdx = 0
-
-      setInterval(() => {
-
-        const signalLength = Object.values(data)[0].length
-        const dataSlice = [ lastIdx, signalLength ]
-        lastIdx = signalLength
-
-        const bandpowers = Object.entries(data).reduce((acc, [key, value ]) => {
-
-          const sliced = value.slice(...dataSlice)
-
-          const powers = bci.bandpower(
-            sliced,
-            EEG_FREQUENCY,
-            BANDS,
-            { relative: true }
-          );
-          
-          acc[key] = BANDS.reduce((acc, band, idx) => {
-            acc[band] = powers[idx]
-            return acc
-          }, {})
-
-          BANDS.forEach((band) => {
-            const el = bandElementsByChannel[key][band]
-            el.style.width = `${powers[BANDS.indexOf(band)] * 100}%`
-          })
-
-          return acc
-        }, {})
-
-        const score = calculateScore(bandpowers)
-        
-        setFeedback(score)
-
-      }, BAND_CALCULATION_INTERVAL)
+      // BANDS.forEach((band) => {
+      //   const el = bandElementsByChannel[key][band]
+      //   el.style.width = `${powers[BANDS.indexOf(band)] * 100}%`
+      // })
   
     }
   }

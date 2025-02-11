@@ -1,12 +1,12 @@
 
-const feedbackInfo = {
+const feedback = {
     name: "Robot.js Mouse Noise"
 }
 
 export function load () {
 
     return {
-        feedbackInfo,
+        feedback,
         set: (level) => this.send("robot.mouseNoise", level)
     }
 

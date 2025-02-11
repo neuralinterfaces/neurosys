@@ -7,8 +7,12 @@ import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
 
-const OVERLAY = true
-// const OVERLAY = false
+// Scores
+import  * as sineScorePlugin from './src/plugins/scores/sine/index'
+import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
+
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -40,10 +44,16 @@ const config = {
         bluetooth: bluetoothPlugin,
         menu: menuPlugin,
 
+        // Feedback
         textFeedback: textFeedbackPlugin,
         brightnessFeedback: BrightnessFeedbackPlugin,
         // robotFeedback: robotPlugin,
 
+        // Scores
+        sineScore: sineScorePlugin,
+        alphaScore: alphaScorePlugin,
+
+        // // Data Acquisition
         // brainflow {
         //     load: function () {
         //         const { SERVICES: { brainflow : { url }} } = commoners
