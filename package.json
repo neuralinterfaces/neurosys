@@ -4,26 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "commoners",
+    "start": "commoners --target desktop",
+    "build": "commoners build --target desktop"
   },
   "devDependencies": {
-    "@capacitor/android": "^7.0.1",
-    "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^7.0.1",
-    "@capacitor/ios": "^7.0.1",
     "typescript": "~5.7.2",
     "vite": "^6.1.0"
   },
   "dependencies": {
-    "@capacitor-community/screen-brightness": "^7.0.0",
     "@electron/rebuild": "^3.7.1",
-    "@ottimis/capacitor-volumes": "^6.1.0",
     "bcijs": "^1.8.0",
-    "brightness": "^3.0.0",
-    "muse-js": "^3.3.0",
-    "robotjs": "^0.6.0"
-  },
-  "main": ".commoners/.temp/main.cjs"
+    "commoners": "^0.0.59",
+    "muse-js": "^3.3.0"
+  }
 }

@@ -1,16 +1,11 @@
 import './style.css'
 
-import { ScreenBrightness } from '@capacitor-community/screen-brightness';
-
-import * as capacitorVolume from '@ottimis/capacitor-volumes'
-console.log('capacitorVolume', capacitorVolume)
-
 import * as desktop from './desktop'
 
 import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 import * as bci from 'bcijs/browser.js'
 
-const { DESKTOP, MOBILE, READY } = commoners
+const { DESKTOP, READY } = commoners
 
 const onShowDevices = async (fn: Function) => {
   const { menu: { showDeviceSelector } } = await READY
@@ -56,16 +51,6 @@ const setGeneralScore = async (score: number) => {
     return
   }
 
-  // Forward the level to a system-level Capacitor plugin
-  if (MOBILE) {
-
-    await ScreenBrightness.setBrightness({ brightness: score });
-
-    // capacitorVolume.setVolumeLevel({ 
-    //   value: level, 
-    //   type: 'system' 
-    // })
-  }
 
   // Cannot handle system-level volume control on the web
 
@@ -75,19 +60,18 @@ const setGeneralScore = async (score: number) => {
 const BAND_CALCULATION_INTERVAL = 250
 
 const calculateScore = (features: any) => {
-
   const averageAlphaRatio = Object.values(features).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(features).length
-  
-  return averageAlphaRatio 
+  const score = 10 * averageAlphaRatio // Lots of frequencies outside of alpha band. Blinks make this go wild...
+  return Math.min(1, Math.max(0, score))
 }
 
 
 const BANDS = [
-  'delta', 
-  'theta', 
+  // 'delta', 
+  // 'theta', 
   'alpha', 
   'beta', 
-  'gamma'
+  // 'gamma'
 ]
 
 const channelsContainer = document.createElement('div')
@@ -172,6 +156,9 @@ const DEVICES = {
             { relative: true }
           );
 
+          console.log(powers)
+
+          
           acc[key] = BANDS.reduce((acc, band, idx) => {
             acc[band] = powers[idx]
             return acc
