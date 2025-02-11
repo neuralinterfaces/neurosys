@@ -14,6 +14,7 @@ const ELECTRON_WINDOW_SETTINGS = {
 
 export default {
     name: "System Neurofeedback",
+    target: "electron",
 
     pages: {
         settings: './src/pages/settings/settings.html'
@@ -110,7 +111,6 @@ export default {
 
             load: function () {
                 return {
-                    onAnimationToggled: (callback) => this.on("toggle-animation", () => callback()),
                     showDeviceSelector: (callback) => this.on("devices.show", () => callback())
                 }
             },
@@ -130,13 +130,6 @@ export default {
                         },
 
                         { type: 'separator' },
-
-                        {
-                          label: 'Options',
-                          submenu: [
-                            { label: 'Toggle Animation', click: () => this.send("toggle-animation") }
-                          ],
-                        },
 
                         { label: 'Quit', role: 'quit' }
                       ]);

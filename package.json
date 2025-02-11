@@ -15,7 +15,7 @@
   "dependencies": {
     "@electron/rebuild": "^3.7.1",
     "bcijs": "^1.8.0",
-    "commoners": "^0.0.59",
+    "commoners": "^0.0.60-alpha.0",
     "muse-js": "^3.3.0"
   }
 }

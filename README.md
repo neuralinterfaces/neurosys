@@ -1,25 +1,27 @@
+# System Neurofeedback
+This application modifies the brightness of a computer screen based on the user's brainwaves.
 
+## Installation
+1. Install [Node.js](https://nodejs.org/en/download/)
+2. Clone this repository    
+3. Run `npm install --force` in the root directory of the repository
 
-- [ ] Brightness
-    - [x] Desktop (overlay)
-    - [ ] Desktop (system)
-        - [ ] Windows
-        - [ ] macOS (Intel)
-        - [ ] macOS (ARM)
-        - [ ] Linux
-    - [x] iOS (interaction)
-    - [ ] iOS (animated)
-    - [ ] Android (interaction)
-    - [ ] Android (animated)
-- [ ] Volume
-- [ ] Mouse jitter (e.g. robot.js) 
+## Usage
+Run `npm start` in the root directory of the repository
 
-## Improvements
+### Connecting a Device
+To connect a device, click on the brain icon in the system tray and select the Connect to Device option from the list.
+
+Beware that you might get stuck with your brightness very low! To force the application to close, use the `Ctrl + q` shortcut.
+
+## Development
+### Improvements
 - Create multiple windows for different screens in a multi-monitor setup
 
-## Issues
+### Issues
 - Every once in a while, the brightness stops responding...
-- Robot.js [will not run on Electron](https://github.com/octalmage/robotjs/issues/675)
 
-## Notes
+## Extensions
+### robot.js
+This feature has been commented out in the `commoners.config.ts` file.
 - [rebuild.js](./rebuild.js) is used to build the correct version of robot.js for Electron
