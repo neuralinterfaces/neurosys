@@ -105,8 +105,8 @@ export default {
 
         menu: {
             assets: {
-                macTrayIcon: "./src/tray/macIcon.png",
-                trayIcon: "./src/tray/trayIcon.png"
+                icon: "./src/tray/iconTemplate.png",
+                icon2x: "./src/tray/iconTemplate@2x.png"
             },
 
             load: function () {
@@ -118,7 +118,7 @@ export default {
             desktop: {
                 load: function () {
 
-                    const { plugin: { assets: { trayIcon, macTrayIcon } }, electron, utils: { platform: { isMacOS }} } = this
+                    const { plugin: { assets: { trayIcon, macTrayIcon, icon } }, electron, utils: { platform: { isMacOS }} } = this
 
                     const { Menu, BrowserWindow, Tray } = electron
 
@@ -136,7 +136,7 @@ export default {
                     
                     //   Menu.setApplicationMenu(menu);
 
-                    const tray = new Tray(isMacOS ? macTrayIcon : trayIcon);
+                    const tray = new Tray(icon);
 
                     tray.setContextMenu(menu);
                     tray.setToolTip('System Neurofeedback');
