@@ -63,7 +63,6 @@ export default {
 ```
 
 ### Improvements
-- Fix bandpower visualization and show on demand
 - Properly handle cancelled BLE request
 - Baseline your features with the first 5s + allow Reset Baseline
 - Integrate with Spotify for volume control
