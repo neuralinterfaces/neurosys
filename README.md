@@ -64,6 +64,8 @@ export default {
 
 ### Improvements
 - Properly handle cancelled BLE request
+- Save settings and reload.
+    - Provide a preset for new users to get started quickly (alpha + features + text)
 - Baseline your features with the first 5s + allow Reset Baseline
 - Integrate with Spotify for volume control
     - Add login with spotify option 
