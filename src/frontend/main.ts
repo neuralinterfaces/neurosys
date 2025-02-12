@@ -219,10 +219,16 @@ onDeviceDisconnect(async () => {
   toggleDeviceConnection(true)
 })
 
+const PROTOCOL_LABELS = {
+  bluetooth: 'Bluetooth',
+  usb: 'USB'
+}
+
 const DEVICES = {
   muse: {
-    name: 'Muse 2',
-    protocols: [ 'Bluetooth' ],
+    name: 'Muse',
+    category: 'EEG',
+    protocols: [ 'bluetooth' ],
     connect: async () => {
 
       client = new MuseClient();
@@ -255,6 +261,24 @@ const DEVICES = {
       // })
   
     }
+  },
+  openbci: {
+    name: 'OpenBCI',
+    category: 'EEG',
+    protocols: [ { type: 'usb', enabled: false } ]
+  },
+  mendi: {
+    name: 'Mendi',
+    category: 'fNIRS',
+    protocols: [ { type: 'bluetooth', enabled: false } ]
+  },
+  hegduino: {
+    name: 'HEGduino',
+    category: 'fNIRS',
+    protocols: [ 
+      { type: 'usb', enabled: false },
+      { type: 'bluetooth', enabled: false }
+    ],
   }
 }
 
@@ -265,22 +289,31 @@ const startSearchForDevice = async (device: string, protocol: string) => {
   await deviceInfo.connect()
 }
 
+type ProtocolInfo = {
+  type: string,
+  enabled?: boolean
+}
+
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
 onShowDevices(() => {
 
-  const modal = createModal({ title: 'EEG Devices' })
+  const modal = createModal({ title: 'Neurofeedback Devices' })
   const ul = modal.querySelector('ul') as HTMLUListElement
 
 
-  Object.entries(DEVICES).forEach(([identifier, { name, protocols }]) => {
+  Object.entries(DEVICES).forEach(([identifier, { name, category, protocols = [] }]) => {
     const li = document.createElement('li')
 
     const buttons = protocols.map((protocol) => {
+      const info = typeof protocol === 'string' ? { type: protocol } : protocol
+      const { type, enabled = true } = info as ProtocolInfo
+      const label = PROTOCOL_LABELS[type] || type
       const button = document.createElement('button')
-      button.innerText = protocol
+      button.innerText = label
+      if (!enabled) button.setAttribute('disabled', '')
       button.onclick = () => {
         modal.close()
-        startSearchForDevice(identifier, protocol)
+        startSearchForDevice(identifier, type)
       }
       return button
     })
@@ -289,7 +322,9 @@ onShowDevices(() => {
     title.innerText = name || identifier
 
     const buttonDiv = document.createElement('div')
+    buttonDiv.classList.add('buttons')
     buttonDiv.append(...buttons)
+    
     li.append(title, buttonDiv)
     ul.appendChild(li)
   })
@@ -298,15 +333,17 @@ onShowDevices(() => {
   modal.showModal()
 })
 
-const createModal = ({ title }: { title: string }) => {
+const createModal = ({ title, emptyMessage = '' }: { 
+  title: string,
+  emptyMessage?: string
+}) => {
 
   const modal = document.createElement('dialog')
   registerAsInteractive(modal)
 
-  const header = document.createElement('h2')
-  header.innerText = title
+  modal.setAttribute("header", title)
   const ul = document.createElement('ul')
-  modal.appendChild(header)
+  ul.setAttribute('empty-message', emptyMessage)
   modal.appendChild(ul)
 
   // Dismiss modal if user clicks outside on the backdrop
@@ -321,7 +358,7 @@ const handleBluetoothPluginEvents = async () => {
 
   const { bluetooth: { onOpen, onUpdate, select } } = await READY
 
-  const modal = createModal({ title: 'Discovered Bluetooth Devices' })
+  const modal = createModal({ title: 'Discovered Local Devices', emptyMessage: 'Searching...' })
   document.body.append(modal)
 
   const ul = modal.querySelector('ul') as HTMLUListElement

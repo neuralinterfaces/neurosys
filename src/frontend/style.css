@@ -26,6 +26,10 @@ h1 {
   line-height: 1.1;
 }
 
+button {
+  cursor: pointer;
+}
+
 #error {
   margin: 15px;
   display: block;
@@ -40,14 +44,47 @@ h1 {
 
 /* NO FOCUS on the dialog */
 dialog {
+  position: relative;
   outline: none;
   width: clamp(0px, 100%, 400px);
+  user-select: none;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0;
+  border-radius: 10px;
+  border: none;
+  overflow: hidden;
 }
 
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+dialog::before {
+  content: attr(header);
+  position: sticky;
+  top: 0;
+  display: block;
+  font-size: 1.4em;
+  font-weight: bold;
+  padding: 20px 20px;
+  background: whitesmoke;
+  border-bottom: 1px solid lightgray;
+  pointer-events: none; /* Pass pointer events through to the dialog */
+}
 
 dialog ul {
   list-style: none;
-  padding: 0;
+  padding: 0px 20px;
+  margin: 0;
+}
+
+dialog ul:empty::before {
+  content: attr(empty-message);
+  display: block;
+  padding: 20px;
+  text-align: center;
+  font-size: 80%;
 }
 
 dialog ul li {
@@ -55,9 +92,18 @@ dialog ul li {
   justify-content: space-between;
   gap: 10px;
   align-items: center;
-  padding: 10px;
-  cursor: pointer;
 }
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+
+/* dialog ul li[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+} */
 
  /* Add a top border to all items except the first one */
 dialog ul li:not(:first-child) {
@@ -117,4 +163,17 @@ dialog ul li:not(:first-child) {
 
 .band.gamma {
   background: #ff69f3;
+}
+
+
+/* Dark mode */
+@media  (prefers-color-scheme: dark) {
+  dialog::before {
+    background: #111;
+    border-bottom: 1px solid gainsboro;
+  }
+
+  dialog {
+    background: #222;
+  }
 }

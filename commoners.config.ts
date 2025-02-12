@@ -11,8 +11,8 @@ import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/ind
 import  * as sineScorePlugin from './src/plugins/scores/sine/index'
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
