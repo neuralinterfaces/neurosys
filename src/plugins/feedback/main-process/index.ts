@@ -1,13 +1,21 @@
 export default {
     load() {
-        const { send } = this
         return {
             feedback: { label: 'Print in Main Process' },
-            set: function (score) { this.enabled && send("score", score) }
+            start({ cache = 0 }) {
+                const counter = cache + 1
+                console.log('Plugin activated', counter)
+                return { counter }
+            },
+            stop({ counter }) {
+                console.log('Plugin deactivated')
+                return { cache: counter }
+            },
+            set: ({ score }) => this.send("score", score) 
         }
     },
     desktop: {
-        load: function () {
+        load () {
             this.on("score", (_, score) => console.log("Score:", score) )
         }
     }

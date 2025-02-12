@@ -6,14 +6,15 @@ import * as menuPlugin from './src/plugins/menu/index'
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
-import mainProcessPlugin from './src/plugins/feedback/main-process/index'
+import mainProcessFeedbackPlugin from './src/plugins/feedback/main-process/index'
+import bandsFeedbackPlugin from './src/plugins/feedback/bands/index'
 
 // Scores
 import  * as sineScorePlugin from './src/plugins/scores/sine/index'
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -46,12 +47,13 @@ const config = {
         menu: menuPlugin,
 
         // Test Plugins
-        mainProcess: mainProcessPlugin,
+        mainProcess: mainProcessFeedbackPlugin,
         sineScore: sineScorePlugin,
 
         // Feedback
         textFeedback: textFeedbackPlugin,
         brightnessFeedback: BrightnessFeedbackPlugin,
+        bandsFeedback: bandsFeedbackPlugin,
         // robotFeedback: robotPlugin,
 
         // Scores

@@ -2,6 +2,7 @@ import './style.css'
 
 import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 import * as bci from 'bcijs/browser.js'
+import { createBandpowerVisualization } from './visualization/bandpowers'
 
 const { DESKTOP, READY } = commoners
 
@@ -12,17 +13,23 @@ let PREV_DATA_RANGE_FOR_FEATURES = [0, 0] as DataRange
 
 const SCORE_INTERVAL = 250
 
-setInterval(async () => {
+const calculate = async (dataRange: DataRange) => {
+  const plugin = await getActiveScorePlugin()
+  if (!plugin) return { features: null, score: null }
+  const { get, features = {} } = plugin
+  const calculatedFeatures = getFeatures(features, dataRange)
+  const score = get(calculatedFeatures)
+  return { features: calculatedFeatures, score  }
+}
 
+setInterval(async () => {
   const signalLength = Object.values(data)?.[0]?.length || 0
   const lastDataIdx = PREV_DATA_RANGE_FOR_FEATURES[1]
   const dataSlice = [ lastDataIdx, signalLength ] as DataRange
   PREV_DATA_RANGE_FOR_FEATURES = dataSlice
 
-  const score = await calculateScore(dataSlice)
-  if (score === null) return
-  setFeedback(score)
-
+  const { score, features } = await calculate(dataSlice)
+  setFeedback(score, features)
 }, SCORE_INTERVAL)
 
 
@@ -30,18 +37,31 @@ const registerAllFeedbackPlugins = async () => {
   const PLUGINS = await READY
   const { menu: { registerFeedback, onFeedbackToggle } } = PLUGINS
   return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
-    const { feedback, enabled, set } = plugin
+    const { feedback, enabled, start, stop, set } = plugin
 
     if (!feedback) return acc
     
     registerFeedback(key, { feedback, enabled })
 
-    const ref = acc[key] = { enabled, set, __score: 1 }
+    const ref = acc[key] = { start, stop, set, enabled, __score: null, __info: {} }
 
-    onFeedbackToggle(key, (enabled) => {
+    onFeedbackToggle(key, async (enabled) => {
+      const { start, stop, __info, __score, __features } = ref
+
       ref.enabled = enabled
-      console.log("ENABLED", key, ref.enabled, set)
-      ref.set(ref.__score) // Set the plugin score immediately when toggled
+
+      const callback = enabled ? start : stop
+      if (callback) ref.__info = (await callback(__info)) ?? {}
+
+      if (__score === null) return
+      if (!enabled) return
+
+      ref.set({
+        score: __score,
+        features: __features,
+        info: ref.__info
+      }) // Set the plugin score immediately when toggled
+
     })
 
     return acc
@@ -63,8 +83,8 @@ const registerAllScorePlugins = async () => {
 
     onScoreToggle(key, async (enabled) => {
       ref.enabled = enabled
-      console.log("ENABLED", key, ref.enabled)
-      setFeedback(await calculateScore(PREV_DATA_RANGE_FOR_FEATURES)) // Set the plugin score immediately when toggled
+      const { score, features } = await calculate(PREV_DATA_RANGE_FOR_FEATURES)
+      setFeedback(score, features) // Set the plugin score immediately when toggled
     })
 
     return acc
@@ -103,12 +123,15 @@ const registerAsInteractive = async (element: HTMLElement) => {
   element.onmouseout = () => setIgnoreMouseEvents(canIgnoreMouseEvents)
 }
 
-const setFeedback = async (score: number) => {
+const setFeedback = async (score: number, features: any) => {
 
-  if (score === null) return // No active score plugin
+  if (score === null && features === null) return // No active score plugin
 
   const feedbackOptions = await feedbackOptionsPromise
-  for (const [ key, plugin ] of Object.entries(feedbackOptions)) plugin.set(plugin.__score = score)
+  for (const [ key, plugin ] of Object.entries(feedbackOptions)) {
+    plugin.__score = score // Always set score
+    if (plugin.enabled) plugin.set({ score, features, info: plugin.__info })
+  }
 }
 
 type UserFeatures = {
@@ -125,49 +148,6 @@ const getActiveScorePlugin = async () => {
   const scoreOptions = await scoreOptionsPromise
   return Object.values(scoreOptions).find(({ enabled }) => enabled)
 }
-
-
-const BANDS = [
-  // 'delta', 
-  // 'theta', 
-  'alpha', 
-  'beta', 
-  // 'gamma'
-]
-
-const channelsContainer = document.createElement('div')
-channelsContainer.id = 'channels-container'
-
-const bandElementsByChannel = channelNames.reduce((acc, name) => {
-  const channelElement = document.createElement('div')
-  channelElement.id = name
-  channelElement.classList.add('channel')
-
-  const bandElements = BANDS.reduce((acc, band) => {
-    const bandElement = document.createElement('div')
-    bandElement.id = `${name}-${band}`
-    bandElement.className = `band ${band}`
-    acc[band] = bandElement
-    return acc
-  }, {})
-
-  const header = document.createElement('strong')
-  header.innerText = name
-
-  const bandsContainer = document.createElement('div')
-  bandsContainer.classList.add('bands')
-  bandsContainer.append(...Object.values(bandElements))
-  channelElement.append(header, bandsContainer)
-
-  channelsContainer.appendChild(channelElement)
-
-  acc[name] = bandElements
-
-  return acc
-
-}, {})
-
-document.body.appendChild(channelsContainer)
 
 
 // ------------ Calculate Score ------------
@@ -202,14 +182,6 @@ const getFeatures = (features: UserFeatures, dataRange: DataRange): CalculatedFe
     return acc
   }, {})
 
-}
-
-const calculateScore = async (dataRange: DataRange) => {
-  const plugin = await getActiveScorePlugin()
-  if (!plugin) return null
-  const { get, features = {} } = plugin
-  const calculatedFeatures = getFeatures(features, dataRange)
-  return get(calculatedFeatures)
 }
 
 
@@ -255,12 +227,6 @@ const DEVICES = {
         const signal = data[chName] || ( data[chName] = [])
         signal.push(...samples)
       });
-
-
-      // BANDS.forEach((band) => {
-      //   const el = bandElementsByChannel[key][band]
-      //   el.style.width = `${powers[BANDS.indexOf(band)] * 100}%`
-      // })
   
     }
   },
@@ -360,7 +326,6 @@ const createModal = ({ title, emptyMessage = '' }: {
   // Dismiss modal if user clicks outside on the backdrop
   modal.addEventListener('click', (event) => {
     const target = event.target as Node
-    console.log('target', target, modal)
     if (target === modal) modal.close()
   });
 

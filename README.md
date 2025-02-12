@@ -35,19 +35,27 @@ export default {
 #### Feedback Design
 Feedback plugins include a `feedback` field specifying the tray details and a `set` function that consumes a score value.
 
-Make sure that the `set` function responds to the `this.enabled` field, which allows for hiding feedback when the user disables it.
+Use the `start` and `stop` fields to specify reactions to being enabled / disabled, including the management of visualization.
 
 ```javascript
 export default {
     load() {
-        const { send } = this
         return {
             feedback: { label: 'Print in Main Process' },
-            set: function (score) { this.enabled && send("score", score) }
+            start({ cache = 0 }) {
+                const counter = cache + 1
+                console.log('Plugin activated', counter)
+                return { counter }
+            },
+            stop({ counter }) {
+                console.log('Plugin deactivated')
+                return { cache: counter }
+            },
+            set: ({ score, features, info }) => this.send("score", score) 
         }
     },
     desktop: {
-        load: function () {
+        load() {
             this.on("score", (_, score) => console.log("Score:", score) )
         }
     }

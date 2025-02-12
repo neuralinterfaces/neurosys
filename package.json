@@ -3,17 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "src/packages/*"
+  ],
   "scripts": {
     "dev": "commoners",
     "start": "commoners --target desktop",
     "build": "commoners build --target desktop"
   },
   "devDependencies": {
-    "typescript": "~5.7.2",
-    "vite": "^6.1.0"
-  },
-  "dependencies": {
-    "@electron/rebuild": "^3.7.1",
     "bcijs": "^1.8.0",
     "commoners": "^0.0.60-alpha.0",
     "muse-js": "^3.3.0"
