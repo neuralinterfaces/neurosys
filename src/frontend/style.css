@@ -126,10 +126,7 @@ dialog ul li:not(:first-child) {
 #channels-container {
   display: flex;
   flex-direction: column;
-  position: fixed;
   gap: 10px;
-  top: 50px;
-  left: 20px;
   padding: 10px;
   background: #262626;
 }

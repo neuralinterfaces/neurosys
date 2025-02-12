@@ -11,7 +11,7 @@ export default {
                 console.log('Plugin deactivated')
                 return { cache: counter }
             },
-            set: ({ score }) => this.send("score", score) 
+            set: (score) => this.send("score", score) 
         }
     },
     desktop: {

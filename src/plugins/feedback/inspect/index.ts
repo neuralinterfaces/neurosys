@@ -44,25 +44,39 @@ const createBandpowerVisualization = (bands) => {
 export default {
     load() {
         return {
-            feedback: { label: 'Bandpower Visualiation' },
+            feedback: { label: 'Inspect Features' },
             start() {
-                const elements = createBandpowerVisualization([ "alpha", "beta" ])
-                const { parent } = elements
-                document.body.append(parent)
-                return { elements }
+                const featuresDiv = document.createElement("div")
+                featuresDiv.style.position = "absolute"
+                featuresDiv.style.top = "40px";
+                featuresDiv.style.left = "10px";
+                featuresDiv.style.display = "flex";
+                featuresDiv.style.flexDirection = "column";
+                featuresDiv.style.gap = "10px";
+                featuresDiv.style.padding = "10px";
+
+                const bands = createBandpowerVisualization([ "alpha", "beta" ])
+                const { parent } = bands
+                featuresDiv.append(parent)
+
+                document.body.append(featuresDiv)
+                return { elements: { bands } }
             },
             stop({ elements }) {
-                elements.parent.remove()
+                for (const value of Object.values(elements)) value.parent.remove()
             },
-            set: ({ score, features, info }) => {
+            set(score, info) {
                 const { elements } = info
-                const { bands } = features
+                const { bands } = this.__features
                 if (bands) {
+
+                    const bandElements = elements.bands
+
                     for (const ch in bands) {
                         const data = bands[ch]
                         for (const band in data) {
                             const value = data[band]
-                            const el = elements.bands[ch][band]
+                            const el = bandElements.bands[ch][band]
                             el.style.width = `${value * 100}%`
                         }
                     }

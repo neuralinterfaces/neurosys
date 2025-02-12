@@ -46,7 +46,7 @@ const registerAllFeedbackPlugins = async () => {
     const ref = acc[key] = { start, stop, set, enabled, __score: null, __info: {} }
 
     onFeedbackToggle(key, async (enabled) => {
-      const { start, stop, __info, __score, __features } = ref
+      const { start, stop, __info, __score } = ref
 
       ref.enabled = enabled
 
@@ -56,11 +56,7 @@ const registerAllFeedbackPlugins = async () => {
       if (__score === null) return
       if (!enabled) return
 
-      ref.set({
-        score: __score,
-        features: __features,
-        info: ref.__info
-      }) // Set the plugin score immediately when toggled
+      ref.set(__score, ref.__info) // Set the plugin score immediately when toggled
 
     })
 
@@ -73,13 +69,18 @@ const registerAllScorePlugins = async () => {
   const { menu: { registerScore, onScoreToggle } } = PLUGINS
 
   return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
-    const { score, enabled, features, get } = plugin
+    const { 
+      score,    // Menu Information
+      enabled,  // Menu state
+      get,      // Score getter
+      features  // Features requested
+    } = plugin
 
     if (!score) return acc
 
-    registerScore(key, { score, enabled })
+    registerScore(key, { score, enabled, })
 
-    const ref = acc[key] = { enabled, get, features,  __features: {} }
+    const ref = acc[key] = { enabled, get, features }
 
     onScoreToggle(key, async (enabled) => {
       ref.enabled = enabled
@@ -130,7 +131,8 @@ const setFeedback = async (score: number, features: any) => {
   const feedbackOptions = await feedbackOptionsPromise
   for (const [ key, plugin ] of Object.entries(feedbackOptions)) {
     plugin.__score = score // Always set score
-    if (plugin.enabled) plugin.set({ score, features, info: plugin.__info })
+    plugin.__features = features
+    if (plugin.enabled) plugin.set(score, plugin.__info)
   }
 }
 

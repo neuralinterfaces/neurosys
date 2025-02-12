@@ -7,7 +7,7 @@ export function load () {
 
     return {
         feedback,
-        set: ({ score }) => this.send("robot.mouseNoise", score)
+        set: (score) => this.send("robot.mouseNoise", score)
     }
 
 }

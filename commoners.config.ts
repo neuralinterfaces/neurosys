@@ -7,7 +7,7 @@ import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
 import mainProcessFeedbackPlugin from './src/plugins/feedback/main-process/index'
-import bandsFeedbackPlugin from './src/plugins/feedback/bands/index'
+import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
 // Scores
 import  * as sineScorePlugin from './src/plugins/scores/sine/index'
@@ -53,7 +53,7 @@ const config = {
         // Feedback
         textFeedback: textFeedbackPlugin,
         brightnessFeedback: BrightnessFeedbackPlugin,
-        bandsFeedback: bandsFeedbackPlugin,
+        inspectFeedback: inspectFeedbackPlugin,
         // robotFeedback: robotPlugin,
 
         // Scores

@@ -19,7 +19,7 @@ export function load () {
             return { elements: { main: element, score: scoreEl } }
         },
 
-        set({ score, info }){
+        set(score, info){
             const scoreEl = info.elements.score
             scoreEl.innerText = score.toFixed(3)
         },
