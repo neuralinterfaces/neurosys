@@ -42,26 +42,25 @@ button {
   background: transparent;
 }
 
-/* NO FOCUS on the dialog */
-dialog {
+/* Dialog */
+dialog:modal {
   position: relative;
-  outline: none;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   width: clamp(0px, 100%, 400px);
-  user-select: none;
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: 0;
+  max-height: clamp(0px, 100%, 400px);
   border-radius: 10px;
   border: none;
-  overflow: hidden;
+  padding: 0;
+  outline: none;
+  user-select: none;
 }
 
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.4);
 }
 
-dialog::before {
-  content: attr(header);
+dialog header {
   position: sticky;
   top: 0;
   display: block;
@@ -70,7 +69,16 @@ dialog::before {
   padding: 20px 20px;
   background: whitesmoke;
   border-bottom: 1px solid lightgray;
-  pointer-events: none; /* Pass pointer events through to the dialog */
+}
+
+dialog main {
+  overflow-y: auto;
+}
+
+dialog footer {
+  height: 20px;
+  background: whitesmoke;
+  border-top: 1px solid lightgray;
 }
 
 dialog ul {
@@ -92,6 +100,11 @@ dialog ul li {
   justify-content: space-between;
   gap: 10px;
   align-items: center;
+  padding: 20px 0px;
+}
+
+dialog ul li[device-id] {
+  cursor: pointer;
 }
 
 .buttons {
@@ -168,9 +181,16 @@ dialog ul li:not(:first-child) {
 
 /* Dark mode */
 @media  (prefers-color-scheme: dark) {
-  dialog::before {
+  dialog header, dialog footer {
     background: #111;
+  }
+
+  dialog header {
     border-bottom: 1px solid gainsboro;
+  }
+
+  dialog footer {
+    border-top: 1px solid gainsboro;
   }
 
   dialog {

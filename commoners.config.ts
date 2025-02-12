@@ -6,6 +6,7 @@ import * as menuPlugin from './src/plugins/menu/index'
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
+import mainProcessPlugin from './src/plugins/feedback/main-process/index'
 
 // Scores
 import  * as sineScorePlugin from './src/plugins/scores/sine/index'
@@ -24,7 +25,7 @@ const TRANSPARENT_WINDOW_SETTINGS = {
 }
 
 const config = {
-    name: "System Neurofeedback",
+    name: "neuro.sys",
     target: "electron",
 
     pages: {
@@ -44,13 +45,16 @@ const config = {
         bluetooth: bluetoothPlugin,
         menu: menuPlugin,
 
+        // Test Plugins
+        mainProcess: mainProcessPlugin,
+        sineScore: sineScorePlugin,
+
         // Feedback
         textFeedback: textFeedbackPlugin,
         brightnessFeedback: BrightnessFeedbackPlugin,
         // robotFeedback: robotPlugin,
 
         // Scores
-        sineScore: sineScorePlugin,
         alphaScore: alphaScorePlugin,
 
         // // Data Acquisition

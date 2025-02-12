@@ -40,6 +40,7 @@ const registerAllFeedbackPlugins = async () => {
 
     onFeedbackToggle(key, (enabled) => {
       ref.enabled = enabled
+      console.log("ENABLED", key, ref.enabled, set)
       ref.set(ref.__score) // Set the plugin score immediately when toggled
     })
 
@@ -62,6 +63,7 @@ const registerAllScorePlugins = async () => {
 
     onScoreToggle(key, async (enabled) => {
       ref.enabled = enabled
+      console.log("ENABLED", key, ref.enabled)
       setFeedback(await calculateScore(PREV_DATA_RANGE_FOR_FEATURES)) // Set the plugin score immediately when toggled
     })
 
@@ -318,14 +320,14 @@ onShowDevices(() => {
       return button
     })
 
-    const title = document.createElement('h3')
-    title.innerText = name || identifier
+    const label = document.createElement('strong')
+    label.innerText = name || identifier
 
     const buttonDiv = document.createElement('div')
     buttonDiv.classList.add('buttons')
     buttonDiv.append(...buttons)
     
-    li.append(title, buttonDiv)
+    li.append(label, buttonDiv)
     ul.appendChild(li)
   })
 
@@ -341,14 +343,25 @@ const createModal = ({ title, emptyMessage = '' }: {
   const modal = document.createElement('dialog')
   registerAsInteractive(modal)
 
-  modal.setAttribute("header", title)
+  const header = document.createElement('header')
+  header.innerText = title
+  modal.appendChild(header)
+
+  const main = document.createElement('main')
+  modal.appendChild(main)
+
+  const footer = document.createElement('footer')
+  modal.appendChild(footer)
+
   const ul = document.createElement('ul')
   ul.setAttribute('empty-message', emptyMessage)
-  modal.appendChild(ul)
+  main.appendChild(ul)
 
   // Dismiss modal if user clicks outside on the backdrop
   modal.addEventListener('click', (event) => {
-    if (event.target === modal) modal.close()
+    const target = event.target as Node
+    console.log('target', target, modal)
+    if (target === modal) modal.close()
   });
 
   return modal
@@ -372,6 +385,7 @@ const handleBluetoothPluginEvents = async () => {
     ul.innerHTML = ''
     devices.forEach(({ deviceName, deviceId }) => {
       const li = document.createElement('li')
+      li.setAttribute('device-id', deviceId)
       li.innerText = deviceName
       li.onclick = () => closeModal(deviceId)
       ul.appendChild(li)

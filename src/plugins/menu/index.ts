@@ -64,7 +64,7 @@ export const desktop = {
         toggleConnection(true)
         updateContextMenu()
 
-        tray.setToolTip('System Neurofeedback');
+        tray.setToolTip('neuro.sys');
         tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
 
         this.on("connection.toggle", (_, on) => toggleConnection(on))
