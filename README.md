@@ -63,13 +63,13 @@ export default {
 ```
 
 ### Improvements
-- Properly handle cancelled BLE request
+- Integrate with Spotify for volume control
+    - Popup using Electon instead of standard window popup
+    - Gracefully handle page refresh
+    - Use refresh token…
 - Save settings and reload.
     - Provide a preset for new users to get started quickly (alpha + features + text)
 - Baseline your features with the first 5s + allow Reset Baseline
-- Integrate with Spotify for volume control
-    - Add login with spotify option 
-    - Use refresh token…
 - Integrate Brainflow robustly
 - Test Linux
 - Create multiple windows for different screens in a multi-monitor setup

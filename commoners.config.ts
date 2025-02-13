@@ -5,7 +5,9 @@ import * as menuPlugin from './src/plugins/menu/index'
 // Feedback
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
-import * as BrightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
+import * as brightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
+import spotifyFeedbackPlugin from './src/plugins/feedback/spotify/index'
+
 import mainProcessFeedbackPlugin from './src/plugins/feedback/main-process/index'
 import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
@@ -13,8 +15,8 @@ import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 import  * as sineScorePlugin from './src/plugins/scores/sine/index'
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -34,6 +36,7 @@ const config = {
     },
 
     electron: {
+        protocol: { scheme: 'neuro.sys', privileges: { secure: true, standard: true, supportFetchAPI: true } },
         window: OVERLAY ? TRANSPARENT_WINDOW_SETTINGS : {},
         // win: { requestedExecutionLevel: 'requireAdministrator' }
     },
@@ -43,6 +46,8 @@ const config = {
     // },
 
     plugins: {
+
+
         bluetooth: bluetoothPlugin,
         menu: menuPlugin,
 
@@ -52,7 +57,8 @@ const config = {
 
         // Feedback
         textFeedback: textFeedbackPlugin,
-        brightnessFeedback: BrightnessFeedbackPlugin,
+        brightnessFeedback: brightnessFeedbackPlugin,
+        spotifyFeedback: spotifyFeedbackPlugin,
         inspectFeedback: inspectFeedbackPlugin,
         // robotFeedback: robotPlugin,
 

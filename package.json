@@ -12,6 +12,7 @@
     "build": "commoners build --target desktop"
   },
   "devDependencies": {
+    "@commoners/custom-protocol": "^0.0.55",
     "bcijs": "^1.8.0",
     "commoners": "^0.0.60-alpha.0",
     "muse-js": "^3.3.0"
