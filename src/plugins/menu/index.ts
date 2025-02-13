@@ -9,16 +9,21 @@ export function load() {
         showDeviceSelector: (callback) => this.on("devices.show", () => callback()),
 
         // Feedback Mechanisms
-        registerFeedback: (key, plugin) => this.send("feedback.register", { key, plugin }),
+        registerFeedback: (key, plugin) => this.sendSync("feedback.register", { key, plugin }),
         onFeedbackToggle: (key, callback) => this.on(`feedback.${key}.toggle`, (_, enabled) => callback(enabled)),
 
         // Score Mechanisms
-        registerScore: (key, plugin) => this.send("score.register", { key, plugin }),
+        registerScore: (key, plugin) => this.sendSync("score.register", { key, plugin }),
         onScoreToggle: (key, callback) => this.on(`score.${key}.toggle`, (_, enabled) => callback(enabled)),
 
         // Connection
         toggleDeviceConnection: (on = true) => this.send("connection.toggle", on),
         onDeviceDisconnect: (callback) => this.on("device.disconnect", () => callback()),
+
+        // Settings
+        onSaveSettings: (callback) => this.on("settings.save", () => callback()),
+        configureSettings: (settings) => this.send("settings.configure", settings),
+        enableSettings: (enabled) => this.send("settings.enabled", enabled)
     }
 }
 
@@ -37,8 +42,10 @@ export const desktop = {
         }
 
         const template = [
-            { id: SUBMENU_IDS.feedback, label: "Show Feedback", submenu: [] },
-            { id: SUBMENU_IDS.score, label: "Choose Score", submenu: [] },
+            { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
+            { type: 'separator' },
+            { id: SUBMENU_IDS.feedback, label: "Feedback", submenu: [] },
+            { id: SUBMENU_IDS.score, label: "Score", submenu: [] },
             { type: 'separator' },
             { label: 'Quit', role: 'quit' }
         ]
@@ -69,12 +76,14 @@ export const desktop = {
 
         this.on("connection.toggle", (_, on) => toggleConnection(on))
 
-        const registered = {
-            feedback: {},
-            score: {}
-        }
+        this.on("settings.enabled", (_, enabled) => {
+            const idx = template.findIndex(item => item.id === "settings")
+            template[idx].enabled = enabled
+            updateContextMenu()
+        })
 
-        const sendState = (id, key, enabled) => registered[id][key] && this.send(`${id}.${key}.toggle`, enabled)
+        const REGISTERED = { feedback: {}, score: {} }
+        const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.${key}.toggle`, enabled)
         const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
         const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
 
@@ -82,10 +91,11 @@ export const desktop = {
             id, 
             key, 
             options,
-            onClick?: Function
+            updateAll = false
         ) => {
 
-            if (registered[id][key]) return
+            const registered = REGISTERED[id] ?? ( REGISTERED[id] = {} )
+            if (registered[key]) return false
 
             const foundItem = template.find(item => item.id === id)
             if (!foundItem) return
@@ -95,32 +105,53 @@ export const desktop = {
             const item = new MenuItem({
                 id: key,
                 ...options,
-                click: () => onClick ? onClick(key, item) : this.send(`${id}.${key}.toggle`, item.checked)
+                click: () => updateAll ? updateAllStates(id) : sendState(id, key, item.checked)
             })
 
             submenu.push(item)
             updateContextMenu()
 
-            registered[id][key] = true
+            registered[key] = true
+
+            return true
+
         }
 
-        this.on("feedback.register", (_, { key, plugin }) => {
+        // ------------------------- Define Setting Options ------------------------- \\
+        this.on("feedback.register", (ev, { key, plugin }) => {
             const { feedback, enabled = false } = plugin
-            registerNewItem(SUBMENU_IDS.feedback, key, { type: 'checkbox', checked: enabled, ...feedback })
+            const success = registerNewItem(SUBMENU_IDS.feedback, key, { type: 'checkbox', checked: enabled, ...feedback })
+            ev.returnValue = success
         })
 
-
-        this.on("score.register", (_, { key, plugin }) => {
-
-            const id = SUBMENU_IDS.score
+        this.on("score.register", (ev, { key, plugin }) => {
             const { score, enabled = false } = plugin
-            registerNewItem(
-                id, 
-                key, 
-                { type: 'radio', checked: enabled, ...score },
-                () => updateAllStates(id)
-            )
-
+            const success = registerNewItem( SUBMENU_IDS.score, key, { type: 'radio', checked: enabled, ...score }, true )
+            ev.returnValue = success
         })
+
+        // ------------------------- Allow Configuration based on Settings ------------------------- \\
+
+        this.on("settings.configure", (_, settings) => {
+
+            for (const [ id, registered ] of Object.entries(REGISTERED)) {
+                const categorySettings = settings[id] ?? {}
+                for (const key in registered) {
+                    const itemSettings = categorySettings[key] ?? {}
+                    const { enabled = false } = itemSettings
+                    
+                    const actualMenuItem = template.find(item => item.id === id).submenu.find(item => item.id === key)
+                    if (actualMenuItem) {
+                        const isRadio = actualMenuItem.type === "radio"
+                        if (!isRadio || enabled) actualMenuItem.checked = enabled
+                    }
+                }
+
+                updateAllStates(id) // Update all other states in case any changed
+            }
+
+            updateContextMenu()
+        })
+
     }
 }

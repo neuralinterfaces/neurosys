@@ -2,7 +2,6 @@ import './style.css'
 
 import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 import * as bci from 'bcijs/browser.js'
-import { createBandpowerVisualization } from './visualization/bandpowers'
 
 const { DESKTOP, READY } = commoners
 
@@ -32,6 +31,18 @@ setInterval(async () => {
   setFeedback(score, features)
 }, SCORE_INTERVAL)
 
+const setValueInSettings = async (path: string, value: any) => {
+  let resolved = await GLOBALS.settings.data
+  const segments = path.split('.')
+  const lastSegment = segments.pop()
+  for (const segment of segments) resolved = resolved[segment] ?? ( resolved[segment] = {} )
+  const hasChanged = JSON.stringify(resolved[lastSegment]) !== JSON.stringify(value)
+  if (!hasChanged) return
+  resolved[lastSegment] = value
+  enableSettings(true)
+}
+
+
 
 const registerAllFeedbackPlugins = async () => {
   const PLUGINS = await READY
@@ -47,8 +58,9 @@ const registerAllFeedbackPlugins = async () => {
 
     onFeedbackToggle(key, async (enabled) => {
       const { start, stop, __info, __score } = ref
-
+    
       ref.enabled = enabled
+      await setValueInSettings(`feedback.${key}.enabled`, enabled)
 
       const callback = enabled ? start : stop
       if (callback) ref.__info = (await callback(__info)) ?? {}
@@ -84,6 +96,7 @@ const registerAllScorePlugins = async () => {
 
     onScoreToggle(key, async (enabled) => {
       ref.enabled = enabled
+      await setValueInSettings(`score.${key}.enabled`, enabled)
       const { score, features } = await calculate(PREV_DATA_RANGE_FOR_FEATURES)
       setFeedback(score, features) // Set the plugin score immediately when toggled
     })
@@ -92,8 +105,19 @@ const registerAllScorePlugins = async () => {
   }, {})
 }
 
+const configureSettings = async (data?: Record<string, any>) => {
+  const { menu: { configureSettings } } = await READY
+  if (!data) data = await GLOBALS.settings.data
+  configureSettings(data)
+}
+
 const feedbackOptionsPromise = registerAllFeedbackPlugins()
 const scoreOptionsPromise = registerAllScorePlugins()
+
+feedbackOptionsPromise.then(async () => {
+  await scoreOptionsPromise
+  configureSettings()
+})
 
 const onShowDevices = async (fn: Function) => {
   const { menu: { showDeviceSelector } } = await READY
@@ -109,6 +133,35 @@ const onDeviceDisconnect = async (fn: Function) => {
   const { menu: { onDeviceDisconnect } } = await READY
   onDeviceDisconnect(fn)
 }
+
+const enableSettings = async (enabled: boolean) => {
+  const { menu: { enableSettings } } = await READY
+  enableSettings(enabled)
+}
+
+const onSaveSettings = async (fn: Function) => {
+  const { menu: { onSaveSettings } } = await READY
+  onSaveSettings(fn)
+}
+
+const getSettings = async () => {
+  const { settings: { get } } = await READY
+  return get('settings')
+}
+
+const GLOBALS = {
+  settings: {
+    name: 'settings',
+    data: getSettings() // Always a promise
+  }
+}
+
+onSaveSettings(async () => {
+  const { settings: { set } } = await READY
+  const { settings: { name, data } } = GLOBALS
+  set(name, await data)
+  enableSettings(false)
+})
 
 let canIgnoreMouseEvents = true
 

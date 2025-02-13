@@ -1,6 +1,7 @@
 import * as bluetoothPlugin from './src/plugins/ble/index'
 import * as systemOverlayPlugin from './src/plugins/systemOverlay/index'
 import * as menuPlugin from './src/plugins/menu/index'
+import settingsPlugin from './src/plugins/settings/index'
 
 // Feedback
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
@@ -50,9 +51,10 @@ const config = {
 
         bluetooth: bluetoothPlugin,
         menu: menuPlugin,
+        settings: settingsPlugin,
 
         // Test Plugins
-        mainProcess: mainProcessFeedbackPlugin,
+        mainProcessFeedback: mainProcessFeedbackPlugin,
         sineScore: sineScorePlugin,
 
         // Feedback
