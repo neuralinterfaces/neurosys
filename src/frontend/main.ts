@@ -343,10 +343,10 @@ const handleBluetoothPluginEvents = async () => {
 
   const ul = modal.querySelector('ul') as HTMLUListElement
 
-  const closeModal = (device?: string) => {
-    modal.close()
-    select(device || '')
-  }
+  let device = '';
+  const onModalClosed = () => select(device)
+
+  modal.addEventListener('close', onModalClosed)
 
   const updateList = (devices) => {
     ul.innerHTML = ''
@@ -354,7 +354,10 @@ const handleBluetoothPluginEvents = async () => {
       const li = document.createElement('li')
       li.setAttribute('device-id', deviceId)
       li.innerText = deviceName
-      li.onclick = () => closeModal(deviceId)
+      li.onclick = () => {
+        device = deviceId
+        modal.close()
+      }
       ul.appendChild(li)
     })
   }
