@@ -1,9 +1,20 @@
 import './style.css'
 
-import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
+import * as DEVICES from './devices'
 import * as bci from 'bcijs/browser.js'
 
-const { DESKTOP, READY } = commoners
+
+// Example Search Params: ?feedback=textFeedback&feedback=inspectFeedback&score=alphaScore
+const searchParams = new URLSearchParams(window.location.search)
+
+const urlSettings = {
+  feedback: searchParams.getAll('feedback').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
+  score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
+}
+
+const hasUrlSettings = Object.values(urlSettings).some((o) => Object.keys(o).length > 0)
+
+const { READY } = commoners
 
 type DataRange = [number, number]
 
@@ -16,7 +27,7 @@ const calculate = async (dataRange: DataRange) => {
   const plugin = await getActiveScorePlugin()
   if (!plugin) return { features: null, score: null }
   const { get, features = {} } = plugin
-  const calculatedFeatures = getFeatures(features, dataRange)
+  const calculatedFeatures = getFeatures(features, dataRange, client?.sfreq)
   const score = get(calculatedFeatures)
   return { features: calculatedFeatures, score  }
 }
@@ -59,8 +70,11 @@ const registerAllFeedbackPlugins = async () => {
     onFeedbackToggle(key, async (enabled) => {
       const { start, stop, __info, __score } = ref
     
+      const toggledFromPrevState = enabled == !ref.enabled
       ref.enabled = enabled
       await setValueInSettings(`feedback.${key}.enabled`, enabled)
+
+      if (!enabled && !toggledFromPrevState) return
 
       const callback = enabled ? start : stop
       if (callback) ref.__info = (await callback(__info)) ?? {}
@@ -105,10 +119,10 @@ const registerAllScorePlugins = async () => {
   }, {})
 }
 
-const configureSettings = async (data?: Record<string, any>) => {
-  const { menu: { configureSettings } } = await READY
+const loadSettings = async (data?: Record<string, any>) => {
+  const { menu: { loadSettings } } = await READY
   if (!data) data = await GLOBALS.settings.data
-  configureSettings(data)
+  loadSettings(data)
 }
 
 const feedbackOptionsPromise = registerAllFeedbackPlugins()
@@ -116,7 +130,7 @@ const scoreOptionsPromise = registerAllScorePlugins()
 
 feedbackOptionsPromise.then(async () => {
   await scoreOptionsPromise
-  configureSettings()
+  loadSettings()
 })
 
 const onShowDevices = async (fn: Function) => {
@@ -152,7 +166,7 @@ const getSettings = async () => {
 const GLOBALS = {
   settings: {
     name: 'settings',
-    data: getSettings() // Always a promise
+    data: hasUrlSettings ? urlSettings : getSettings(),
   }
 }
 
@@ -206,7 +220,11 @@ const getActiveScorePlugin = async () => {
 
 
 // ------------ Calculate Score ------------
-const getFeatures = (features: UserFeatures, dataRange: DataRange): CalculatedFeatures => {
+const getFeatures = (
+  features: UserFeatures, 
+  dataRange: DataRange,
+  sfreq: number
+): CalculatedFeatures => {
 
   return Object.entries(features).reduce((acc, [ key, value ]) => {
 
@@ -218,7 +236,7 @@ const getFeatures = (features: UserFeatures, dataRange: DataRange): CalculatedFe
 
           const powers = bci.bandpower(
             sliced,
-            EEG_FREQUENCY,
+            sfreq,
             value,
             { relative: true }
           )
@@ -253,63 +271,12 @@ const PROTOCOL_LABELS = {
   usb: 'USB'
 }
 
-const DEVICES = {
-  muse: {
-    name: 'Muse',
-    category: 'EEG',
-    protocols: [ 'bluetooth' ],
-    connect: async () => {
-
-      client = new MuseClient();
-
-      const previousDevice = null
-      if (DESKTOP && previousDevice) {
-        const { bluetooth } = await READY
-        bluetooth.match(previousDevice, 5000) // Set device to match on desktop
-      }
-  
-      // options.device = previousDevice
-
-      data = {} // Reset data
-      await client.connect();
-      toggleDeviceConnection(false)
-      
-      await client.start();
-  
-
-      client.eegReadings.subscribe(({ electrode, samples }) => {
-        const chName = channelNames[electrode]
-        const signal = data[chName] || ( data[chName] = [])
-        signal.push(...samples)
-      });
-  
-    }
-  },
-  openbci: {
-    name: 'OpenBCI',
-    category: 'EEG',
-    protocols: [ { type: 'usb', enabled: false } ]
-  },
-  mendi: {
-    name: 'Mendi',
-    category: 'fNIRS',
-    protocols: [ { type: 'bluetooth', enabled: false } ]
-  },
-  hegduino: {
-    name: 'HEGduino',
-    category: 'fNIRS',
-    protocols: [ 
-      { type: 'usb', enabled: false },
-      { type: 'bluetooth', enabled: false }
-    ],
-  }
-}
-
-
 const startSearchForDevice = async (device: string, protocol: string) => {
   const deviceInfo = DEVICES[device]
   if (!deviceInfo) return console.error('Unknown device', device)
-  await deviceInfo.connect()
+  data = {} // Reset data
+  client = await deviceInfo.connect({ data, protocol })
+  toggleDeviceConnection(false)
 }
 
 type ProtocolInfo = {
@@ -327,10 +294,12 @@ onShowDevices(() => {
   Object.entries(DEVICES).forEach(([identifier, { name, category, protocols = [] }]) => {
     const li = document.createElement('li')
 
+    if (!Array.isArray(protocols)) protocols = [ protocols ]
+
     const buttons = protocols.map((protocol) => {
-      const info = typeof protocol === 'string' ? { type: protocol } : protocol
+      const info = protocol && typeof protocol === 'object' ? protocol : { type: protocol }
       const { type, enabled = true } = info as ProtocolInfo
-      const label = PROTOCOL_LABELS[type] || type
+      const label = PROTOCOL_LABELS[type] || 'Start'
       const button = document.createElement('button')
       button.innerText = label
       if (!enabled) button.setAttribute('disabled', '')

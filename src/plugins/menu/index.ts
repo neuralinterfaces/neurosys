@@ -22,7 +22,7 @@ export function load() {
 
         // Settings
         onSaveSettings: (callback) => this.on("settings.save", () => callback()),
-        configureSettings: (settings) => this.send("settings.configure", settings),
+        loadSettings: (settings) => this.send("settings.load", settings),
         enableSettings: (enabled) => this.send("settings.enabled", enabled)
     }
 }
@@ -132,7 +132,7 @@ export const desktop = {
 
         // ------------------------- Allow Configuration based on Settings ------------------------- \\
 
-        this.on("settings.configure", (_, settings) => {
+        this.on("settings.load", (_, settings) => {
 
             for (const [ id, registered ] of Object.entries(REGISTERED)) {
                 const categorySettings = settings[id] ?? {}

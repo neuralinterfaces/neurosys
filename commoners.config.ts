@@ -13,7 +13,6 @@ import mainProcessFeedbackPlugin from './src/plugins/feedback/main-process/index
 import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
 // Scores
-import  * as sineScorePlugin from './src/plugins/scores/sine/index'
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
 const OVERLAY = true
@@ -33,7 +32,8 @@ const config = {
     target: "electron",
 
     pages: {
-        settings: './src/pages/settings/settings.html'
+        settings: './src/pages/settings/index.html',
+        spotify: './src/plugins/feedback/spotify/index.html',
     },
 
     electron: {
@@ -55,7 +55,6 @@ const config = {
 
         // Test Plugins
         mainProcessFeedback: mainProcessFeedbackPlugin,
-        sineScore: sineScorePlugin,
 
         // Feedback
         textFeedback: textFeedbackPlugin,

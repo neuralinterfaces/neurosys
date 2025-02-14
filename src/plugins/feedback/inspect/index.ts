@@ -1,45 +1,25 @@
-import { channelNames } from "muse-js"
-
-const createBandpowerVisualization = (bands) => {
-    const channelsContainer = document.createElement('div')
-    channelsContainer.id = 'channels-container'
-
-    const bandElementsByChannel = channelNames.reduce((acc, name) => {
-        const channelElement = document.createElement('div')
-        channelElement.id = name
-        channelElement.classList.add('channel')
-
-        const bandElements = bands.reduce((acc, band) => {
-            const bandElement = document.createElement('div')
-            bandElement.id = `${name}-${band}`
-            bandElement.className = `band ${band}`
-            acc[band] = bandElement
-            return acc
-        }, {})
-
-        const header = document.createElement('strong')
-        header.innerText = name
-
-        const bandsContainer = document.createElement('div')
-        bandsContainer.classList.add('bands')
-        bandsContainer.append(...Object.values(bandElements))
-        channelElement.append(header, bandsContainer)
-
-        channelsContainer.appendChild(channelElement)
-
-        acc[name] = bandElements
-
-        return acc
-
-    }, {})
-
-    return {
-        parent: channelsContainer,
-        bands: bandElementsByChannel
-    }
+const createBandElement = (band) => {
+    const element = document.createElement('div')
+    element.className = `band ${band}`
+    return element
 }
 
+const createChannelElement = (name) => {
+    const channel = document.createElement('div')
+    channel.id = name
+    channel.classList.add('channel')
 
+    const header = document.createElement('strong')
+    header.innerText = name
+
+    const bands = document.createElement('div')
+    bands.classList.add('bands')
+    channel.append(header, bands)
+
+    return { channel, bands }
+}
+
+// const createBandElements = (bands) => bands.reduce((acc, band) => ({ ...acc, [band]: createBandElement(band) }), {})
 
 export default {
     load() {
@@ -53,30 +33,51 @@ export default {
                 featuresDiv.style.display = "flex";
                 featuresDiv.style.flexDirection = "column";
                 featuresDiv.style.gap = "10px";
-                featuresDiv.style.padding = "10px";
 
-                const bands = createBandpowerVisualization([ "alpha", "beta" ])
-                const { parent } = bands
-                featuresDiv.append(parent)
-
+                const channelsContainer = document.createElement('div')
+                channelsContainer.id = 'channels-container'
+                featuresDiv.append(channelsContainer)
                 document.body.append(featuresDiv)
-                return { elements: { bands } }
+
+                // const bands = createBandpowerVisualization([ "alpha", "beta" ])
+
+                const getBandElement = (ch, band) => {
+                    // Get ch element with query selctor, add if not present
+                    let chBandsElement = document.querySelector(`#${ch} .bands`)
+                    if (!chBandsElement) {
+                        const { channel, bands } = createChannelElement(ch)
+                        channelsContainer.append(channel) 
+                        chBandsElement = bands
+                    }
+
+                    let bandElement = chBandsElement.querySelector(`.band.${band}`)
+                    if (!bandElement) {
+                        bandElement = createBandElement(band)
+                        chBandsElement.append(bandElement)
+                    }
+
+                    return bandElement
+
+                }
+                
+                return { 
+                    container: featuresDiv,
+                    getBandElement
+                }
             },
-            stop({ elements }) {
-                for (const value of Object.values(elements)) value.parent.remove()
+            stop({ container }) {
+                container.remove()
             },
             set(score, info) {
-                const { elements } = info
+                const { getBandElement } = info
                 const { bands } = this.__features
                 if (bands) {
-
-                    const bandElements = elements.bands
 
                     for (const ch in bands) {
                         const data = bands[ch]
                         for (const band in data) {
                             const value = data[band]
-                            const el = bandElements.bands[ch][band]
+                            const el = getBandElement(ch, band)
                             el.style.width = `${value * 100}%`
                         }
                     }

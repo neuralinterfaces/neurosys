@@ -21,13 +21,19 @@ This application is built with [commmoners](https://github.com/neuralinterfaces/
 Score and feedback plugins are automatically detected and loaded into the system tray.
 
 #### Score Design
-Score plugins have special `load` fields, including `score` for tray details and a `get` function that returns a score value.
+Score plugins have special `load` fields, including `score` for tray details, `features` for feature requirements, and a `get` function that calculates a score value based on the resolved features.
+
+The `get` function
 
 ```javascript
 export default {
     load: () => ({
-        score: { label: 'Sine Wave' },
-        get: () => (Math.sin(Date.now() / 1000) + 1) / 2,
+        score: { label: 'Alpha Score' },
+        features: { bands: ['alpha'] },
+        get({ bands }) {
+            const averageAlphaRatio = Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
+            return Math.min(1, Math.max(0, averageAlphaRatio))
+        }
     })
 }
 ```
@@ -67,8 +73,6 @@ export default {
     - Popup using Electon instead of standard window popup
     - Gracefully handle page refresh
     - Use refresh token…
-- Save settings and reload.
-    - Provide a preset for new users to get started quickly (alpha + features + text)
 - Baseline your features with the first 5s + allow Reset Baseline
 - Integrate Brainflow robustly
 - Test Linux

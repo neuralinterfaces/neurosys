@@ -4,6 +4,7 @@ import { setVolume } from "./utils/controls";
 
 export default {
     load() {
+
         return {
             feedback: { label: 'Spotify Volume' },
             
