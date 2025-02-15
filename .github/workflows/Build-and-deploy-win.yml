@@ -31,4 +31,4 @@ jobs:
       - name: Build and deploy on Windows
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build -- --target desktop --publish
+        run: npm run build -- --publish
