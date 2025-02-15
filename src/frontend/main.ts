@@ -268,14 +268,6 @@ onDeviceDisconnect(async () => {
   toggleDeviceConnection(true)
 })
 
-const PROTOCOL_LABELS = {
-  bluetooth: 'Bluetooth',
-  usb: 'USB',
-
-  generate: 'Generate',
-  file: 'Load File'
-}
-
 const startSearchForDevice = async (device: string, protocol: string) => {
   const deviceInfo = DEVICES[device]
   if (!deviceInfo) return console.error('Unknown device', device)
@@ -370,6 +362,8 @@ const createModal = ({ title, emptyMessage = '' }: {
     const target = event.target as Node
     if (target === modal) modal.close()
   });
+
+  modal.addEventListener('close', () => modal.remove())
 
   return modal
 }
