@@ -1,7 +1,7 @@
 # Neurosys 🌀
 > OS-level Control for BCIs
 
-Neurosys (pronounced like "neurosis") is a desktop application that uses brain-computer interface (BCI) technology to provide system-level feedack on your computer.
+Neurosys is a desktop application that uses brain-computer interface (BCI) technology to provide system-level feedack on your computer.
 
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)
