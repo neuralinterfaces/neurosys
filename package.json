@@ -6,10 +6,20 @@
   "workspaces": [
     "src/packages/*"
   ],
+  "engine": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garrettmflynn/neurosys.git"
+  },
+  "author": {
+    "name": "Garrett Flynn",
+    "email": "garrettmflynn@gmail.com"
+  },
   "scripts": {
-    "dev": "commoners",
-    "start": "commoners --target desktop",
-    "build": "commoners build --target desktop"
+    "start": "commoners",
+    "build": "commoners build"
   },
   "devDependencies": {
     "bcijs": "^1.8.0",
