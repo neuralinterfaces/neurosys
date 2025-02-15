@@ -8,9 +8,9 @@ export const protocols = {
     ble: { label: 'Bluetooth', enabled: true },
 }
 
-const { DESKTOP, READY } = commoners
-
 export const connect = async ({ data }) => {
+
+    const { DESKTOP, READY } = commoners
 
     const client = new MuseClient();
 
@@ -32,6 +32,7 @@ export const connect = async ({ data }) => {
     });
 
     return {
+        disconnect: () => client.disconnect(),  
         sfreq: EEG_FREQUENCY
     }
 

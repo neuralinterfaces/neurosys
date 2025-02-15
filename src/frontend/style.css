@@ -30,6 +30,10 @@ button {
   cursor: pointer;
 }
 
+button[disabled] {
+  cursor: not-allowed;
+}
+
 #error {
   margin: 15px;
   display: block;

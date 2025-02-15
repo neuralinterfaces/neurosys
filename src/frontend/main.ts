@@ -1,9 +1,5 @@
 import './style.css'
 
-import * as DEVICES from './devices'
-import * as bci from 'bcijs/browser.js'
-
-
 // Example Search Params: ?feedback=textFeedback&feedback=inspectFeedback&score=alphaScore
 const searchParams = new URLSearchParams(window.location.search)
 
@@ -27,7 +23,7 @@ const calculate = async (dataRange: DataRange) => {
   const plugin = await getActiveScorePlugin()
   if (!plugin) return { features: null, score: null }
   const { get, features = {} } = plugin
-  const calculatedFeatures = getFeatures(features, dataRange, client?.sfreq)
+  const calculatedFeatures = await getFeatures(features, dataRange, client?.sfreq)
   const score = get(calculatedFeatures)
   return { features: calculatedFeatures, score  }
 }
@@ -119,6 +115,27 @@ const registerAllScorePlugins = async () => {
   }, {})
 }
 
+const getAllFeaturePlugins = async () => {
+  const PLUGINS = await READY
+
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+    const { feature } = plugin
+    if (!feature) return acc
+    acc[key] = plugin
+    return acc
+  }, {})
+}
+
+const getAllDevicesFromPlugins = async () => {
+  const PLUGINS = await READY
+  return Object.values(PLUGINS).reduce((acc, plugin) => {
+    const { devices } = plugin
+    if (!devices) return acc
+    acc.push(...devices)
+    return acc
+  }, [])
+}
+
 const loadSettings = async (data?: Record<string, any>) => {
   const { menu: { loadSettings } } = await READY
   if (!data) data = await GLOBALS.settings.data
@@ -127,6 +144,8 @@ const loadSettings = async (data?: Record<string, any>) => {
 
 const feedbackOptionsPromise = registerAllFeedbackPlugins()
 const scoreOptionsPromise = registerAllScorePlugins()
+const featurePluginsPromise = getAllFeaturePlugins()
+const devicesPromise = getAllDevicesFromPlugins()
 
 feedbackOptionsPromise.then(async () => {
   await scoreOptionsPromise
@@ -222,40 +241,25 @@ const getActiveScorePlugin = async () => {
 
 
 // ------------ Calculate Score ------------
-const getFeatures = (
+const getFeatures = async (
   features: UserFeatures, 
   dataRange: DataRange,
   sfreq: number
-): CalculatedFeatures => {
+): Promise<CalculatedFeatures> => {
 
-  return Object.entries(features).reduce((acc, [ key, value ]) => {
+  const featurePlugins = await featurePluginsPromise
 
-    if (key === 'bands') {
+  const results = {}
 
-      acc.bands = Object.entries(data).reduce((acc, [ ch, chData ]) => {
+  for (const [ key, value ] of Object.entries(features)) {
+    const plugin = featurePlugins[key]
+    if (!plugin) continue
+    const { calculate } = plugin
+    if (!calculate) continue
+    results[key] = await calculate({ data, window: dataRange, sfreq }, value)
+  }
 
-          const sliced = chData.slice(...dataRange)
-
-          const powers = bci.bandpower(
-            sliced,
-            sfreq,
-            value,
-            { relative: true }
-          )
-
-          acc[ch] = value.reduce((acc, band, idx) => {
-            acc[band] = powers[idx]
-            return acc
-          }, {})
-
-          return acc
-
-        }, {})
-
-    }
-
-    return acc
-  }, {})
+  return results
 
 }
 
@@ -268,36 +272,25 @@ onDeviceDisconnect(async () => {
   toggleDeviceConnection(true)
 })
 
-const startSearchForDevice = async (device: string, protocol: string) => {
-  const deviceInfo = DEVICES[device]
-  if (!deviceInfo) return console.error('Unknown device', device)
-  data = {} // Reset data
-  client = await deviceInfo.connect({ data, protocol })
-  toggleDeviceConnection(false)
-}
-
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
-onShowDevices(() => {
+onShowDevices(async () => {
 
   const modal = createModal({ title: 'Neurofeedback Devices' })
   const ul = modal.querySelector('ul') as HTMLUListElement
 
+  const devices = await devicesPromise
 
-  // Sort devices by enabled state
-  Object.entries(DEVICES)
-  .map(([ identifier, info]) => {
-
+  devices.map((info) => {
     // Resolve protocols
     const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
-        const overrides = typeof protocol === 'string' ? { label: protocol } : {}
-        return { ...protocol, ...overrides, id }
+      const overrides = typeof protocol === 'string' ? { label: protocol } : {}
+      return { ...protocol, ...overrides, id }
     })
 
-    return [ identifier, { ...info, protocols: resolvedProtocols} ]
-
+    return { ...info, protocols: resolvedProtocols}
   })
-  .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-  .sort(([, a], [, b]) => {
+  .sort((a,b) => a.name.localeCompare(b.name))
+  .sort((a,b) => {
 
     const firstAnyEnabled = a.protocols.find(({ enabled = true }) => enabled)
     const secondAnyEnabled =  b.protocols.find(({ enabled = true }) => enabled)
@@ -305,23 +298,28 @@ onShowDevices(() => {
     if (!firstAnyEnabled && !secondAnyEnabled) return 0
     if (!firstAnyEnabled && secondAnyEnabled) return 1
     if (firstAnyEnabled && !secondAnyEnabled) return -1
-  })
-  .forEach(([identifier, { name, category, protocols }]) => {
+  }).forEach(({ name, category, protocols, connect }) => {
+
     const li = document.createElement('li')
 
-    const buttons = protocols.map(({ id, label, enabled = true }) => {
+    const buttons = protocols.map(({ id: protocol, label, enabled = true }) => {
       const button = document.createElement('button')
       button.innerText = label
       if (!enabled) button.setAttribute('disabled', '')
-      button.onclick = () => {
+      button.onclick = async () => {
         modal.close()
-        startSearchForDevice(identifier, id)
+
+
+        // Connect to the device
+        data = {} // Reset data
+        client = await connect?.({ data, protocol })
+        toggleDeviceConnection(false)
       }
       return button
     })
 
     const label = document.createElement('strong')
-    label.innerText = name || identifier
+    label.innerText = name
 
     const buttonDiv = document.createElement('div')
     buttonDiv.classList.add('buttons')

@@ -1,14 +1,12 @@
-import { generateSignal } from 'bcijs/browser.js'
-
+import { generateSignal } from "../bcijs/generateSignal"
 
 export const name = 'Synthetic EEG'
+
 export const category = 'EEG'
+
 export const protocols = {
     generate: "Generate",
-    load: {
-        label: "Load File",
-        enabled: false
-    }
+    load: { label: "Load File", enabled: false }
 }
 
 const channelNames = [ 'Fp1', 'Fp2', 'C3', 'C4', 'O1', 'O2', 'AUX1', 'AUX2' ]
@@ -18,7 +16,6 @@ export const connect = async ({ data }) => {
 
     const componentOne = { freq: 10, amp: 10 }
     const componentTwo = { freq: 20, amp: 10 }
-
 
     const generatedData = (chNames, components, sfreq, duration) => chNames.map(() => generateSignal(components.map(({ amp }) => amp), components.map(({ freq }) => freq), sfreq, duration ))
 

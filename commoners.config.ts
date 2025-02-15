@@ -4,6 +4,14 @@ import * as menuPlugin from './src/plugins/menu/index'
 import * as bluetoothPlugin from './src/plugins/ble/index'
 import settingsPlugin from './src/plugins/settings/index'
 
+// Devices
+import syntheticDevicesPlugin from './src/plugins/devices/synthetic/index'
+import museDevicePlugin from './src/plugins/devices/muse/index'
+import mockDevicesPlugin from './src/plugins/devices/mocks/index'
+
+// Features
+import bandsPlugin from './src/plugins/features/bands/index'
+
 // Feedback
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
@@ -16,8 +24,8 @@ import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 // Scores
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -51,10 +59,11 @@ const config = {
     plugins: {
 
 
-        bluetooth: bluetoothPlugin,
         menu: menuPlugin,
         settings: settingsPlugin,
 
+        // ------------------- Features -------------------
+        bands: bandsPlugin,
 
         // ------------------- Feedback -------------------
         textFeedback: textFeedbackPlugin,
@@ -72,6 +81,17 @@ const config = {
         alphaScore: alphaScorePlugin,
 
         // ------------------- Acquisition -------------------
+
+        // Mocked
+        mockDevices: mockDevicesPlugin,
+
+        // Functional
+        syntheticDevices: syntheticDevicesPlugin,
+
+        // BLE
+        bluetooth: bluetoothPlugin, // For Desktop Support
+        museDevicePlugin: museDevicePlugin,
+
         // brainflow {
         //     load: function () {
         //         const { SERVICES: { brainflow : { url }} } = commoners
