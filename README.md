@@ -71,17 +71,10 @@ export default {
 ```
 
 ### Improvements
-- Integrate with Spotify for volume control
-    - Popup using Electon instead of standard window popup
-    - Gracefully handle page refresh
-    - Use refresh token…
 - Baseline your features with the first 5s + allow Reset Baseline
-- Integrate Brainflow robustly
-- Test Linux
+- Integrate Brainflow
 - Create multiple windows for different screens in a multi-monitor setup
-
-### Issues
-- Every once in a while, the brightness stops responding...
+- Test Linux
 
 ## Extensions
 ### robot.js
