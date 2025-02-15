@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "src/packages/*"
+    "src/plugins/**/*"
   ],
   "engine": {
     "node": ">=20.0.0"
@@ -30,10 +30,8 @@
     "@storybook/test": "^8.5.6",
     "@storybook/web-components": "^8.5.6",
     "@storybook/web-components-vite": "^8.5.6",
-    "bcijs": "^1.8.0",
     "commoners": "^0.0.60-alpha.1",
     "lit": "^3.2.1",
-    "muse-js": "^3.3.0",
     "storybook": "^8.5.6"
   }
 }

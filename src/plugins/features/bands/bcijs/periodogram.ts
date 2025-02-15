@@ -3,11 +3,7 @@ import fft from 'fft.js';
 
 let fftCache = {};
 
-/**
- * Apply a Hann window to a signal
- * @private
- */
-function hann(signal) {
+function hann(signal: number[]) {
     let windowed = [];
     let L = signal.length - 1;
     let C = Math.PI / L;
@@ -23,14 +19,10 @@ function hann(signal) {
     return {signal: windowed, scale: scale};
 }
 
-/**
- * Apply a taper to a signal
- * @private
- * @param {number[]} signal - The signal
- * @param {number[]} taper - The taper
- * @returns {number[]} The tapered signal
- */
-function taper(signal, taper) {
+function taper(
+    signal: number[],
+    taper: number[]
+) {
     if(signal.length != taper.length)
         throw new Error('Signal length must match taper length');
 
@@ -45,22 +37,15 @@ function taper(signal, taper) {
     return {signal: windowed, scale: scale};
 }
 
-/** 
- * Estimates the power spectral density of a real-valued input signal using the periodogram method and a rectangular window.
- * Output units are based on that of the input signal, of the form X^2/Hz, where X is the units of the input signal.
- * For example, if the input is an EEG signal measured in μV, then this method returns values of μV^2/Hz.
- * 
- * @memberof module:bcijs
- * @function
- * @name periodogram
- * @param {number[]} signal - The signal.
- * @param {number} sample_rate - sample rate in Hz
- * @param {Object} [options]
- * @param {number} [options.fftSize=Math.pow(2, bci.nextpow2(signal.length))] - Size of the fft to be used. Should be a power of 2.
- * @param {string|number[]} [options.window='rectangular'] - Window function to apply, either 'hann', 'rectangular', or an array for a custom window. Default is 'rectangular'.
- * @returns {Object} Object with keys 'estimates' (the psd estimates) and 'frequencies' (the corresponding frequencies in Hz)
- */
-export function periodogram(signal, sample_rate, options) {
+export function periodogram(
+    signal: number[],
+    sample_rate: number,
+    options: {
+        fftSize?: number,  // Should be a power of 2
+        window?: string | number[], // 'hann', 'rectangular', or a custom window
+        _scaling?: 'psd' | 'none' // 'psd' for power spectral density, 'none' for unscaled
+    } = {}
+) {
 	let {fftSize, window, _scaling} = Object.assign({
         fftSize: Math.pow(2, nextpow2(signal.length)),
         window: 'rectangular',

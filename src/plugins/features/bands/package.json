@@ -1,0 +1,11 @@
+{
+    "name": "@neurosys/bands",
+    "version": "0.0.0",
+    "private": true,
+    "keywords": [
+        "features"
+    ],
+    "devDependencies": {
+        "fft.js": "^4.0.4"
+    }
+}

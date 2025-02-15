@@ -24,8 +24,8 @@ import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 // Scores
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
