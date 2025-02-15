@@ -19,11 +19,19 @@ export default {
     load() {
         return {
             feature: { label: 'Bandpowers' },
+
+            // Create a set of all requested bands accross all channels
+            aggregateSettings: (settings: BandSpecification[]) => {
+                const bands = settings.reduce((acc, val) => acc.concat(val), [])
+                return [ ...new Set(bands) ]
+            },
+
             calculate(
                 { data, window, sfreq }: CalculationProperties,
-                requesterSettings: BandSpecification
+                requesters: BandSpecification[]
             ) {
-                
+
+                const uniqueBands = [ ...new Set(requesters.reduce((acc, val) => acc.concat(val), []) ) ]
 
                 return Object.entries(data).reduce((acc, [ch, chData]) => {
 
@@ -32,11 +40,11 @@ export default {
                     const powers = calculateBandPower(
                         sliced,
                         sfreq,
-                        requesterSettings,
+                        uniqueBands,
                         { relative: true }
                     )
 
-                    acc[ch] = requesterSettings.reduce((acc, band, idx) => {
+                    acc[ch] = uniqueBands.reduce((acc, band, idx) => {
                         acc[band] = powers[idx]
                         return acc
                     }, {})

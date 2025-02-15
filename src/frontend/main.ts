@@ -256,7 +256,7 @@ const getFeatures = async (
     if (!plugin) continue
     const { calculate } = plugin
     if (!calculate) continue
-    results[key] = await calculate({ data, window: dataRange, sfreq }, value)
+    results[key] = await calculate({ data, window: dataRange, sfreq }, [ value ]) // NOTE: Support multiple requesteres in the future
   }
 
   return results
