@@ -1,0 +1,34 @@
+name: Build and Deploy — Linux
+run-name: ${{ github.actor }} is building a Linux release
+
+on:
+  # push:
+  #   branches: ["main"]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write 
+
+jobs:
+  deploy-on-linux:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and deploy on Linux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build -- --target desktop --publish
