@@ -1,6 +1,7 @@
-import * as bluetoothPlugin from './src/plugins/ble/index'
 import * as systemOverlayPlugin from './src/plugins/systemOverlay/index'
 import * as menuPlugin from './src/plugins/menu/index'
+
+import * as bluetoothPlugin from './src/plugins/ble/index'
 import settingsPlugin from './src/plugins/settings/index'
 
 // Feedback
@@ -28,16 +29,15 @@ const TRANSPARENT_WINDOW_SETTINGS = {
 }
 
 const config = {
-    name: "neuro.sys",
+    name: "Neurosys",
     target: "electron",
 
     pages: {
-        settings: './src/pages/settings/index.html',
         spotify: './src/plugins/feedback/spotify/index.html',
     },
 
     electron: {
-        protocol: { scheme: 'neuro.sys', privileges: { secure: true, standard: true, supportFetchAPI: true } },
+        protocol: { scheme: 'neurosys', privileges: { secure: true, standard: true, supportFetchAPI: true } },
         window: OVERLAY ? TRANSPARENT_WINDOW_SETTINGS : {},
         // win: { requestedExecutionLevel: 'requireAdministrator' }
     },

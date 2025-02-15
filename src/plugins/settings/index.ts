@@ -12,7 +12,7 @@ export default {
             const fs = require('fs')
             const path = require('path')
 
-            const homeDir = path.join(require('os').homedir(), 'neuro.sys')
+            const homeDir = path.join(require('os').homedir(), 'neurosys')
             const settingsDir = path.join(homeDir, 'settings')
 
             const getSettingsPath = (name: string) => path.join(settingsDir, `${name}.json`)

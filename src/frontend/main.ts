@@ -159,7 +159,9 @@ const onSaveSettings = async (fn: Function) => {
 }
 
 const getSettings = async () => {
-  const { settings: { get } } = await READY
+  const { settings } = await READY
+  if (!settings) return {}
+  const { get } = settings
   return get('settings')
 }
 
@@ -374,7 +376,9 @@ const createModal = ({ title, emptyMessage = '' }: {
 
 const handleBluetoothPluginEvents = async () => {
 
-  const { bluetooth: { onOpen, onUpdate, select } } = await READY
+  const { bluetooth } = await READY
+  if (!bluetooth) return
+  const { onOpen, onUpdate, select } = bluetooth
 
   const modal = createModal({ title: 'Discovered Local Devices', emptyMessage: 'Searching...' })
   document.body.append(modal)

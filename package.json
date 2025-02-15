@@ -1,7 +1,7 @@
 {
-  "name": "system-neurofeedback",
-  "private": true,
+  "name": "neurosys",
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "workspaces": [
     "src/packages/*"
