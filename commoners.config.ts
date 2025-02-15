@@ -35,7 +35,7 @@ const config = {
     icon: "./src/assets/icon.png",
 
     pages: {
-        spotify: './src/plugins/feedback/spotify/index.html',
+        // spotify: './src/plugins/feedback/spotify/index.html',
     },
 
     electron: {
@@ -55,20 +55,23 @@ const config = {
         menu: menuPlugin,
         settings: settingsPlugin,
 
-        // Test Plugins
-        mainProcessFeedback: mainProcessFeedbackPlugin,
 
-        // Feedback
+        // ------------------- Feedback -------------------
         textFeedback: textFeedbackPlugin,
         brightnessFeedback: brightnessFeedbackPlugin,
-        spotifyFeedback: spotifyFeedbackPlugin,
         inspectFeedback: inspectFeedbackPlugin,
+
+        // // Test Plugins
+        // mainProcessFeedback: mainProcessFeedbackPlugin,
+
+        // // Experimental Plugins
+        // spotifyFeedback: spotifyFeedbackPlugin
         // robotFeedback: robotPlugin,
 
-        // Scores
+        // ------------------- Scores -------------------
         alphaScore: alphaScorePlugin,
 
-        // // Data Acquisition
+        // ------------------- Acquisition -------------------
         // brainflow {
         //     load: function () {
         //         const { SERVICES: { brainflow : { url }} } = commoners
