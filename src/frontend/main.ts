@@ -1,3 +1,5 @@
+import { BluetoothSearchList } from './components/BluetoothSearchList'
+import { DeviceList } from './components/DeviceList'
 import './style.css'
 
 // Example Search Params: ?feedback=textFeedback&feedback=inspectFeedback&score=alphaScore
@@ -275,66 +277,30 @@ onDeviceDisconnect(async () => {
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
 onShowDevices(async () => {
 
-  const modal = createModal({ title: 'Neurofeedback Devices' })
-  const ul = modal.querySelector('ul') as HTMLUListElement
-
   const devices = await devicesPromise
 
-  devices.map((info) => {
-    // Resolve protocols
-    const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
-      const overrides = typeof protocol === 'string' ? { label: protocol } : {}
-      return { ...protocol, ...overrides, id }
-    })
+  const list = new DeviceList({ 
+    devices, 
 
-    return { ...info, protocols: resolvedProtocols}
+    // Connect to the device
+    onSelect: async ({ connect }, protocol) => {
+      modal.close()
+      data = {} // Reset data
+      client = await connect?.({ data, protocol })
+      toggleDeviceConnection(false)
+    } 
   })
-  .sort((a,b) => a.name.localeCompare(b.name))
-  .sort((a,b) => {
 
-    const firstAnyEnabled = a.protocols.find(({ enabled = true }) => enabled)
-    const secondAnyEnabled =  b.protocols.find(({ enabled = true }) => enabled)
+  const modal = createModal({ title: 'Neurofeedback Devices', content: list })
 
-    if (!firstAnyEnabled && !secondAnyEnabled) return 0
-    if (!firstAnyEnabled && secondAnyEnabled) return 1
-    if (firstAnyEnabled && !secondAnyEnabled) return -1
-  }).forEach(({ name, category, protocols, connect }) => {
-
-    const li = document.createElement('li')
-
-    const buttons = protocols.map(({ id: protocol, label, enabled = true }) => {
-      const button = document.createElement('button')
-      button.innerText = label
-      if (!enabled) button.setAttribute('disabled', '')
-      button.onclick = async () => {
-        modal.close()
-
-
-        // Connect to the device
-        data = {} // Reset data
-        client = await connect?.({ data, protocol })
-        toggleDeviceConnection(false)
-      }
-      return button
-    })
-
-    const label = document.createElement('strong')
-    label.innerText = name
-
-    const buttonDiv = document.createElement('div')
-    buttonDiv.classList.add('buttons')
-    buttonDiv.append(...buttons)
-    
-    li.append(label, buttonDiv)
-    ul.appendChild(li)
-  })
 
   document.body.append(modal)
   modal.showModal()
 })
 
-const createModal = ({ title, emptyMessage = '' }: { 
+const createModal = ({ title, content, emptyMessage = '' }: { 
   title: string,
+  content?: HTMLElement,
   emptyMessage?: string
 }) => {
 
@@ -351,9 +317,7 @@ const createModal = ({ title, emptyMessage = '' }: {
   const footer = document.createElement('footer')
   modal.appendChild(footer)
 
-  const ul = document.createElement('ul')
-  ul.setAttribute('empty-message', emptyMessage)
-  main.appendChild(ul)
+  if (content) main.appendChild(content)
 
   // Dismiss modal if user clicks outside on the backdrop
   modal.addEventListener('click', (event) => {
@@ -372,29 +336,23 @@ const handleBluetoothPluginEvents = async () => {
   if (!bluetooth) return
   const { onOpen, onUpdate, select } = bluetooth
 
-  const modal = createModal({ title: 'Discovered Local Devices', emptyMessage: 'Searching...' })
-  document.body.append(modal)
-
-  const ul = modal.querySelector('ul') as HTMLUListElement
-
   let device = '';
   const onModalClosed = () => select(device)
 
+  const list = new BluetoothSearchList({ 
+    emptyMessage: 'Searching...',
+    onSelect: (deviceId) => {
+      device = deviceId
+      modal.close()
+    } 
+  })
+
+  const modal = createModal({ title: 'Discovered Local Devices',  content: list })
+
+  document.body.append(modal)
+
   modal.addEventListener('close', onModalClosed)
 
-  const updateList = (devices) => {
-    ul.innerHTML = ''
-    devices.forEach(({ deviceName, deviceId }) => {
-      const li = document.createElement('li')
-      li.setAttribute('device-id', deviceId)
-      li.innerText = deviceName
-      li.onclick = () => {
-        device = deviceId
-        modal.close()
-      }
-      ul.appendChild(li)
-    })
-  }
 
   let latestDevices = ''
   onOpen(() => modal.showModal())
@@ -402,7 +360,7 @@ const handleBluetoothPluginEvents = async () => {
   onUpdate((devices) => {
     if (latestDevices !== JSON.stringify(devices)) {
       latestDevices = JSON.stringify(devices)
-      updateList(devices)
+      list.devices = [ ...devices ]
     }
   })
 }

@@ -85,48 +85,6 @@ dialog footer {
   border-top: 1px solid lightgray;
 }
 
-dialog ul {
-  list-style: none;
-  padding: 0px 20px;
-  margin: 0;
-}
-
-dialog ul:empty::before {
-  content: attr(empty-message);
-  display: block;
-  padding: 20px;
-  text-align: center;
-  font-size: 80%;
-}
-
-dialog ul li {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-  padding: 20px 0px;
-}
-
-dialog ul li[device-id] {
-  cursor: pointer;
-}
-
-.buttons {
-  display: flex;
-  gap: 10px;
-}
-
-
-/* dialog ul li[disabled] {
-  opacity: 0.5;
-  pointer-events: none;
-} */
-
- /* Add a top border to all items except the first one */
-dialog ul li:not(:first-child) {
-  border-top: 1px solid #333;
-}
-
 #channels-container {
   display: flex;
   flex-direction: column;
