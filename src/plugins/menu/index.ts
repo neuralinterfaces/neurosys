@@ -1,7 +1,7 @@
 // NOTE: Paths are relative to project root
 export const assets = {
-    icon: "./src/tray/iconTemplate.png",
-    icon2x: "./src/tray/iconTemplate@2x.png"
+    icon: "./src/assets/iconTemplate.png",
+    icon2x: "./src/assets/iconTemplate@2x.png"
 }
 
 export function load() {

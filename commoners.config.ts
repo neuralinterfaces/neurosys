@@ -32,6 +32,8 @@ const config = {
     name: "Neurosys",
     target: "electron",
 
+    icon: "./src/assets/icon.png",
+
     pages: {
         spotify: './src/plugins/feedback/spotify/index.html',
     },
