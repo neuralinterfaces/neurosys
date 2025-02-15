@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "bcijs": "^1.8.0",
-    "commoners": "^0.0.60-alpha.0",
+    "commoners": "^0.0.60-alpha.1",
     "muse-js": "^3.3.0"
   }
 }
