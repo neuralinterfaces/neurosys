@@ -28,8 +28,8 @@ import * as bluetoothPlugin from './src/plugins/other/ble/index'
 import settingsPlugin from './src/plugins/other/settings/index'
 
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -66,10 +66,6 @@ const config = {
         menu: menuPlugin,
         settings: settingsPlugin,
         
-
-        // ------------------- Example Plugins from Documentation -------------------
-        ...examplePlugins,
-
         // ------------------- Acquisition -------------------
         mockDevices: mockDevicesPlugin,
 
@@ -118,6 +114,10 @@ const config = {
 
         // ------------------- Scores -------------------
         alphaScore: alphaScorePlugin,
+
+        // ------------------- Example Plugins from Documentation -------------------
+        ...examplePlugins,
+
 
     }
 }

@@ -24,7 +24,7 @@ void main() {
     
     // Check if the distance is within the stroke range
     if (dist < radius && dist > radius - strokeThickness) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // white stroke
+        gl_FragColor = vec4(0.4, 0.4, 0.4, 1.0); // gray stroke
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // transparent fill
     }
