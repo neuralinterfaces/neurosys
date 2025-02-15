@@ -1,0 +1,11 @@
+{
+    "name": "@neurosys/cursor",
+    "version": "0.0.0",
+    "private": true,
+    "keywords": [
+        "feedback"
+    ],
+    "devDependencies": {
+        "gl-matrix": "^3.4.3"
+    }
+}

@@ -11,6 +11,7 @@ import bandsPlugin from './src/plugins/features/bands/index'
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as brightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
+import * as cursorFeedbackPlugin from './src/plugins/feedback/cursor/index'
 import spotifyFeedbackPlugin from './src/plugins/feedback/spotify/index'
 import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
@@ -106,6 +107,7 @@ const config = {
 
         // ------------------- Feedback -------------------
         textFeedback: textFeedbackPlugin,
+        cursorFeedback: cursorFeedbackPlugin,
         brightnessFeedback: brightnessFeedbackPlugin,
         inspectFeedback: inspectFeedbackPlugin,
 
