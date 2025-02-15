@@ -136,7 +136,7 @@ export const desktop = {
 
             for (const [ id, registered ] of Object.entries(REGISTERED)) {
                 const categorySettings = settings[id] ?? {}
-                for (const key in registered) {
+                const itemMetadata = Object.entries(registered).map(([ key, _ ]) => {
                     const itemSettings = categorySettings[key] ?? {}
                     const { enabled = false } = itemSettings
                     
@@ -144,8 +144,13 @@ export const desktop = {
                     if (actualMenuItem) {
                         const isRadio = actualMenuItem.type === "radio"
                         if (!isRadio || enabled) actualMenuItem.checked = enabled
+                        return { radio: isRadio, item: actualMenuItem, enabled }
                     }
-                }
+                })
+
+                // Enable the first radio item by default, if none are enabled
+                const radioItems = itemMetadata.filter(item => item?.radio)
+                if (radioItems.length && !radioItems.find(item => item?.enabled)) radioItems[0].item.checked = true 
 
                 updateAllStates(id) // Update all other states in case any changed
             }
