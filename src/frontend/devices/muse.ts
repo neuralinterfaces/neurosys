@@ -4,7 +4,9 @@ import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 
 export const name = 'Muse'
 export const category = 'EEG'
-export const protocols = [ 'bluetooth' ]
+export const protocols = {
+    ble: { label: 'Bluetooth', enabled: true },
+}
 
 const { DESKTOP, READY } = commoners
 

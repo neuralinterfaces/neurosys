@@ -1,5 +1,7 @@
-# neuro.sys
-This application modifies the brightness of a computer screen based on the user's brainwaves.
+# neuro.sys 🌀
+> OS-level Control for BCIs
+
+Neuro.sys (pronounced like "neurosis") is a desktop application that uses brain-computer interface (BCI) technology to provide system-level feedack on your computer.
 
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)
@@ -9,10 +11,10 @@ This application modifies the brightness of a computer screen based on the user'
 ## Usage
 Run `npm start` in the root directory of the repository
 
+> **Beware**: If you're ever stuck with an unresponsive screen, use the shortcut `Ctrl + q` to force close the application.
+
 ### Connecting a Device
 To connect a device, click on the brain icon in the system tray and select the Connect to Device option from the list.
-
-Beware that you might get stuck with your brightness very low! To force the application to close, use the `Ctrl + q` shortcut.
 
 ## Development
 This application is built with [commmoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.

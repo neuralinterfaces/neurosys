@@ -3,7 +3,13 @@ import { generateSignal } from 'bcijs/browser.js'
 
 export const name = 'Synthetic EEG'
 export const category = 'EEG'
-export const protocols = null
+export const protocols = {
+    generate: "Generate",
+    load: {
+        label: "Load File",
+        enabled: false
+    }
+}
 
 const channelNames = [ 'Fp1', 'Fp2', 'C3', 'C4', 'O1', 'O2', 'AUX1', 'AUX2' ]
 const sfreq = 512

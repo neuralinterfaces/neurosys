@@ -268,7 +268,10 @@ onDeviceDisconnect(async () => {
 
 const PROTOCOL_LABELS = {
   bluetooth: 'Bluetooth',
-  usb: 'USB'
+  usb: 'USB',
+
+  generate: 'Generate',
+  file: 'Load File'
 }
 
 const startSearchForDevice = async (device: string, protocol: string) => {
@@ -279,11 +282,6 @@ const startSearchForDevice = async (device: string, protocol: string) => {
   toggleDeviceConnection(false)
 }
 
-type ProtocolInfo = {
-  type: string,
-  enabled?: boolean
-}
-
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
 onShowDevices(() => {
 
@@ -291,21 +289,39 @@ onShowDevices(() => {
   const ul = modal.querySelector('ul') as HTMLUListElement
 
 
-  Object.entries(DEVICES).forEach(([identifier, { name, category, protocols = [] }]) => {
+  // Sort devices by enabled state
+  Object.entries(DEVICES)
+  .map(([ identifier, info]) => {
+
+    // Resolve protocols
+    const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
+        const overrides = typeof protocol === 'string' ? { label: protocol } : {}
+        return { ...protocol, ...overrides, id }
+    })
+
+    return [ identifier, { ...info, protocols: resolvedProtocols} ]
+
+  })
+  .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+  .sort(([, a], [, b]) => {
+
+    const firstAnyEnabled = a.protocols.find(({ enabled = true }) => enabled)
+    const secondAnyEnabled =  b.protocols.find(({ enabled = true }) => enabled)
+
+    if (!firstAnyEnabled && !secondAnyEnabled) return 0
+    if (!firstAnyEnabled && secondAnyEnabled) return 1
+    if (firstAnyEnabled && !secondAnyEnabled) return -1
+  })
+  .forEach(([identifier, { name, category, protocols }]) => {
     const li = document.createElement('li')
 
-    if (!Array.isArray(protocols)) protocols = [ protocols ]
-
-    const buttons = protocols.map((protocol) => {
-      const info = protocol && typeof protocol === 'object' ? protocol : { type: protocol }
-      const { type, enabled = true } = info as ProtocolInfo
-      const label = PROTOCOL_LABELS[type] || 'Start'
+    const buttons = protocols.map(({ id, label, enabled = true }) => {
       const button = document.createElement('button')
       button.innerText = label
       if (!enabled) button.setAttribute('disabled', '')
       button.onclick = () => {
         modal.close()
-        startSearchForDevice(identifier, type)
+        startSearchForDevice(identifier, id)
       }
       return button
     })
