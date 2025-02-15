@@ -1,8 +1,3 @@
-import * as systemOverlayPlugin from './src/plugins/systemOverlay/index'
-import * as menuPlugin from './src/plugins/menu/index'
-
-import * as bluetoothPlugin from './src/plugins/ble/index'
-import settingsPlugin from './src/plugins/settings/index'
 
 // Devices
 import syntheticDevicesPlugin from './src/plugins/devices/synthetic/index'
@@ -17,15 +12,23 @@ import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
 import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
 import * as brightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
 import spotifyFeedbackPlugin from './src/plugins/feedback/spotify/index'
-
-import mainProcessFeedbackPlugin from './src/plugins/feedback/main-process/index'
 import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
 // Scores
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
 
-const OVERLAY = true
-// const OVERLAY = false
+// Examples
+import examplePlugins from './src/plugins/examples/index'
+
+// Other Plugins
+import * as systemOverlayPlugin from './src/plugins/other/systemOverlay/index'
+import * as menuPlugin from './src/plugins/other/menu/index'
+import * as bluetoothPlugin from './src/plugins/other/ble/index'
+import settingsPlugin from './src/plugins/other/settings/index'
+
+
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -61,31 +64,15 @@ const config = {
 
         menu: menuPlugin,
         settings: settingsPlugin,
+        
 
-        // ------------------- Features -------------------
-        bands: bandsPlugin,
-
-        // ------------------- Feedback -------------------
-        textFeedback: textFeedbackPlugin,
-        brightnessFeedback: brightnessFeedbackPlugin,
-        inspectFeedback: inspectFeedbackPlugin,
-
-        // // Test Plugins
-        // mainProcessFeedback: mainProcessFeedbackPlugin,
-
-        // // Experimental Plugins
-        // spotifyFeedback: spotifyFeedbackPlugin
-        // robotFeedback: robotPlugin,
-
-        // ------------------- Scores -------------------
-        alphaScore: alphaScorePlugin,
+        // ------------------- Example Plugins from Documentation -------------------
+        ...examplePlugins,
 
         // ------------------- Acquisition -------------------
-
-        // Mocked
         mockDevices: mockDevicesPlugin,
 
-        // Functional
+        // Synthetic Data Streams
         syntheticDevices: syntheticDevicesPlugin,
 
         // BLE
@@ -112,6 +99,23 @@ const config = {
         //         }
         //     }
         // },
+        
+
+        // ------------------- Features -------------------
+        bands: bandsPlugin,
+
+        // ------------------- Feedback -------------------
+        textFeedback: textFeedbackPlugin,
+        brightnessFeedback: brightnessFeedbackPlugin,
+        inspectFeedback: inspectFeedbackPlugin,
+
+
+        // // Experimental Plugins
+        // spotifyFeedback: spotifyFeedbackPlugin
+        // robotFeedback: robotPlugin,
+
+        // ------------------- Scores -------------------
+        alphaScore: alphaScorePlugin,
 
     }
 }

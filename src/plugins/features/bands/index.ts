@@ -20,12 +20,6 @@ export default {
         return {
             feature: { label: 'Bandpowers' },
 
-            // Create a set of all requested bands accross all channels
-            aggregateSettings: (settings: BandSpecification[]) => {
-                const bands = settings.reduce((acc, val) => acc.concat(val), [])
-                return [ ...new Set(bands) ]
-            },
-
             calculate(
                 { data, window, sfreq }: CalculationProperties,
                 requesters: BandSpecification[]

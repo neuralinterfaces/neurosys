@@ -21,6 +21,7 @@ export function load () {
 
         set(score, info){
             const scoreEl = info.elements.score
+            if ( score != score ) return scoreEl.innerText = "—" // NaN check
             scoreEl.innerText = score.toFixed(3)
         },
 

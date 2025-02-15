@@ -1,5 +1,9 @@
 export default {
     load() {
+
+        const { PROD } = commoners
+        if (PROD) return
+
         return {
             feedback: { label: 'Print in Main Process' },
             start({ cache = 0 }) {

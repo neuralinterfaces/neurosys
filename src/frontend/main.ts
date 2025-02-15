@@ -22,9 +22,9 @@ const SCORE_INTERVAL = 250
 const calculate = async (dataRange: DataRange) => {
   const plugin = await getActiveScorePlugin()
   if (!plugin) return { features: null, score: null }
-  const { get, features = {} } = plugin
+  const { get, features = {}, __ctx } = plugin
   const calculatedFeatures = await getFeatures(features, dataRange, client?.sfreq)
-  const score = get(calculatedFeatures)
+  const score = get.call(__ctx, calculatedFeatures)
   return { features: calculatedFeatures, score  }
 }
 
@@ -54,7 +54,7 @@ const setValueInSettings = async (path: string, value: any) => {
 const registerAllFeedbackPlugins = async () => {
   const PLUGINS = await READY
   const { menu: { registerFeedback, onFeedbackToggle } } = PLUGINS
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
     const { feedback, enabled, start, stop, set } = plugin
 
     if (!feedback) return acc
@@ -90,7 +90,7 @@ const registerAllScorePlugins = async () => {
   const PLUGINS = await READY
   const { menu: { registerScore, onScoreToggle } } = PLUGINS
 
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
     const { 
       score,    // Menu Information
       enabled,  // Menu state
@@ -102,7 +102,7 @@ const registerAllScorePlugins = async () => {
 
     registerScore(key, { score, enabled, })
 
-    const ref = acc[key] = { enabled, get, features }
+    const ref = acc[key] = { enabled, get, features, __ctx: {} }
 
     onScoreToggle(key, async (enabled) => {
       ref.enabled = enabled
@@ -118,7 +118,7 @@ const registerAllScorePlugins = async () => {
 const getAllFeaturePlugins = async () => {
   const PLUGINS = await READY
 
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
     const { feature } = plugin
     if (!feature) return acc
     acc[key] = plugin
@@ -128,7 +128,7 @@ const getAllFeaturePlugins = async () => {
 
 const getAllDevicesFromPlugins = async () => {
   const PLUGINS = await READY
-  return Object.values(PLUGINS).reduce((acc, plugin) => {
+  return Object.values(PLUGINS).reduce((acc, plugin = {}) => {
     const { devices } = plugin
     if (!devices) return acc
     acc.push(...devices)
