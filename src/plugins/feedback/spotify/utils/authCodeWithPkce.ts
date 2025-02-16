@@ -48,6 +48,7 @@ export async function getRedirectURLForAuth() {
     return `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
+const BASE_TOKEN_URL = "https://accounts.spotify.com/api/token"
 export async function getAccessToken(code: string) {
 
     const verifier = localStorage.getItem("verifier");
@@ -59,17 +60,31 @@ export async function getAccessToken(code: string) {
     params.append("redirect_uri", redirectURI);
     params.append("code_verifier", verifier!);
 
-    const result = await fetch("https://accounts.spotify.com/api/token", {
+    const result = await fetch(BASE_TOKEN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params
     });
     
 
-    const accessTokenResult = await result.json();
-    console.log(accessTokenResult)
-    const { access_token } = accessTokenResult;
-    return access_token;
+    return await result.json();
+}
+
+export async function refreshToken(refresh_token: string) {
+
+    const payload = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token,
+        client_id: CLIENT_ID
+      }),
+    }
+    const body = await fetch(BASE_TOKEN_URL, payload);
+    return await body.json();
 }
 
 function generateCodeVerifier(length: number) {

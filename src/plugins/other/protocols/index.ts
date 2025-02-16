@@ -13,19 +13,19 @@ export default {
             const path = require('path')
 
             const homeDir = path.join(require('os').homedir(), 'neurosys')
-            const settingsDir = path.join(homeDir, 'settings')
+            const protocolsDir = path.join(homeDir, 'protocols')
 
-            const getSettingsPath = (name: string) => path.join(settingsDir, `${name}.json`)
+            const getProtocolsPath = (name: string) => path.join(protocolsDir, `${name}.json`)
 
             this.on('set', (event, name, data) => {
-                const filePath = getSettingsPath(name)
-                if (!fs.existsSync(settingsDir)) fs.mkdirSync(settingsDir, { recursive: true })
+                const filePath = getProtocolsPath(name)
+                if (!fs.existsSync(protocolsDir)) fs.mkdirSync(protocolsDir, { recursive: true })
                 fs.writeFileSync(filePath, JSON.stringify(data))
                 event.returnValue = true
             })
 
             this.on('get', (event, name) => {
-                const filePath = getSettingsPath(name)
+                const filePath = getProtocolsPath(name)
                 if (!fs.existsSync(filePath)) return event.returnValue = {}
                 const data = fs.readFileSync(filePath)
                 const parsed = JSON.parse(data)

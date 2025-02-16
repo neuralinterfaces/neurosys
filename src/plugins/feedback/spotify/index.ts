@@ -1,4 +1,4 @@
-import { getAccessToken, authorize } from "./utils/authCodeWithPkce";
+import { getAccessToken, refreshToken, authorize } from "./utils/authCodeWithPkce";
 import { setVolume } from "./utils/controls";
 
 
@@ -10,11 +10,21 @@ export default {
             
             async start() {
 
+                const getValidToken = async () => {
+                    const existingToken = localStorage.getItem('access_token')
+                    if (existingToken) return existingToken
+                    const existingRefreshToken = localStorage.getItem('refresh_token')
+                    const info = existingRefreshToken ? await refreshToken(existingRefreshToken) : await getAccessToken(await authorize())
+                    const { access_token, refresh_token } = info;
+                    localStorage.setItem('access_token', access_token)
+                    if (refresh_token) localStorage.setItem('refresh_token', refresh_token) 
+                    return access_token;
+                }
+
                 const onBadAccessToken = async () => {
-                    localStorage.removeItem('code') // Invalid access token
-                    const code = await authorize();
-                    localStorage.setItem('code', code)
-                    handleCode(code);
+                    localStorage.removeItem('access_token') // Invalid access token
+                    const access_token = await getValidToken()
+                    handleCode(access_token);
                 }
                 
                 const handleCode = async (code: string) => {
@@ -44,16 +54,8 @@ export default {
                 
                 // Otherwise handle the actual behaviors of the page
                 else {
-                
-                    const code = localStorage.getItem('code')
-                
-                    if (code) handleCode(code);
-                    else {
-                        const code = await authorize();
-                        localStorage.setItem('code', code)
-                        handleCode(code);
-                    }
-                
+                    const access_token = await getValidToken()
+                    handleCode(access_token);
                 }
             },
             stop() {

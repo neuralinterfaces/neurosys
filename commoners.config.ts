@@ -25,7 +25,7 @@ import examplePlugins from './src/plugins/examples/index'
 import * as systemOverlayPlugin from './src/plugins/other/systemOverlay/index'
 import * as menuPlugin from './src/plugins/other/menu/index'
 import * as bluetoothPlugin from './src/plugins/other/ble/index'
-import settingsPlugin from './src/plugins/other/settings/index'
+import protocolsPlugin from './src/plugins/other/protocols/index'
 
 
 const OVERLAY = true
@@ -64,7 +64,7 @@ const config = {
 
 
         menu: menuPlugin,
-        settings: settingsPlugin,
+        protocols: protocolsPlugin,
         
         // ------------------- Acquisition -------------------
         mockDevices: mockDevicesPlugin,
