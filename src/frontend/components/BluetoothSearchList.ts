@@ -20,6 +20,10 @@ export class BluetoothSearchList extends LitElement {
 
     static get styles() {
         return css`
+
+            :host {
+              font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
         
             ul {
                 list-style: none;

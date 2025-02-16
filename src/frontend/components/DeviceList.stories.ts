@@ -2,8 +2,8 @@
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import type { DeviceListProps } from '../../frontend/components/DeviceList';
-import { DeviceList } from '../../frontend/components/DeviceList';
+import type { DeviceListProps } from './DeviceList';
+import { DeviceList } from './DeviceList';
 
 const exampleDeviceList = [
     { name: 'EEG Device', protocols: { generate: "Generate", load: { label: "Load File", enabled: false } }, category: 'EEG' },

@@ -13,14 +13,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -32,18 +24,6 @@ button {
 
 button[disabled] {
   cursor: not-allowed;
-}
-
-#error {
-  margin: 15px;
-  display: block;
-  padding: 10px;
-  color: white;
-  background: #262626;
-}
-
-#error:empty {
-  background: transparent;
 }
 
 /* Dialog */
@@ -83,61 +63,6 @@ dialog footer {
   height: 20px;
   background: whitesmoke;
   border-top: 1px solid lightgray;
-}
-
-#channels-container {
-  display: flex;
-  flex-direction: column;
-  background: #262626;
-}
-
-#channels-container .channel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 20px;
-}
-
-#channels-container .channel:not(:first-child) {
-  padding-top: 0px
-}
-
-#channels-container .channel strong {
-  font-size: 90%;
-} 
-
-#channels-container .bands {
-  display: flex;
-  width: 150px;
-  height: 10px;
-  border-radius: 5px;
-  overflow: hidden;
-  background: gainsboro;
-}
-
-.band {
-  height: 100%;
-}
-
-.band.delta {
-  background: #ff6969;
-}
-
-.band.theta {
-  background: #fff569;
-}
-
-.band.alpha {
-  background: #6cff69;
-}
-
-.band.beta {
-  background: #69a3ff;
-}
-
-.band.gamma {
-  background: #ff69f3;
 }
 
 

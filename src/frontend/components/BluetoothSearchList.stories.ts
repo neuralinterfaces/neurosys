@@ -2,10 +2,8 @@
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import type { BluetoothSearchListProps } from '../../frontend/components/BluetoothSearchList';
-import { BluetoothSearchList } from '../../frontend/components/BluetoothSearchList';
-
-
+import type { BluetoothSearchListProps } from './BluetoothSearchList';
+import { BluetoothSearchList } from './BluetoothSearchList';
 
 const exampleDeviceList = [
     { deviceId: 'id1', deviceName: 'Device-1' },

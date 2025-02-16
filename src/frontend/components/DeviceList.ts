@@ -24,6 +24,10 @@ export class DeviceList extends LitElement {
     static get styles() {
         return css`
         
+            :host {
+              font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+        
             ul {
                 list-style: none;
                 padding: 0px 20px;

@@ -298,7 +298,7 @@ onShowDevices(async () => {
   modal.showModal()
 })
 
-const createModal = ({ title, content, emptyMessage = '' }: { 
+const createModal = ({ title, content }: { 
   title: string,
   content?: HTMLElement,
   emptyMessage?: string
