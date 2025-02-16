@@ -1,6 +1,4 @@
 # Neurosys 🌀
-> Neurofeedback for the Rest of Us
-
 Neurosys is a desktop application that uses brain-computer interface (BCI) technology to provide system-level feedback on your computer.
 
 ## Installation
