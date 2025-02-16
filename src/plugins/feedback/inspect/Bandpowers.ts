@@ -15,7 +15,7 @@ export class Bandpowers extends LitElement {
         display: flex;
         flex-direction: column;
         color: white;
-        background: #262626;
+        background: #111;
         width: min-content;
         border-radius: 5px;
     }
@@ -25,7 +25,8 @@ export class Bandpowers extends LitElement {
         justify-content: end;
         align-items: center;
         gap: 20px;
-        padding: 20px;
+        padding: 10px 20px;
+
     }
 
     #channels-container .channel:not(:first-child) {
@@ -42,7 +43,7 @@ export class Bandpowers extends LitElement {
         height: 10px;
         border-radius: 5px;
         overflow: hidden;
-        background: #555;
+        background: #444;
         
     }
 

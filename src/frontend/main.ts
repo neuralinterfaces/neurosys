@@ -271,6 +271,7 @@ const getFeatures = async (
 let client;
 onDeviceDisconnect(async () => {
   await client?.disconnect()
+  data = {} // Reset data
   toggleDeviceConnection(true)
 })
 
