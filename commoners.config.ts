@@ -2,6 +2,7 @@
 // Devices
 import syntheticDevicesPlugin from './src/plugins/devices/synthetic/index'
 import museDevicePlugin from './src/plugins/devices/muse/index'
+
 import mockDevicesPlugin from './src/plugins/devices/mocks/index'
 
 // Features
@@ -24,7 +25,8 @@ import examplePlugins from './src/plugins/examples/index'
 // Other Plugins
 import * as systemOverlayPlugin from './src/plugins/other/systemOverlay/index'
 import * as menuPlugin from './src/plugins/other/menu/index'
-import * as bluetoothPlugin from './src/plugins/other/ble/index'
+import * as bluetoothPlugin from './src/plugins/other/devices/ble/index'
+import * as serialPlugin from './src/plugins/other/devices/serial/index'
 import protocolsPlugin from './src/plugins/other/protocols/index'
 
 
@@ -74,7 +76,8 @@ const config = {
 
         // BLE
         bluetooth: bluetoothPlugin, // For Desktop Support
-        museDevicePlugin: museDevicePlugin,
+        serial: serialPlugin, // For Desktop Support
+        museDevice: museDevicePlugin,
 
         // brainflow {
         //     load: function () {
