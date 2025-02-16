@@ -1,21 +1,21 @@
 import { css, html, LitElement } from "lit";
 
 interface Device {
-    deviceName: string
-    deviceId: string
+    name: string
+    id: string
 }
 
-export interface BluetoothSearchListProps {
+export interface DeviceDiscoveryListProps {
     devices?: Device[]
     emptyMessage?: string
     onSelect?: (deviceId: string) => void
 }
 
-export class BluetoothSearchList extends LitElement {
+export class DeviceDiscoveryList extends LitElement {
 
     declare devices: Device[]
     declare emptyMessage: string
-    declare onSelect: BluetoothSearchListProps["onSelect"]
+    declare onSelect: DeviceDiscoveryListProps["onSelect"]
 
 
     static get styles() {
@@ -66,7 +66,7 @@ export class BluetoothSearchList extends LitElement {
         devices = [], 
         emptyMessage = "",
         onSelect
-    }: BluetoothSearchListProps) {
+    }: DeviceDiscoveryListProps) {
         super();
         this.devices = devices
         this.emptyMessage = emptyMessage
@@ -80,11 +80,11 @@ export class BluetoothSearchList extends LitElement {
 
         return html`
             <ul>
-                ${this.devices.map(({ deviceName, deviceId }) => html`
-                    <li @click=${() => this.onSelect?.(deviceId)} data-device-id=${deviceId}>${deviceName}</li>
+                ${this.devices.map(({ name, id }) => html`
+                    <li @click=${() => this.onSelect?.(id)}>${name}</li>
                 `)}
             </ul>
         `
     }
 }
-customElements.define('bluetooth-search-list', BluetoothSearchList);
+customElements.define('bluetooth-search-list', DeviceDiscoveryList);

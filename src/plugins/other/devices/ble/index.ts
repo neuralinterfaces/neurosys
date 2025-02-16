@@ -1,5 +1,3 @@
-import createModal from '../modal.js'
-
 type MACAddress = string
 
 type DeviceInformation = {

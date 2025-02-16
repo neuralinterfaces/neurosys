@@ -1,4 +1,4 @@
-import { BluetoothSearchList } from './components/BluetoothSearchList'
+import { DeviceDiscoveryList } from './components/DeviceDiscoveryList'
 import { DeviceList } from './components/DeviceList'
 import './style.css'
 
@@ -331,6 +331,46 @@ const createModal = ({ title, content }: {
   return modal
 }
 
+const handleSerialPluginEvents = async () => {
+
+  const { serial } = await READY
+  if (!serial) return
+  const { onRequest, select, onDeviceAdded, onDeviceRemoved } = serial
+
+
+  let device = '';
+  const onModalClosed = () => select(device)
+
+  const list = new DeviceDiscoveryList({ 
+    emptyMessage: 'Searching...',
+    onSelect: (deviceId) => {
+      device = deviceId
+      modal.close()
+    } 
+  })
+
+  const modal = createModal({ title: 'Discovered USB Devices',  content: list })
+  document.body.append(modal)
+
+  modal.addEventListener('close', onModalClosed)
+
+  const transformDevices = (devices: any[]) => devices.map(o => ({
+    name: o.displayName ?? o.portName,
+    info: o.displayName ? o.portName : '',
+    id: o.portId
+  }))
+
+  onRequest((devices) => {
+    modal.showModal()
+    list.devices = transformDevices(devices)
+  })
+
+  onDeviceAdded((device) => list.devices = [...list.devices, ...transformDevices([ device ])])
+
+  onDeviceRemoved((device ) => list.devices = list.devices.filter(({ id }) => id !== device.portId))
+
+}
+
 const handleBluetoothPluginEvents = async () => {
 
   const { bluetooth } = await READY
@@ -340,7 +380,7 @@ const handleBluetoothPluginEvents = async () => {
   let device = '';
   const onModalClosed = () => select(device)
 
-  const list = new BluetoothSearchList({ 
+  const list = new DeviceDiscoveryList({ 
     emptyMessage: 'Searching...',
     onSelect: (deviceId) => {
       device = deviceId
@@ -348,7 +388,7 @@ const handleBluetoothPluginEvents = async () => {
     } 
   })
 
-  const modal = createModal({ title: 'Discovered Local Devices',  content: list })
+  const modal = createModal({ title: 'Discovered Bluetooth Devices',  content: list })
 
   document.body.append(modal)
 
@@ -361,9 +401,13 @@ const handleBluetoothPluginEvents = async () => {
   onUpdate((devices) => {
     if (latestDevices !== JSON.stringify(devices)) {
       latestDevices = JSON.stringify(devices)
-      list.devices = [ ...devices ]
+      list.devices = devices.map(o => ({
+        name: o.deviceName,
+        id: o.deviceId
+      }))
     }
   })
 }
 
 handleBluetoothPluginEvents()
+handleSerialPluginEvents()

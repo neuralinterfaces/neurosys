@@ -1,5 +1,4 @@
 
-
 import { MuseClient, EEG_FREQUENCY, channelNames } from 'muse-js'
 
 export const name = 'Muse'

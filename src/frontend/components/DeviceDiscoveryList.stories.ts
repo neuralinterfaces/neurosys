@@ -2,30 +2,30 @@
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import type { BluetoothSearchListProps } from './BluetoothSearchList';
-import { BluetoothSearchList } from './BluetoothSearchList';
+import type { DeviceDiscoveryListProps } from './DeviceDiscoveryList';
+import { DeviceDiscoveryList } from './DeviceDiscoveryList';
 
 const exampleDeviceList = [
-    { deviceId: 'id1', deviceName: 'Device-1' },
-    { deviceId: 'id2', deviceName: 'Device-2' },
-    { deviceId: 'id3', deviceName: 'Device-3' },
+    { id: 'id1', name: 'Device-1' },
+    { id: 'id2', name: 'Device-2' },
+    { id: 'id3', name: 'Device-3' },
 ]
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
-  title: 'Lists/BluetoothSearch',
+  title: 'Lists/DeviceDiscovery',
   tags: ['autodocs'],
-  render: (args) => new BluetoothSearchList(args),
+  render: (args) => new DeviceDiscoveryList(args),
   argTypes: {
     emptyMessage: { control: 'text' }
   },
   args: { 
     emptyMessage: "No devices found.",
   },
-} satisfies Meta<BluetoothSearchListProps>;
+} satisfies Meta<DeviceDiscoveryListProps>;
 
 export default meta;
-type Story = StoryObj<BluetoothSearchListProps>;
+type Story = StoryObj<DeviceDiscoveryListProps>;
 
 
 export const Populated: Story = {

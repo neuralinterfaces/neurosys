@@ -27,25 +27,30 @@ export default {
 
                 const uniqueBands = [ ...new Set(requesters.reduce((acc, val) => acc.concat(val), []) ) ]
 
-                return Object.entries(data).reduce((acc, [ch, chData]) => {
+                try {
+                    return Object.entries(data).reduce((acc, [ch, chData]) => {
 
-                    const sliced = chData.slice(...window)
+                        const sliced = chData.slice(...window)
+                        const powers = calculateBandPower(
+                            sliced,
+                            sfreq,
+                            uniqueBands,
+                            { relative: true }
+                        )
 
-                    const powers = calculateBandPower(
-                        sliced,
-                        sfreq,
-                        uniqueBands,
-                        { relative: true }
-                    )
+                        acc[ch] = uniqueBands.reduce((acc, band, idx) => {
+                            acc[band] = powers[idx]
+                            return acc
+                        }, {})
 
-                    acc[ch] = uniqueBands.reduce((acc, band, idx) => {
-                        acc[band] = powers[idx]
                         return acc
+
                     }, {})
-
-                    return acc
-
-                }, {})
+                }
+                catch (err) {
+                    console.error(err)
+                    return {}
+                }
 
             }
         }
