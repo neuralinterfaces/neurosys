@@ -71,7 +71,7 @@ export default {
 ```
 
 #### Features
-Each **feature** plugin has an `id` field to allow references from other plugins, a `label` field for tray details, and a `calculate` function that returns the relevant feature data.
+Each **feature** plugin has an `id` field to allow references from other plugins and a `calculate` function that returns the relevant feature data.
 
 The `calculate` function receives an `info` object that includes all data organized by channel name, as well as the current calculation window (`window`) and device sampling frequency(`sfreq`). A `settings` value is also provided, which is provided by the requesting **score** plugin.
 
@@ -80,7 +80,6 @@ export default {
     load() {
         return {
             id: 'window',
-            label: 'Current Window',
             calculate( { data, sfreq }, windowDuration = 1) {
                 const window = [ -sfreq * windowDuration ] // Calculate using the specified window on the latest data 
                 return Object.entries(data).reduce((acc, [ch, chData]) => {
@@ -104,12 +103,12 @@ export default {
 See the [Scores](#score) section for an example of how to request this feature.
 
 #### Score
-Each **score** plugin has special `load` fields, including `score` for tray details, `features` for feature requirements with related settings, and a `get` function that calculates a score value based on the resolved features.
+Each **score** plugin has a `label` field for the tray option names, `features` for feature requirements with related settings, and a `get` function that calculates a score value based on the resolved features.
 
 ```javascript
 export default {
     load: () => ({
-        score: { label: 'Average Voltage' },
+        label: 'Average Voltage',
         features: { window: 1 }, // Request the 1s window feature
         get({ window }) {
 
@@ -128,7 +127,7 @@ export default {
 ```
 
 #### Feedback
-Each **feedback** plugin has a `feedback` field specifying the tray details and a `set` function that consumes a score value.
+Each **feedback** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
 
 Use the `start` and `stop` fields to specify reactions to being enabled / disabled, including the management of visualization.
 
@@ -136,7 +135,7 @@ Use the `start` and `stop` fields to specify reactions to being enabled / disabl
 export default {
     load() {
         return {
-            feedback: { label: 'Print in Main Process' },
+            label: 'Print in Main Process',
             start({ cache = 0 }) {
                 const counter = cache + 1
                 console.log('Plugin activated', counter)

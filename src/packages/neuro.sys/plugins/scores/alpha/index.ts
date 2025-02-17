@@ -1,7 +1,3 @@
-const score = {
-    label: 'Alpha Score'
-}
-
 // ----------- Bands -------------
 //     delta: [1, 3],
 //     theta: [4, 7],
@@ -14,7 +10,10 @@ export function load() {
     return {
         label: 'Alpha Score',
         features: {
-            bands: { alpha: [ 8, 12 ] }
+            bands: { 
+                bands: { alpha: [ 8, 12 ] },
+                 windowDuration: 1 
+            }
         },
         get({ bands = {} }) {
             const averageAlphaRatio = Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length

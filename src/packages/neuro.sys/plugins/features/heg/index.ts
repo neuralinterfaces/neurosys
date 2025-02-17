@@ -3,7 +3,6 @@ export default {
     load() {
         return {
             id: 'HEG',
-            label: 'HEG Ratio',
             devices: [ 'HEG' ],
             calculate({ data, window }) {
 

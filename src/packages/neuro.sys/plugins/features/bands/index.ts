@@ -12,24 +12,25 @@ type CalculationProperties = {
     sfreq: SamplingRate
 }
 
+type Settings = {
+    bands: BandSpecification
+    windowDuration: number
+}
 
 
 export default {
     load() {
         return {
             id: 'bands',
-            label: 'Bandpowers',
-            
-            settings: {
-                windowInSeconds: 1
-            },
 
             calculate(
                 { data, sfreq }: CalculationProperties,
-                settings: BandSpecification
+                settings: Settings = { bands: {}, windowDuration: 1 }
             ) {
 
-                const window = [ -sfreq * this.settings.windowInSeconds ]
+                const { bands, windowDuration } = settings
+
+                const window = [ -sfreq * windowDuration ]
 
                 try {
                     return Object.entries(data).reduce((acc, [ch, chData]) => {
@@ -38,7 +39,7 @@ export default {
                         const powers = calculateBandPower(
                             sliced,
                             sfreq,
-                            Object.values(settings),
+                            Object.values(bands),
                             { relative: true }
                         )
 

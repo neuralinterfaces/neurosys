@@ -34,8 +34,17 @@ import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/se
 import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
 
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
+
+// const INCLUDE_EXAMPLES = true
+const INCLUDE_EXAMPLES = false
+
+
+const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.feature : {}
+const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.device : {}
+const exampleFeedback = INCLUDE_EXAMPLES ? examplePlugins.feedback : {}
+const exampleScores = INCLUDE_EXAMPLES ? examplePlugins.score : {}
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -78,7 +87,7 @@ const config = {
         // --------------------------------- Optional Plugins --------------------------------- //
         ...registerDevicePlugins({
             
-            ...examplePlugins.device,
+            ...exampleDevices,
 
             mockDevices: mockDevicesPlugin,
 
@@ -112,14 +121,14 @@ const config = {
         }),
             
         ...registerFeaturePlugins({
-            ...examplePlugins.feature,
+            ...exampleFeatures,
 
             bands: bandsPlugin,
             hegRatio: hegRatioPlugin,
         }),
 
         ...registerFeedbackPlugins({
-            ...examplePlugins.feedback,
+            ...exampleFeedback,
 
             textFeedback: textFeedbackPlugin,
             cursorFeedback: cursorFeedbackPlugin,
@@ -133,7 +142,7 @@ const config = {
         }),
 
         ...registerScorePlugins({
-            ...examplePlugins.score,
+            ...exampleScores,
             alphaScore: alphaScorePlugin,
             hegScore: hegScorePlugin,
         }),
