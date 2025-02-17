@@ -1,5 +1,7 @@
-# Neurosys 🌀
-Neurosys is a software development kit (SDK) and desktop application for delivering system-level neurofeedback.
+# Neurosys 🖥️
+Neurosys is a desktop application that provides real-time neurofeedback using a system overlay.
+
+This repository can also be used as a software development kit (SDK) for building your own system-level neurofeedback applications.
 
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)
