@@ -16,8 +16,7 @@ export function load() {
             }
         },
         get({ bands = {} }) {
-            const averageAlphaRatio = Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
-            return Math.min(1, Math.max(0, averageAlphaRatio))
+            return Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
         }
     }
 }

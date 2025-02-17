@@ -29,11 +29,11 @@ const calculate = async (
   if (calculatedScore < scoreNormalization.min) scoreNormalization.min = calculatedScore
   if (calculatedScore > scoreNormalization.max) scoreNormalization.max = calculatedScore
 
-  const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - scoreNormalization.min) / (scoreNormalization.max - scoreNormalization.min)))
-  console.log(normalizedScore)
+  const { min, max } = scoreNormalization
+  const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - min) / (max - min)))
 
   // Set the feedback from the calculated score and features
-  feedback.set(calculatedScore, calculatedFeatures)
+  feedback.set(normalizedScore, calculatedFeatures)
 
 
 }

@@ -45,6 +45,7 @@ export const calculate = async (
       const plugin = featurePlugins[id]
       if (!plugin) continue
       if (!plugin.calculate) continue
+
       results[id] = await plugin.calculate(client, settings) // NOTE: Support multiple requesteres in the future
     }
 

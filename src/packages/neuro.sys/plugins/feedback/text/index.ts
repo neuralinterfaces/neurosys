@@ -2,7 +2,7 @@
 export function load () {
     
     return {
-        
+
         label: 'Text',
 
         async start() {
@@ -11,7 +11,7 @@ export function load () {
             const { ScoreText } = await import("./ScoreText")
             const scoreText = new ScoreText()
             scoreText.style.position = "absolute"
-            scoreText.style.top = "35px"
+            scoreText.style.top = "50px"
             scoreText.style.right = "25px"
 
             document.body.append(scoreText)

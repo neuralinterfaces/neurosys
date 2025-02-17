@@ -11,13 +11,42 @@ This repository can also be used as a software development kit (SDK) for buildin
 ## Usage
 Run `npm start` in the root directory of the repository
 
-> **Beware**: If you're ever stuck with an unresponsive screen, use the shortcut `Ctrl + q` to force close the application.
+> **Note**: You can use the shortcut `Ctrl + q` to quit the application at any time.
 
-### Connecting a Device
-To connect a device, click on the brain icon in the system tray and select the Connect to Device option from the list.
+### Connecting a Neurofeedback Device
+To connect your device, click on the brain icon in the system tray and select the Connect to Device option from the list.
+
+
+<figure>
+    <img src="./docs/assets/screenshots/DeviceConnection.png" alt="Neurosys Device Connection Workflow">
+    <figcaption>Figure 1. Device Connection</figcaption>
+</figure>
+
+After completing the device connection workflow, you'll be able to configure other settings.
+
+### Defining your Feedback
+To define your feedback, click on the brain icon in the system tray and select any of the available Feedback options—as many as you like!
+
+<figure>
+    <img src="./docs/assets/screenshots/FeedbackSelection.png" alt="Neurosys Feedback Selection">
+    <figcaption>Figure 2. Feedback Selection</figcaption>
+</figure>
+
+You can save your selection by clicking on the Save Settings tray option.
+
+## Changing the Score
+The first score option will be chosen automatically. To change the score, click on the brain icon in the system tray and select an alternative Score option from the list.
+
+> **Note**: Currently, there's only one EEG-related score (Alpha Score) and one HEG-related score (HEG Score). More scores will be added in the future.
+
 
 ## Development
 This application is built with [commmoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
+
+<figure>
+    <img src="./docs/assets/NeurosysArchitecture.png" alt="Neurosys Architecture">
+    <figcaption>Neurosys Architecture</figcaption>
+</figure>
 
 ### Plugins
 Score and feedback plugins are automatically detected and loaded into the system tray.
@@ -117,16 +146,13 @@ export default {
             const averagePerChannel = Object.entries(window).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})
 
             const average = Object.values(averagePerChannel).reduce((acc, val) => acc + val, 0) / Object.values(averagePerChannel).length
-
-
-            // Normalize the voltage by storing historical min and max values
-            this.min = this.min ? Math.min(this.min, average) : average
-            this.max = this.max ? Math.max(this.max, average) : average
-            return Math.max(0, Math.min(1, (average - this.min) / (this.max - this.min)))
+            return average // This will get normalized automatically
         }
     })
 }
 ```
+
+Once calculated, scores are auto-normalized using baseline data and min/max values detected during the session.
 
 #### Feedback
 Each **feedback** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
@@ -157,13 +183,6 @@ export default {
     }
 }
 ```
-
-
-### Improvements
-- Baseline your features with the first 5s + allow Reset Baseline
-- Integrate Brainflow
-- Create multiple windows for different screens in a multi-monitor setup
-- Test Linux
 
 ## Extensions
 ### robot.js

@@ -11,7 +11,7 @@ export default {
 
                 const featuresDiv = document.createElement("div")
                 featuresDiv.style.position = "absolute"
-                featuresDiv.style.top = "40px";
+                featuresDiv.style.top = "50px";
                 featuresDiv.style.left = "10px";
                 featuresDiv.style.display = "flex";
                 featuresDiv.style.flexDirection = "column";
