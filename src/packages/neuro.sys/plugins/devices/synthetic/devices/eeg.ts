@@ -1,4 +1,4 @@
-import { generateSignal } from "../../../../packages/timefreak/src"
+import { generateSignal } from "../../../../../timefreak/src"
 
 export const name = 'Synthetic EEG'
 

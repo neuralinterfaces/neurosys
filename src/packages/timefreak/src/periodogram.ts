@@ -1,12 +1,12 @@
-import { nextpow2 } from './nextpow2';
+import { nextpow2 } from './utils';
 import fft from 'fft.js';
 
 let fftCache = {};
 
 function hann(signal: number[]) {
-    let windowed = [];
-    let L = signal.length - 1;
-    let C = Math.PI / L;
+    const windowed = [];
+    const L = signal.length - 1;
+    const C = Math.PI / L;
 
     let scale = 0;
 
@@ -16,17 +16,17 @@ function hann(signal: number[]) {
         scale += w ** 2;
     }
 
-    return {signal: windowed, scale: scale};
+    return { signal: windowed, scale: scale };
 }
 
 function taper(
     signal: number[],
     taper: number[]
 ) {
-    if(signal.length != taper.length)
-        throw new Error('Signal length must match taper length');
 
-    let windowed = [];
+    if(signal.length != taper.length)  throw new Error('Signal length must match taper length');
+
+    const windowed = [];
     let scale = 0;
 
     for(let i = 0; i < signal.length; i++) {
@@ -34,7 +34,7 @@ function taper(
         scale += taper[i] ** 2;
     }
 
-    return {signal: windowed, scale: scale};
+    return { signal: windowed, scale: scale };
 }
 
 export function periodogram(
@@ -46,44 +46,43 @@ export function periodogram(
         _scaling?: 'psd' | 'none' // 'psd' for power spectral density, 'none' for unscaled
     } = {}
 ) {
-	let {fftSize, window, _scaling} = Object.assign({
+
+	const { fftSize, window, _scaling } = Object.assign({
         fftSize: Math.pow(2, nextpow2(signal.length)),
         window: 'rectangular',
         _scaling: 'psd'
 	}, options);
 
 	let f;
-	if (fftCache.hasOwnProperty(fftSize)) {
-		f = fftCache[fftSize];
-	} else {
+
+	if (fftCache.hasOwnProperty(fftSize)) f = fftCache[fftSize];
+    else {
 		f = new fft(fftSize);
 		fftCache[fftSize] = f;
     }
+
     // Validate _scaling
-    if(_scaling != 'psd' && _scaling != 'none') {
-        throw new Error('Unknown scaling');
-    }
+    if (_scaling != 'psd' && _scaling != 'none') throw new Error('Unknown scaling');
     
     // Apply window
-    let num_samples = signal.length;
+    const num_samples = signal.length;
     let S = num_samples;
     if (Array.isArray(window)) {
-        let t = taper(signal, window);
+        const t = taper(signal, window);
         signal = t.signal;
         S = t.scale;
     }
+
     else if(window == 'hann') {
-        let h = hann(signal);
+        const h = hann(signal);
         signal = h.signal;
         S = h.scale;
-    } else if(window != 'rectangular') {
-        throw new Error('Unknown window type');
-    }
+    } 
+    
+    else if (window != 'rectangular') throw new Error('Unknown window type');
 
     // Zero pad signal to fftSize if needed
-	if (num_samples < fftSize) {
-		signal = signal.concat(Array(fftSize - signal.length).fill(0));
-	}
+	if (num_samples < fftSize) signal = signal.concat(Array(fftSize - signal.length).fill(0));
 
     // Complex array [real, imag, real, imag, etc.]
     let freqs = f.createComplexArray();
@@ -117,14 +116,8 @@ export function periodogram(
         powers[powers.length - 1] /= 2;
     }
     
-    // Compute frequencies
-    let frequencies = new Array(powers.length);
-    for(let i = 0; i < frequencies.length; i++) {
-        frequencies[i] = i * (sample_rate / fftSize);
-    }
-
 	return {
         estimates: powers,
-        frequencies: frequencies
+        frequencies: powers.map((p, i) => i * (sample_rate / fftSize)),
     };
 }

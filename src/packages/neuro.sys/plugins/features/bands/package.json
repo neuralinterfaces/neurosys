@@ -1,11 +1,11 @@
 {
-    "name": "@neurosys/cursor",
+    "name": "@neuro.sys/bands",
     "version": "0.0.0",
     "private": true,
     "keywords": [
-        "feedback"
+        "features"
     ],
     "devDependencies": {
-        "gl-matrix": "^3.4.3"
+        "timefreak": "file:../../../../timefreak"
     }
 }

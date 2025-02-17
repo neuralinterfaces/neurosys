@@ -1,11 +1,11 @@
 {
-    "name": "@neurosys/bands",
+    "name": "@neuro.sys/cursor",
     "version": "0.0.0",
     "private": true,
     "keywords": [
-        "features"
+        "feedback"
     ],
     "devDependencies": {
-        "fft.js": "^4.0.4"
+        "gl-matrix": "^3.4.3"
     }
 }

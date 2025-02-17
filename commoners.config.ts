@@ -1,36 +1,36 @@
 
 // Devices
-import syntheticDevicesPlugin from './src/plugins/devices/synthetic/index'
-import museDevicePlugin from './src/plugins/devices/muse/index'
-import hegDevicePlugin from './src/plugins/devices/heg/index'
+import syntheticDevicesPlugin from './src/packages/neuro.sys/plugins/devices/synthetic/index'
+import museDevicePlugin from './src/packages/neuro.sys/plugins/devices/muse/index'
+import hegDevicePlugin from './src/packages/neuro.sys/plugins/devices/heg/index'
 
-import mockDevicesPlugin from './src/plugins/devices/mocks/index'
+import mockDevicesPlugin from './src/packages/neuro.sys/plugins/devices/mocks/index'
 
 // Features
-import bandsPlugin from './src/plugins/features/bands/index'
-import hegRatioPlugin from './src/plugins/features/hegratio/index'
+import bandsPlugin from './src/packages/neuro.sys/plugins/features/bands/index'
+import hegRatioPlugin from './src/packages/neuro.sys/plugins/features/hegratio/index'
 
 // Feedback
-import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
-import * as textFeedbackPlugin from './src/plugins/feedback/text/index'
-import * as brightnessFeedbackPlugin from './src/plugins/feedback/brightness/index'
-import * as cursorFeedbackPlugin from './src/plugins/feedback/cursor/index'
-import spotifyFeedbackPlugin from './src/plugins/feedback/spotify/index'
-import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
+import * as robotFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/robot/index'
+import * as textFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/text/index'
+import * as brightnessFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/brightness/index'
+import * as cursorFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/cursor/index'
+import spotifyFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/spotify/index'
+import inspectFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/inspect/index'
 
 // Scores
-import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
-import * as hegScorePlugin from './src/plugins/scores/heg/index'
+import * as alphaScorePlugin from './src/packages/neuro.sys/plugins/scores/alpha/index'
+import * as hegScorePlugin from './src/packages/neuro.sys/plugins/scores/heg/index'
 
 // Examples
-import examplePlugins from './src/plugins/examples/index'
+import examplePlugins from './src/packages/neuro.sys/plugins/examples/index'
 
 // Other Plugins
-import * as systemOverlayPlugin from './src/plugins/other/systemOverlay/index'
-import * as menuPlugin from './src/plugins/other/menu/index'
-import * as bluetoothPlugin from './src/plugins/other/devices/ble/index'
-import * as serialPlugin from './src/plugins/other/devices/serial/index'
-import protocolsPlugin from './src/plugins/other/protocols/index'
+import * as systemOverlayPlugin from './src/packages/neuro.sys/plugins/other/systemOverlay/index'
+import * as menuPlugin from './src/packages/neuro.sys/plugins/other/menu/index'
+import * as bluetoothPlugin from './src/packages/neuro.sys/plugins/other/devices/ble/index'
+import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/serial/index'
+import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
 
 
 const OVERLAY = true

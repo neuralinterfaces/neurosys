@@ -1,12 +1,5 @@
 import { periodogram } from './periodogram.js';
-import { transpose } from './transpose.js';
-import { nextpow2 } from './nextpow2.js';
-
-function integrate(x: number[], dx: number = 1) {
-    let sum = 0;
-    for(let i = 0; i < x.length; i++) sum += x[i];
-    return sum * dx;
-}
+import { integrate, transpose, nextpow2 } from './utils.js';
 
 const DEFAULT_BANDS = {
     delta: [1, 3],
