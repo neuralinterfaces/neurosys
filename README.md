@@ -34,7 +34,7 @@ You can save your selection by clicking on the Save Settings tray option.
 
 
 ## Development
-This application is built with [commmoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
+This application is built with [commoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
