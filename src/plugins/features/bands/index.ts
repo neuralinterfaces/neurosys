@@ -1,4 +1,4 @@
-import { bandpower as calculateBandPower } from './bcijs/bandpower'
+import { bandpower as calculateBandPower } from "../../../packages/timefreak/src"
 
 
 type BandSpecification = string[]

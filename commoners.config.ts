@@ -8,6 +8,7 @@ import mockDevicesPlugin from './src/plugins/devices/mocks/index'
 
 // Features
 import bandsPlugin from './src/plugins/features/bands/index'
+import hegRatioPlugin from './src/plugins/features/hegratio/index'
 
 // Feedback
 import * as robotFeedbackPlugin from './src/plugins/feedback/robot/index'
@@ -19,6 +20,7 @@ import inspectFeedbackPlugin from './src/plugins/feedback/inspect/index'
 
 // Scores
 import * as alphaScorePlugin from './src/plugins/scores/alpha/index'
+import * as hegScorePlugin from './src/plugins/scores/heg/index'
 
 // Examples
 import examplePlugins from './src/plugins/examples/index'
@@ -31,8 +33,8 @@ import * as serialPlugin from './src/plugins/other/devices/serial/index'
 import protocolsPlugin from './src/plugins/other/protocols/index'
 
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -105,6 +107,7 @@ const config = {
 
         // ------------------- Features -------------------
         bands: bandsPlugin,
+        hegRatio: hegRatioPlugin,
 
         // ------------------- Feedback -------------------
         textFeedback: textFeedbackPlugin,
@@ -119,6 +122,7 @@ const config = {
 
         // ------------------- Scores -------------------
         alphaScore: alphaScorePlugin,
+        hegScore: hegScorePlugin,
 
         // ------------------- Example Plugins from Documentation -------------------
         ...examplePlugins,

@@ -7,34 +7,20 @@ export const protocols = {
     serial: { label: 'USB', enabled: true },
 }
 
-export const connect = async ({ data, protocol }) => {
+export const connect = async ({ data, timestamps, protocol }) => {
 
     const client = new HEGClient()
     await client.connect({ protocol });      
     await client.start();
 
-    let microsecondTimestamps = []
-    client.subscribe(({ red, ir, ratio, time }) => {
-        // console.log("Data", red / ir, ratio)
-        microsecondTimestamps.push(time)
+    client.subscribe(({ red, ir, time }) => {
+        const redArray = data['red'] || ( data['red'] = [])
+        const irArray = data['ir'] || ( data['ir'] = [])
+        redArray.push(red)
+        irArray.push(ir)
+        timestamps.push(time)
     })
 
-
-    setInterval(() => {
-
-        // Estimate sampling frequency by calculating the difference between each timestamp and the next
-        const timestamps = microsecondTimestamps
-        const diffs = []
-        for (let i = 1; i < timestamps.length; i++) {
-            const diff = timestamps[i] - timestamps[i - 1]
-            diffs.push(diff)
-        }
-        const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length
-        const sfreq = 1 / (avgDiff / 1e6)
-        console.log(sfreq, avgDiff)
-
-
-    }, 1000)
 
     return {
         disconnect: () => client.disconnect(),  

@@ -17,6 +17,13 @@ const { READY } = commoners
 type DataRange = [number, number]
 
 let data = {} as Record<string, number[]>
+let timestsamps = [] as number[]
+const resetData = () => {
+  data = {}
+  timestsamps = []
+  return { data, timestsamps }
+}
+
 let PREV_DATA_RANGE_FOR_FEATURES = [0, 0] as DataRange
 
 const SCORE_INTERVAL = 250
@@ -266,11 +273,13 @@ const getFeatures = async (
 
 // ------------ Handle Devices ------------
 
-let client;
+let client: null | any = null
+
 onDeviceDisconnect(async () => {
   await client?.disconnect()
-  data = {} // Reset data
+  resetData()
   toggleDeviceConnection(true)
+  client = null
 })
 
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
@@ -289,7 +298,8 @@ onShowDevices(async () => {
       modal.close() // Close modal
       
       data = {} // Reset data
-      client = await connect?.({ data, protocol })
+      const states = resetData()
+      client = await connect?.({ ...states, protocol })
       toggleDeviceConnection(false) // Success
     } 
   })
