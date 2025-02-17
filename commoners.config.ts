@@ -34,8 +34,8 @@ import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/se
 import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
 
 
-// const OVERLAY = true
-const OVERLAY = false
+const OVERLAY = true
+// const OVERLAY = false
 
 // const INCLUDE_EXAMPLES = true
 const INCLUDE_EXAMPLES = false
