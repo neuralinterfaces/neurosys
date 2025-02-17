@@ -13,8 +13,8 @@ const exampleBandpowerData = {
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
-  title: 'Plugins/Feedback/Inspect/Bandpowers',
-  tags: [ 'plugin', 'feedback', 'inspect' ],
+  title: 'Plugins/Outputs/Inspect/Bandpowers',
+  tags: [ 'plugin', 'output', 'inspect' ],
   render: (args) => new Bandpowers(args)
 } satisfies Meta<BandpowersProps>;
 

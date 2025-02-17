@@ -7,8 +7,8 @@ import { ScoreText } from './ScoreText';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
-  title: 'Plugins/Feedback/Text/ScoreText',
-  tags: [ 'plugin', 'feedback', 'text' ],
+  title: 'Plugins/Outputs/Text/ScoreText',
+  tags: [ 'plugin', 'output', 'text' ],
   render: (args) => new ScoreText(args)
 } satisfies Meta<ScoreTextProps>;
 

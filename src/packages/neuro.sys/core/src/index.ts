@@ -5,11 +5,11 @@ import { getAllDevices, onDeviceDisconnect, onShowDevices, toggleDeviceConnectio
 import { loadSettings } from "./settings"
 import { createModal } from "./ui"
 
-import * as feedback from './feedback'
+import * as outputs from './outputs'
 import * as score from './score'
 
 export {
-    feedback,
+    outputs,
     score
 }
 
@@ -25,12 +25,12 @@ export const getClient = () => client
 const reset = () => client = null
 
 const promises = [
-    feedback.getPlugins(),
+    outputs.getPlugins(),
     score.getPlugins()
 ]
 
 // Load settings in Electron after all related plugins have been registered
-export const readyForFeedback = Promise.all(promises).then(async () => loadSettings())
+export const readyToOutputFeedback = Promise.all(promises).then(async () => loadSettings())
 
 // ------------ Default Device Handling Behaviors ------------
 

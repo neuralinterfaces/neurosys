@@ -1,6 +1,6 @@
 import './style.css'
 
-import { score, feedback, features, getClient, setValueInSettings, readyForFeedback } from '../packages/neuro.sys/core/src'
+import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from '../packages/neuro.sys/core/src'
 
 const UPDATE_INVERVAL = 250
 
@@ -33,13 +33,13 @@ const calculate = async (
   const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - min) / (max - min)))
 
   // Set the feedback from the calculated score and features
-  feedback.set(normalizedScore, calculatedFeatures)
+  outputs.set(normalizedScore, calculatedFeatures)
 
 
 }
 
 
-readyForFeedback.then(() => setInterval(calculate, UPDATE_INVERVAL))
+readyToOutputFeedback.then(() => setInterval(calculate, UPDATE_INVERVAL))
 
 score.onToggle(async (key, enabled) => {
   const plugins = await score.getPlugins()
@@ -49,9 +49,9 @@ score.onToggle(async (key, enabled) => {
   calculate() // Set the plugin score immediately when toggled
 })
 
-feedback.onToggle(async (key, enabled) => {
+outputs.onToggle(async (key, enabled) => {
 
-      const plugins = await feedback.getPlugins()
+      const plugins = await outputs.getPlugins()
       const ref = plugins[key]
 
       const { start, stop, __info, __score } = ref
@@ -65,7 +65,7 @@ feedback.onToggle(async (key, enabled) => {
 
       // Ensure the appropriate callback is called before the state is toggled
       ref.enabled = enabled
-      await setValueInSettings(`feedback.${key}.enabled`, enabled)
+      await setValueInSettings(`outputs.${key}.enabled`, enabled)
 
       if (hasNotChanged) return
       if (__score === null) return

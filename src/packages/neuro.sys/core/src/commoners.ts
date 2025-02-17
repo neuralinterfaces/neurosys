@@ -7,7 +7,7 @@ type Plugins = Record<string, any>
 export const NAMESPACES = {
     features: 'feature',
     devices: 'device',
-    feedback: 'feedback',
+    outputs: 'outputs',
     scores: 'score'
 }
 
@@ -26,5 +26,5 @@ const registerPlugins = (plugins: Plugins, namespace: string) => {
 
 export const registerFeaturePlugins = (plugins: Plugins) =>registerPlugins(plugins, NAMESPACES.features)
 export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.devices)
-export const registerFeedbackPlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.feedback)
+export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.outputs)
 export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.scores)

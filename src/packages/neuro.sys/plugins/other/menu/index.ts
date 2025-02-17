@@ -8,9 +8,9 @@ export function load() {
     return {
         showDeviceSelector: (callback) => this.on("devices.show", () => callback()),
 
-        // Feedback Mechanisms
-        registerFeedback: (key, plugin) => this.sendSync("feedback.register", { key, plugin }),
-        onFeedbackToggle: (callback) => this.on(`feedback.toggle`, (_, key, enabled) => callback(key, enabled)),
+        // Output Mechanisms
+        registerOutput: (key, plugin) => this.sendSync("outputs.register", { key, plugin }),
+        onOutputToggle: (callback) => this.on(`outputs.toggle`, (_, key, enabled) => callback(key, enabled)),
 
         // Score Mechanisms
         registerScore: (key, plugin) => this.sendSync("score.register", { key, plugin }),
@@ -38,14 +38,14 @@ export const desktop = {
 
         const SUBMENU_IDS = {
             score: "score",
-            feedback: "feedback"
+            outputs: "outputs"
         }
 
         const template = [
             { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
             { type: 'separator' },
-            { id: SUBMENU_IDS.feedback, label: "Feedback", submenu: [] },
             { id: SUBMENU_IDS.score, label: "Score", submenu: [] },
+            { id: SUBMENU_IDS.outputs, label: "Outputs", submenu: [] },
             { type: 'separator' },
             { label: 'Quit', role: 'quit' }
         ]
@@ -82,7 +82,7 @@ export const desktop = {
             updateContextMenu()
         })
 
-        const REGISTERED = { feedback: {}, score: {} }
+        const REGISTERED = { outputs: {}, score: {} }
         const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.toggle`, key, enabled)
         const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
         const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
@@ -118,9 +118,9 @@ export const desktop = {
         }
 
         // ------------------------- Define Setting Options ------------------------- \\
-        this.on("feedback.register", (ev, { key, plugin }) => {
+        this.on("outputs.register", (ev, { key, plugin }) => {
             const { enabled = false, ...options } = plugin
-            const success = registerNewItem(SUBMENU_IDS.feedback, key, { type: 'checkbox', checked: enabled, ...options })
+            const success = registerNewItem(SUBMENU_IDS.outputs, key, { type: 'checkbox', checked: enabled, ...options })
             ev.returnValue = success
         })
 

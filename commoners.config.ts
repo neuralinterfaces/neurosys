@@ -1,4 +1,4 @@
-import { registerDevicePlugins, registerFeaturePlugins, registerFeedbackPlugins, registerScorePlugins } from './src/packages/neuro.sys/core/src/commoners'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './src/packages/neuro.sys/core/src/commoners'
 
 // Devices
 import syntheticDevicesPlugin from './src/packages/neuro.sys/plugins/devices/synthetic/index'
@@ -11,13 +11,13 @@ import mockDevicesPlugin from './src/packages/neuro.sys/plugins/devices/mocks/in
 import bandsPlugin from './src/packages/neuro.sys/plugins/features/bands/index'
 import hegRatioPlugin from './src/packages/neuro.sys/plugins/features/heg/index'
 
-// Feedback
-import * as robotFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/robot/index'
-import * as textFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/text/index'
-import * as brightnessFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/brightness/index'
-import * as cursorFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/cursor/index'
-import spotifyFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/spotify/index'
-import inspectFeedbackPlugin from './src/packages/neuro.sys/plugins/feedback/inspect/index'
+// Output
+import * as robotOutputPlugin from './src/packages/neuro.sys/plugins/outputs/robot/index'
+import * as textOutputPlugin from './src/packages/neuro.sys/plugins/outputs/text/index'
+import * as brightnessOutputPlugin from './src/packages/neuro.sys/plugins/outputs/brightness/index'
+import * as cursorOutputPlugin from './src/packages/neuro.sys/plugins/outputs/cursor/index'
+import spotifyOutputPlugin from './src/packages/neuro.sys/plugins/outputs/spotify/index'
+import inspectOutputPlugin from './src/packages/neuro.sys/plugins/outputs/inspect/index'
 
 // Scores
 import * as alphaScorePlugin from './src/packages/neuro.sys/plugins/scores/alpha/index'
@@ -34,8 +34,8 @@ import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/se
 import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
 
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 // const INCLUDE_EXAMPLES = true
 const INCLUDE_EXAMPLES = false
@@ -43,7 +43,7 @@ const INCLUDE_EXAMPLES = false
 
 const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.feature : {}
 const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.device : {}
-const exampleFeedback = INCLUDE_EXAMPLES ? examplePlugins.feedback : {}
+const exampleOutputs = INCLUDE_EXAMPLES ? examplePlugins.outputs : {}
 const exampleScores = INCLUDE_EXAMPLES ? examplePlugins.score : {}
 
 const TRANSPARENT_WINDOW_SETTINGS = {
@@ -62,7 +62,7 @@ const config = {
     icon: "./src/assets/icon.png",
 
     pages: {
-        // spotify: './src/plugins/feedback/spotify/index.html',
+        // spotify: './src/plugins/outputs/spotify/index.html',
     },
 
     electron: {
@@ -127,17 +127,17 @@ const config = {
             hegRatio: hegRatioPlugin,
         }),
 
-        ...registerFeedbackPlugins({
-            ...exampleFeedback,
+        ...registerOutputPlugins({
+            ...exampleOutputs,
 
-            textFeedback: textFeedbackPlugin,
-            cursorFeedback: cursorFeedbackPlugin,
-            brightnessFeedback: brightnessFeedbackPlugin,
-            inspectFeedback: inspectFeedbackPlugin,
+            textOutput: textOutputPlugin,
+            cursorOutput: cursorOutputPlugin,
+            brightnessOutput: brightnessOutputPlugin,
+            inspectOutput: inspectOutputPlugin,
             
             // // Experimental Plugins
-            // spotifyFeedback: spotifyFeedbackPlugin
-            // robotFeedback: robotPlugin,
+            // spotifyOutput: spotifyOutputPlugin
+            // robotOutput: robotPlugin,
 
         }),
 

@@ -1,11 +1,11 @@
 import { resolvePlugins } from "./commoners"
 
-// Example Search Params: ?feedback=textFeedback&feedback=inspectFeedback&score=alphaScore
+// Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
 const searchParams = new URLSearchParams(window.location.search)
 
 const urlSettings = {
-  feedback: searchParams.getAll('feedback').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
-  score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
+    outputs: searchParams.getAll('output').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
+    score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
 }
 
 const hasUrlSettings = Object.values(urlSettings).some((o) => Object.keys(o).length > 0)

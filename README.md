@@ -20,17 +20,17 @@ To connect your device, click on the brain icon in the system tray and select th
 
 After completing the device connection workflow, you'll be able to configure other settings.
 
-### Defining your Feedback
-To define your feedback, click on the brain icon in the system tray and select any of the available Feedback options—as many as you like!
-
-![Neurosys Feedback Selection](./docs/assets/screenshots/FeedbackSelection-min.png)
-
-You can save your selection by clicking on the Save Settings tray option.
-
 ## Changing the Score
 The first score option will be chosen automatically. To change the score, click on the brain icon in the system tray and select an alternative Score option from the list.
 
 > **Note**: Currently, there's only one EEG-related score (Alpha Score) and one HEG-related score (HEG Score). More scores will be added in the future.
+
+### Defining your Outputs
+To define your outputs, click on the brain icon in the system tray and select any of the available Outputs—as many as you like!
+
+![Neurosys Output Selection](./docs/assets/screenshots/OutputSelection-min.png)
+
+You can save your selection by clicking on the Save Settings tray option.
 
 
 ## Development
@@ -39,7 +39,7 @@ This application is built with [commmoners](https://github.com/neuralinterfaces/
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
 ### Plugins
-Score and feedback plugins are automatically detected and loaded into the system tray.
+Score and output plugins are automatically detected and loaded into the system tray.
 
 ### Devices 
 
@@ -144,8 +144,8 @@ export default {
 
 Once calculated, scores are auto-normalized using baseline data and min/max values detected during the session.
 
-#### Feedback
-Each **feedback** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
+#### Outputs
+Each **output** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
 
 Use the `start` and `stop` fields to specify reactions to being enabled / disabled, including the management of visualization.
 
