@@ -1,0 +1,20 @@
+{
+    "name": "neurosys",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "engine": {
+      "node": ">=20.0.0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/garrettmflynn/neurosys.git"
+    },
+    "author": {
+      "name": "Garrett Flynn",
+      "email": "garrettmflynn@gmail.com"
+    },
+    "devDependencies": {
+      "lit": "^3.2.1"
+    }
+  }

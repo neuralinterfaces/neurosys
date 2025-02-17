@@ -10,11 +10,11 @@ export function load() {
 
         // Feedback Mechanisms
         registerFeedback: (key, plugin) => this.sendSync("feedback.register", { key, plugin }),
-        onFeedbackToggle: (key, callback) => this.on(`feedback.${key}.toggle`, (_, enabled) => callback(enabled)),
+        onFeedbackToggle: (callback) => this.on(`feedback.toggle`, (_, key, enabled) => callback(key, enabled)),
 
         // Score Mechanisms
         registerScore: (key, plugin) => this.sendSync("score.register", { key, plugin }),
-        onScoreToggle: (key, callback) => this.on(`score.${key}.toggle`, (_, enabled) => callback(enabled)),
+        onScoreToggle: (callback) => this.on(`score.toggle`, (_, key, enabled) => callback(key, enabled)),
 
         // Connection
         toggleDeviceConnection: (on = true) => this.send("connection.toggle", on),
@@ -83,7 +83,7 @@ export const desktop = {
         })
 
         const REGISTERED = { feedback: {}, score: {} }
-        const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.${key}.toggle`, enabled)
+        const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.toggle`, key, enabled)
         const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
         const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
 

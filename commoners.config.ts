@@ -33,8 +33,8 @@ import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/se
 import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
 
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -69,7 +69,7 @@ const config = {
 
 
         menu: menuPlugin,
-        protocols: protocolsPlugin,
+        settings: protocolsPlugin,
         
         // ------------------- Acquisition -------------------
         mockDevices: mockDevicesPlugin,

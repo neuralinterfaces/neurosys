@@ -1,5 +1,5 @@
 # Neurosys 🌀
-Neurosys is a desktop application that uses brain-computer interface (BCI) technology to provide system-level feedback on your computer.
+Neurosys is a software development kit (SDK) and desktop application for delivering system-level neurofeedback.
 
 ## Installation
 1. Install [Node.js](https://nodejs.org/en/download/)
