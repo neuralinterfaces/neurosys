@@ -200,8 +200,6 @@ onSaveSettings(async () => {
   enableSettings(false)
 })
 
-let canIgnoreMouseEvents = true
-
 const setIgnoreMouseEvents = async (ignore: boolean) => {
   const { systemOverlay } = await READY
   if (!systemOverlay) return
@@ -211,7 +209,7 @@ const setIgnoreMouseEvents = async (ignore: boolean) => {
 
 const registerAsInteractive = async (element: HTMLElement) => {
   element.onmouseover = () => setIgnoreMouseEvents(false)
-  element.onmouseout = () => setIgnoreMouseEvents(canIgnoreMouseEvents)
+  element.onmouseout = () => setIgnoreMouseEvents(true)
 }
 
 const setFeedback = async (score: number, features: any) => {
@@ -278,6 +276,8 @@ onDeviceDisconnect(async () => {
 // ---------------------------- Allow Device Type Selection with a User Action (to bypass security restrictions) ----------------------------
 onShowDevices(async () => {
 
+// if (showDevicesModal) return // Only allow one selection at a time
+
   const devices = await devicesPromise
 
   const list = new DeviceList({ 
@@ -285,15 +285,18 @@ onShowDevices(async () => {
 
     // Connect to the device
     onSelect: async ({ connect }, protocol) => {
-      modal.close()
+
+      modal.close() // Close modal
+      
       data = {} // Reset data
       client = await connect?.({ data, protocol })
-      toggleDeviceConnection(false)
+      toggleDeviceConnection(false) // Success
     } 
   })
 
   const modal = createModal({ title: 'Neurofeedback Devices', content: list })
 
+  modal.addEventListener('close', () => modal.remove())
 
   document.body.append(modal)
   modal.showModal()
@@ -305,8 +308,7 @@ const createModal = ({ title, content }: {
   emptyMessage?: string
 }) => {
 
-  const modal = document.createElement('dialog')
-  registerAsInteractive(modal)
+  const modal = document.createElement('dialog') 
 
   const header = document.createElement('header')
   header.innerText = title
@@ -326,7 +328,14 @@ const createModal = ({ title, content }: {
     if (target === modal) modal.close()
   });
 
-  modal.addEventListener('close', () => modal.remove())
+  // Ensure that no interactions can happen when a modal is open
+  modal.addEventListener('close', () => setIgnoreMouseEvents(true))
+
+  const ogShowModal = modal.showModal.bind(modal)
+  modal.showModal = async () => {
+    await setIgnoreMouseEvents(false)
+    ogShowModal()
+  }
 
   return modal
 }

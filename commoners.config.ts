@@ -2,6 +2,7 @@
 // Devices
 import syntheticDevicesPlugin from './src/plugins/devices/synthetic/index'
 import museDevicePlugin from './src/plugins/devices/muse/index'
+import hegDevicePlugin from './src/plugins/devices/heg/index'
 
 import mockDevicesPlugin from './src/plugins/devices/mocks/index'
 
@@ -30,8 +31,8 @@ import * as serialPlugin from './src/plugins/other/devices/serial/index'
 import protocolsPlugin from './src/plugins/other/protocols/index'
 
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -78,6 +79,7 @@ const config = {
         bluetooth: bluetoothPlugin, // For Desktop Support
         serial: serialPlugin, // For Desktop Support
         museDevice: museDevicePlugin,
+        hegDevice: hegDevicePlugin,
 
         // brainflow {
         //     load: function () {

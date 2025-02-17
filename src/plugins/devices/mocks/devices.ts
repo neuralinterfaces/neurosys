@@ -14,12 +14,3 @@ export const mendi = {
         ble: { label: 'Bluetooth'},
     }
 }
-
-export const hegduino = {
-    name: 'HEGduino',
-    category: 'fNIRS',
-    protocols: {
-        usb: { label: 'USB' },
-        ble: { label: 'Bluetooth' },
-    }
-}
