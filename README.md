@@ -16,21 +16,14 @@ Run `npm start` in the root directory of the repository
 ### Connecting a Neurofeedback Device
 To connect your device, click on the brain icon in the system tray and select the Connect to Device option from the list.
 
-
-<figure>
-    <img src="./docs/assets/screenshots/DeviceConnection.png" alt="Neurosys Device Connection Workflow">
-    <figcaption>Figure 1. Device Connection</figcaption>
-</figure>
+![Neurosys Device Connection Workflow](./docs/assets/screenshots/DeviceConnection-min.png)
 
 After completing the device connection workflow, you'll be able to configure other settings.
 
 ### Defining your Feedback
 To define your feedback, click on the brain icon in the system tray and select any of the available Feedback options—as many as you like!
 
-<figure>
-    <img src="./docs/assets/screenshots/FeedbackSelection.png" alt="Neurosys Feedback Selection">
-    <figcaption>Figure 2. Feedback Selection</figcaption>
-</figure>
+![Neurosys Feedback Selection](./docs/assets/screenshots/FeedbackSelection-min.png)
 
 You can save your selection by clicking on the Save Settings tray option.
 
@@ -43,10 +36,7 @@ The first score option will be chosen automatically. To change the score, click 
 ## Development
 This application is built with [commmoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
 
-<figure>
-    <img src="./docs/assets/NeurosysArchitecture.png" alt="Neurosys Architecture">
-    <figcaption>Neurosys Architecture</figcaption>
-</figure>
+![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
 ### Plugins
 Score and feedback plugins are automatically detected and loaded into the system tray.
