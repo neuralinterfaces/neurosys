@@ -1,6 +1,6 @@
 import { bandpower as calculateBandPower } from "../../../../timefreak/src"
 
-type BandSpecification = string[]
+type BandSpecification = Record<string, [ number, number ]>
 
 type Data = Record<string, number[]>
 type Window = [number, number]
@@ -19,12 +19,17 @@ export default {
         return {
             feature: { label: 'Bandpowers' },
 
+            settings: {
+                windowInSeconds: 1
+            },
+
             calculate(
-                { data, window, sfreq }: CalculationProperties,
+                { data, sfreq }: CalculationProperties,
                 requesters: BandSpecification[]
             ) {
 
-                const uniqueBands = [ ...new Set(requesters.reduce((acc, val) => acc.concat(val), []) ) ]
+                const allBands = requesters.reduce((acc, val) => acc = { ...acc, ...val } , {})
+                const window = [ -sfreq * this.settings.windowInSeconds ]
 
                 try {
                     return Object.entries(data).reduce((acc, [ch, chData]) => {
@@ -33,12 +38,12 @@ export default {
                         const powers = calculateBandPower(
                             sliced,
                             sfreq,
-                            uniqueBands,
+                            Object.values(allBands),
                             { relative: true }
                         )
 
-                        acc[ch] = uniqueBands.reduce((acc, band, idx) => {
-                            acc[band] = powers[idx]
+                        acc[ch] = Object.keys(allBands).reduce((acc, identifier, idx) => {
+                            acc[identifier] = powers[idx]
                             return acc
                         }, {})
 

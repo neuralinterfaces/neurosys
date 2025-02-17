@@ -1,5 +1,4 @@
 import { resolvePlugins } from "./commoners"
-import { DataRange } from "./types"
 
 export type UserFeatures = {
     bands: string[],
@@ -33,11 +32,10 @@ export type UserFeatures = {
 // ------------ Calculate Score ------------
 export const calculate = async (
     features: UserFeatures, 
-    dataRange: DataRange,
     client?: any
   ): Promise<CalculatedFeatures> => {
 
-    const { data = {}, sfreq } = client ?? {}
+    client = client ?? { data: {} }
   
     const featurePlugins = await getAllFeatures()
   
@@ -46,9 +44,8 @@ export const calculate = async (
     for (const [ key, value ] of Object.entries(features)) {
       const plugin = featurePlugins[key]
       if (!plugin) continue
-      const { calculate } = plugin
-      if (!calculate) continue
-      results[key] = await calculate({ data, window: dataRange, sfreq }, [ value ]) // NOTE: Support multiple requesteres in the future
+      if (!plugin.calculate) continue
+      results[key] = await plugin.calculate(client, [ value ]) // NOTE: Support multiple requesteres in the future
     }
 
   
