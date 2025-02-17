@@ -5,8 +5,16 @@ import mainProcessFeedbackPlugin from './feedback/index'
 
 
 export default {
-    __randomDataDevice: randomDataDevicePlugin,
-    __window: currentWindowFeaturePlugin,
-    __averageVoltageScore: averageVoltageScorePlugin,
-    __mainProcessFeedback: mainProcessFeedbackPlugin,
+    device: {
+        randomDataDevice: randomDataDevicePlugin,
+    },
+    feature: {
+        window: currentWindowFeaturePlugin,
+    },
+    score: {
+        averageVoltage: averageVoltageScorePlugin,
+    },
+    feedback: {
+        mainProcess: mainProcessFeedbackPlugin,
+    }
 }

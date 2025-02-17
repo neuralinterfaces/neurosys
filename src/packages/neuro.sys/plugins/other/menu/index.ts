@@ -119,14 +119,14 @@ export const desktop = {
 
         // ------------------------- Define Setting Options ------------------------- \\
         this.on("feedback.register", (ev, { key, plugin }) => {
-            const { feedback, enabled = false } = plugin
-            const success = registerNewItem(SUBMENU_IDS.feedback, key, { type: 'checkbox', checked: enabled, ...feedback })
+            const { enabled = false, ...options } = plugin
+            const success = registerNewItem(SUBMENU_IDS.feedback, key, { type: 'checkbox', checked: enabled, ...options })
             ev.returnValue = success
         })
 
         this.on("score.register", (ev, { key, plugin }) => {
-            const { score, enabled = false } = plugin
-            const success = registerNewItem( SUBMENU_IDS.score, key, { type: 'radio', checked: enabled, ...score }, true )
+            const { enabled = false, ...options } = plugin
+            const success = registerNewItem( SUBMENU_IDS.score, key, { type: 'radio', checked: enabled, ...options }, true )
             ev.returnValue = success
         })
 

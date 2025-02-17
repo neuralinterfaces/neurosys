@@ -17,18 +17,18 @@ type CalculationProperties = {
 export default {
     load() {
         return {
-            feature: { label: 'Bandpowers' },
-
+            id: 'bands',
+            label: 'Bandpowers',
+            
             settings: {
                 windowInSeconds: 1
             },
 
             calculate(
                 { data, sfreq }: CalculationProperties,
-                requesters: BandSpecification[]
+                settings: BandSpecification
             ) {
 
-                const allBands = requesters.reduce((acc, val) => acc = { ...acc, ...val } , {})
                 const window = [ -sfreq * this.settings.windowInSeconds ]
 
                 try {
@@ -38,11 +38,11 @@ export default {
                         const powers = calculateBandPower(
                             sliced,
                             sfreq,
-                            Object.values(allBands),
+                            Object.values(settings),
                             { relative: true }
                         )
 
-                        acc[ch] = Object.keys(allBands).reduce((acc, identifier, idx) => {
+                        acc[ch] = Object.keys(settings).reduce((acc, identifier, idx) => {
                             acc[identifier] = powers[idx]
                             return acc
                         }, {})

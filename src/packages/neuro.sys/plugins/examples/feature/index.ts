@@ -5,8 +5,10 @@ export default {
         if (PROD) return
 
         return {
-            feature: { label: 'Current Window' },
-            calculate( { data, window, sfreq }, requesters) {
+            id: 'window',
+            label: 'Current Window',
+            calculate( { data, sfreq }, windowDuration = 1) {
+                const window = [ -sfreq * windowDuration ] // Calculate using the specified window on the latest data 
                 return Object.entries(data).reduce((acc, [ch, chData]) => {
                     const sliced = chData.slice(...window)
                     return { ...acc, [ch]: sliced }

@@ -2,8 +2,9 @@
 export default {
     load() {
         return {
-            feature: { label: 'HEG Ratio' },
-
+            id: 'HEG',
+            label: 'HEG Ratio',
+            devices: [ 'HEG' ],
             calculate({ data, window }) {
 
                 const averaged =  Object.entries(data).reduce((acc, [ch, chData]) => {

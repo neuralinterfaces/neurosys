@@ -6,7 +6,8 @@ export default {
     load() {
 
         return {
-            feedback: { label: 'Spotify Volume' },
+
+            label: 'Spotify Volume',
             
             async start() {
 

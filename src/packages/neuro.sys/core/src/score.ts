@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners"
+import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners"
 
 export const onToggle = async (fn: Function) => {
   const { menu: { onScoreToggle } } = await resolvePlugins()
@@ -11,17 +11,20 @@ const registerAllScores = async () => {
 
   const { menu: { registerScore } } = PLUGINS
 
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
+  return Object.keys(PLUGINS).reduce((acc, key) => {
+
+    if (!isPluginInNamespace(NAMESPACES.scores, key)) return acc
+    
+    const plugin = PLUGINS[key]
+
     const { 
-      score,    // Menu Information
+      label,    // Menu Information
       enabled,  // Menu state
       get,      // Score getter
       features  // Features requested
     } = plugin
 
-    if (!score) return acc
-
-    registerScore(key, { score, enabled, })
+    registerScore(key, { label, enabled })
 
     acc[key] = { enabled, get, features, __ctx: {} }
     return acc

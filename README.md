@@ -71,16 +71,18 @@ export default {
 ```
 
 #### Features
-Each **feature** plugin has a `features` field with metadata and a `calculate` function that returns the relevant feature data.
+Each **feature** plugin has an `id` field to allow references from other plugins, a `label` field for tray details, and a `calculate` function that returns the relevant feature data.
 
-The `calculate` function receives an `info` object that includes all data organized by channel name, as well as the current calculation window (`window`) and device sampling frequency(`sfreq`). A `requesters` array is also provided, which lists any settings provided for requesting **score** plugins.
+The `calculate` function receives an `info` object that includes all data organized by channel name, as well as the current calculation window (`window`) and device sampling frequency(`sfreq`). A `settings` value is also provided, which is provided by the requesting **score** plugin.
 
 ```javascript
 export default {
     load() {
         return {
-            feature: { label: 'Current Window' },
-            calculate( { data, window, sfreq }, requesters) {
+            id: 'window',
+            label: 'Current Window',
+            calculate( { data, sfreq }, windowDuration = 1) {
+                const window = [ -sfreq * windowDuration ] // Calculate using the specified window on the latest data 
                 return Object.entries(data).reduce((acc, [ch, chData]) => {
                     const sliced = chData.slice(...window)
                     return { ...acc, [ch]: sliced }
@@ -102,13 +104,13 @@ export default {
 See the [Scores](#score) section for an example of how to request this feature.
 
 #### Score
-Each **score** plugin has special `load` fields, including `score` for tray details, `features` for feature requirements, and a `get` function that calculates a score value based on the resolved features.
+Each **score** plugin has special `load` fields, including `score` for tray details, `features` for feature requirements with related settings, and a `get` function that calculates a score value based on the resolved features.
 
 ```javascript
 export default {
     load: () => ({
         score: { label: 'Average Voltage' },
-        features: { window: true },
+        features: { window: 1 }, // Request the 1s window feature
         get({ window }) {
 
             const averagePerChannel = Object.entries(window).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})

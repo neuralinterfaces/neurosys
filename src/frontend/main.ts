@@ -23,12 +23,12 @@ const calculate = async (
 
   // Calculate a score from the provided features
   const calculatedScore = await score.calculate(calculatedFeatures)
-  
+
 
   // Normalize the score between 0 and 1
   if (calculatedScore < scoreNormalization.min) scoreNormalization.min = calculatedScore
   if (calculatedScore > scoreNormalization.max) scoreNormalization.max = calculatedScore
-  
+
   const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - scoreNormalization.min) / (scoreNormalization.max - scoreNormalization.min)))
   console.log(normalizedScore)
 

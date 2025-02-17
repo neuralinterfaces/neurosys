@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners"
+import { getOriginalKey, getTransformedKey, isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners"
 
 export type UserFeatures = {
     bands: string[],
@@ -19,9 +19,9 @@ export type UserFeatures = {
     const PLUGINS = await resolvePlugins()
   
     return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
-      const { feature } = plugin
-      if (!feature) return acc
-      acc[key] = plugin
+      if (!isPluginInNamespace(NAMESPACES.features, key)) return acc
+      const { id = getOriginalKey(NAMESPACES.features, key) } = plugin
+      acc[id] = plugin
       return acc
     }, {})
 
@@ -41,11 +41,11 @@ export const calculate = async (
   
     const results = {}
   
-    for (const [ key, value ] of Object.entries(features)) {
-      const plugin = featurePlugins[key]
+    for (const [ id, settings ] of Object.entries(features)) {
+      const plugin = featurePlugins[id]
       if (!plugin) continue
       if (!plugin.calculate) continue
-      results[key] = await plugin.calculate(client, [ value ]) // NOTE: Support multiple requesteres in the future
+      results[id] = await plugin.calculate(client, settings) // NOTE: Support multiple requesteres in the future
     }
 
   

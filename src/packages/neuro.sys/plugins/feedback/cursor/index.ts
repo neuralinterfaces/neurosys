@@ -14,9 +14,9 @@ const cursorStyles = {
 export function load() {
 
     return {
-        
-        feedback: { label: 'Custom Cursor' },
 
+        label: 'Custom Cursor',
+        
         start() {
 
             const outputs = createCursor(breathingCircle)

@@ -5,7 +5,7 @@ export default {
         if (PROD) return
 
         return {
-            feedback: { label: 'Print in Main Process' },
+            label: 'Print in Main Process',
             start({ cache = 0 }) {
                 const counter = cache + 1
                 console.log('Plugin activated', counter)

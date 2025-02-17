@@ -2,7 +2,8 @@
 export function load () {
     
     return {
-        feedback: { label: 'Text' },
+        
+        label: 'Text',
 
         async start() {
 

@@ -2,7 +2,8 @@
 export default {
     load() {
         return {
-            feedback: { label: 'Inspect Features' },
+            label: 'Inspect Features',
+
             async start() {
 
                 // Dynamic import to avoid conflict with Commoners

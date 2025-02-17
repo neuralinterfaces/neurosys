@@ -12,11 +12,9 @@ const score = {
 export function load() {
 
     return {
-        score,
+        label: 'Alpha Score',
         features: {
-            bands: {
-                alpha: [ 8, 12 ]
-            }
+            bands: { alpha: [ 8, 12 ] }
         },
         get({ bands = {} }) {
             const averageAlphaRatio = Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length

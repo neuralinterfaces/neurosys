@@ -1,11 +1,11 @@
-import { resolvePlugins } from "../commoners"
+import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "../commoners"
 
 let devices: any
 const registerAllDevices = async () => {
     const PLUGINS = await resolvePlugins()
-    return Object.values(PLUGINS).reduce((acc, plugin = {}) => {
-      const { devices } = plugin
-      if (!devices) return acc
+    return Object.keys(PLUGINS).reduce((acc, key) => {
+      if (!isPluginInNamespace(NAMESPACES.devices, key)) return acc
+      const { devices } = PLUGINS[key]
       acc.push(...devices)
       return acc
     }, [])

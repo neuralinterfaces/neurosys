@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners";
+import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners";
 
 export const onToggle = async (fn: Function) => {
     const { menu: { onFeedbackToggle } } = await resolvePlugins()
@@ -9,12 +9,13 @@ let feedbackOptions: any;
 const registerAllFeedbackOptions = async () => {
   const PLUGINS = await resolvePlugins()
   const { menu: { registerFeedback } } = PLUGINS
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin = {} ]) => {
-    const { feedback, enabled, start, stop, set } = plugin
+  return Object.keys(PLUGINS).reduce((acc, key) => {
 
-    if (!feedback) return acc
+    if (!isPluginInNamespace(NAMESPACES.feedback, key)) return acc
     
-    registerFeedback(key, { feedback, enabled })
+    const plugin = PLUGINS[key]
+    const { label, enabled, start, stop, set } = plugin
+    registerFeedback(key, { label, enabled })
 
     acc[key] = { start, stop, set, enabled, __score: null, __info: {} }
 
