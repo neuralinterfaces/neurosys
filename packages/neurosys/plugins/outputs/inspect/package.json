@@ -1,0 +1,11 @@
+{
+    "name": "@neuro.sys/inspect",
+    "version": "0.0.0",
+    "private": true,
+    "keywords": [
+        "output"
+    ],
+    "devDependencies": {
+        "lit": "^3.2.1"
+    }
+}

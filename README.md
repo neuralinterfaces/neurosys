@@ -3,16 +3,16 @@ Neurosys is a desktop application that provides real-time neurofeedback using a 
 
 This repository can also be used as a software development kit (SDK) for building your own system-level neurofeedback applications.
 
-## Installation
-1. Install [Node.js](https://nodejs.org/en/download/)
-2. Clone this repository    
-3. Run `npm install --force` in the root directory of the repository
-
-## Usage
-Run `npm start` in the root directory of the repository
-
 > **Note**: You can use the shortcut `Ctrl + q` to quit the application at any time.
 
+## Key Features
+1. Several brain-responsive outputs, including 
+2. Support for multiple biosensing devices, including the Muse 2 headband and the HEGduino.
+3. Modular architecture for easy extension and customization.
+4. System tray integration for seamless user experience.
+
+
+## Getting Started
 ### Connecting a Neurofeedback Device
 To connect your device, click on the brain icon in the system tray and select the Connect to Device option from the list.
 
@@ -37,6 +37,30 @@ You can save your selection by clicking on the Save Settings tray option.
 This application is built with [commoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
+
+## Installation
+You will need to have [Node.js](https://nodejs.org/en/) installed on your machine.
+
+This repository uses PNPM for package management. Install PNPM by running the following command:
+```bash
+npm install -g pnpm
+```
+
+Install all packages by running the following command:
+```bash
+pnpm install --force
+```
+
+Finally, build all packages by running:
+```bash
+pnpm build
+```
+
+## Running the Application
+To run the application, use the following command:
+```bash
+pnpm start
+```
 
 ### Plugins
 Score and output plugins are automatically detected and loaded into the system tray.

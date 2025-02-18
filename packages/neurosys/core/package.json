@@ -1,8 +1,13 @@
 {
     "name": "neurosys",
     "version": "0.0.0",
-    "private": true,
     "type": "module",
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      }
+    },
     "engine": {
       "node": ">=20.0.0"
     },
@@ -14,7 +19,11 @@
       "name": "Garrett Flynn",
       "email": "garrettmflynn@gmail.com"
     },
+    "scripts": {
+      "build": "vite build"
+    },
     "devDependencies": {
-      "lit": "^3.2.1"
+      "lit": "^3.2.1",
+      "vite": "^6.1.0"
     }
   }

@@ -1,37 +1,37 @@
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './src/packages/neuro.sys/core/src/commoners'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './packages/neurosys/core/src/commoners'
 
 // Devices
-import syntheticDevicesPlugin from './src/packages/neuro.sys/plugins/devices/synthetic/index'
-import museDevicePlugin from './src/packages/neuro.sys/plugins/devices/muse/index'
-import hegDevicePlugin from './src/packages/neuro.sys/plugins/devices/heg/index'
+import syntheticDevicesPlugin from './packages/neurosys/plugins/devices/synthetic/index'
+import museDevicePlugin from './packages/neurosys/plugins/devices/muse/index'
+import hegDevicePlugin from './packages/neurosys/plugins/devices/heg/index'
 
-import mockDevicesPlugin from './src/packages/neuro.sys/plugins/devices/mocks/index'
+import mockDevicesPlugin from './packages/neurosys/plugins/devices/mocks/index'
 
 // Features
-import bandsPlugin from './src/packages/neuro.sys/plugins/features/bands/index'
-import hegRatioPlugin from './src/packages/neuro.sys/plugins/features/heg/index'
+import bandsPlugin from './packages/neurosys/plugins/features/bands/index'
+import hegRatioPlugin from './packages/neurosys/plugins/features/heg/index'
 
 // Output
-import * as robotOutputPlugin from './src/packages/neuro.sys/plugins/outputs/robot/index'
-import * as textOutputPlugin from './src/packages/neuro.sys/plugins/outputs/text/index'
-import * as brightnessOutputPlugin from './src/packages/neuro.sys/plugins/outputs/brightness/index'
-import * as cursorOutputPlugin from './src/packages/neuro.sys/plugins/outputs/cursor/index'
-import inspectOutputPlugin from './src/packages/neuro.sys/plugins/outputs/inspect/index'
-import volumeOutputPlugin from './src/packages/neuro.sys/plugins/outputs/volume/index'
+import * as robotOutputPlugin from './packages/neurosys/plugins/outputs/robot/index'
+import * as textOutputPlugin from './packages/neurosys/plugins/outputs/text/index'
+import * as brightnessOutputPlugin from './packages/neurosys/plugins/outputs/brightness/index'
+import * as cursorOutputPlugin from './packages/neurosys/plugins/outputs/cursor/index'
+import inspectOutputPlugin from './packages/neurosys/plugins/outputs/inspect/index'
+import volumeOutputPlugin from './packages/neurosys/plugins/outputs/volume/index'
 
 // Scores
-import * as alphaScorePlugin from './src/packages/neuro.sys/plugins/scores/alpha/index'
-import * as hegScorePlugin from './src/packages/neuro.sys/plugins/scores/heg/index'
+import * as alphaScorePlugin from './packages/neurosys/plugins/scores/alpha/index'
+import * as hegScorePlugin from './packages/neurosys/plugins/scores/heg/index'
 
 // Examples
-import examplePlugins from './src/packages/neuro.sys/plugins/examples/index'
+import examplePlugins from './packages/neurosys/plugins/examples/index'
 
 // Other Plugins
-import * as systemOverlayPlugin from './src/packages/neuro.sys/plugins/other/systemOverlay/index'
-import * as menuPlugin from './src/packages/neuro.sys/plugins/other/menu/index'
-import * as bluetoothPlugin from './src/packages/neuro.sys/plugins/other/devices/ble/index'
-import * as serialPlugin from './src/packages/neuro.sys/plugins/other/devices/serial/index'
-import protocolsPlugin from './src/packages/neuro.sys/plugins/other/protocols/index'
+import * as systemOverlayPlugin from './packages/neurosys/plugins/other/systemOverlay/index'
+import * as menuPlugin from './packages/neurosys/plugins/other/menu/index'
+import * as bluetoothPlugin from './packages/neurosys/plugins/other/devices/ble/index'
+import * as serialPlugin from './packages/neurosys/plugins/other/devices/serial/index'
+import protocolsPlugin from './packages/neurosys/plugins/other/protocols/index'
 
 
 const OVERLAY = true
@@ -72,7 +72,7 @@ const config = {
 
     services: {
         // brainflow: "./src/services/brainflow.py",
-        volume: "./src/packages/neuro.sys/services/volume/index.ts"
+        volume: "./packages/neurosys/services/volume/index.ts"
     },
 
     plugins: {
