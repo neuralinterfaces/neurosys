@@ -1,7 +1,7 @@
 # Neurosys 🖥️
 Neurosys is a desktop application that provides real-time neurofeedback using a system overlay.
 
-This repository can also be used as a software development kit (SDK) for building your own system-level neurofeedback applications.
+This repository also contains a software development kit (SDK) for building your own system-level neurofeedback applications.
 
 > **Note**: You can use the shortcut `Ctrl + q` to quit the application at any time.
 
