@@ -6,6 +6,6 @@
         "features"
     ],
     "devDependencies": {
-        "timefreak": "file:../../../../timefreak"
+        "timefreak": "0.0.0"
     }
 }

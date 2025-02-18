@@ -1,4 +1,4 @@
-import { getOriginalKey, isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners"
+import { getOriginalKey, isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners/utils"
 
 export type UserFeatures = {
     bands: string[],

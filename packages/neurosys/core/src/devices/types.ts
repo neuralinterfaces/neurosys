@@ -1,4 +1,4 @@
-import { resolvePlugins } from "../commoners";
+import { resolvePlugins } from "../commoners/utils";
 import { DeviceDiscoveryList } from "../components/DeviceDiscoveryList";
 import { createModal } from "../ui";
 

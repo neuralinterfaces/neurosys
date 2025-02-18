@@ -1,10 +1,12 @@
 {
     "name": "timefreak",
     "version": "0.0.0",
-    "main": "dist/index.js",
-    "files": [
-        "dist"
-    ],
+    "exports": {
+        ".": {
+          "import": "./dist/index.mjs",
+          "require": "./dist/index.cjs"
+        }
+    },
     "scripts": {
         "build": "vite build"
     },

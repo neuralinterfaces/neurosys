@@ -1,4 +1,4 @@
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './packages/neurosys/core/src/commoners'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
 
 // Devices
 import syntheticDevicesPlugin from './packages/neurosys/plugins/devices/synthetic/index'

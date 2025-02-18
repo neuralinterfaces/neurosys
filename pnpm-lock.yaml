@@ -33,7 +33,7 @@ importers:
         specifier: ^0.0.60-alpha.1
         version: 0.0.60-alpha.1(@types/node@22.13.4)(dmg-builder@24.13.3)(encoding@0.1.13)(rollup@4.34.8)(terser@5.39.0)
       neurosys:
-        specifier: ^0.0.0
+        specifier: ^0.0.1
         version: link:packages/neurosys/core
       storybook:
         specifier: ^8.5.6
@@ -59,7 +59,7 @@ importers:
   packages/neurosys/plugins/features/bands:
     devDependencies:
       timefreak:
-        specifier: file:../../../../timefreak
+        specifier: 0.0.0
         version: link:../../../../timefreak
 
   packages/neurosys/plugins/outputs/cursor:

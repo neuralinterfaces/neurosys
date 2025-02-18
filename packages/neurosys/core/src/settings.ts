@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners"
+import { resolvePlugins } from "./commoners/utils"
 
 // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
 const searchParams = new URLSearchParams(window.location.search)

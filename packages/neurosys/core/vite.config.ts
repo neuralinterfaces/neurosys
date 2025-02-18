@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
+import { resolve } from "node:path";
 
 const root = './src';
-const srcFile = `${root}/index`;
 
 export default defineConfig({
   server: {
@@ -9,10 +9,13 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: srcFile,
-      name: "neurosys",
-      formats: [ "es", "cjs" ],
-      fileName: (format) => `index.${format === "es" ? "mjs" : "cjs"}`,
+      entry: {
+        main: resolve(__dirname, 'src', 'index'),
+        config: resolve(__dirname, 'src', 'commoners', 'config'),
+      },
+      name: 'neurosys',
+      formats: ['es', 'cjs'],
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`
     }
   },
 });

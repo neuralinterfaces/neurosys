@@ -48,12 +48,12 @@ npm install -g pnpm
 
 Install all packages by running the following command:
 ```bash
-pnpm install --force
+pnpm install
 ```
 
 Finally, build all packages by running:
 ```bash
-pnpm build
+pnpm build:packages
 ```
 
 ## Running the Application

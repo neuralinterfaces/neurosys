@@ -1,4 +1,4 @@
-import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "../commoners"
+import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "../commoners/utils"
 
 let devices: any
 const registerAllDevices = async () => {
