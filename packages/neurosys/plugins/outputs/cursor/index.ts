@@ -15,7 +15,7 @@ export function load() {
 
     return {
 
-        label: 'Custom Cursor',
+        label: 'Cursor Animation',
         
         start() {
 

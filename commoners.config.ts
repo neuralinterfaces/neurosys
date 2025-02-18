@@ -132,9 +132,9 @@ const config = {
             ...exampleOutputs,
 
             text: textOutputPlugin,
-            cursor: cursorOutputPlugin,
             brightness: brightnessOutputPlugin,
             volume: volumeOutputPlugin,
+            cursor: cursorOutputPlugin,
             inspect: inspectOutputPlugin,
             
             // // Experimental Plugins

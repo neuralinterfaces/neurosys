@@ -1,18 +1,18 @@
-# Neurosys 🖥️
-Neurosys is a desktop application that provides real-time neurofeedback using a system overlay.
+# Neurosys SDK
+The Neurosys software suite provides real-time neurofeedback for multiple EEG + fNIRS devices using a system overlay.
 
-This repository also contains a software development kit (SDK) for building your own system-level neurofeedback applications.
+This repository contains the `neurosys` SDK and a fully-functional [Commoners] application for system-level neurofeedback.
+
+### Key Application Features
+1. System-level neurofeedback outputs like Brightness, Volume, and Cursor Animation.
+2. Support for multiple EEG devices, including the Muse 2 and the HEGduino.
+3. System tray integration for a seamless user experience.
+4. Modular architecture for easy extension and customization.
+
+## Getting Started
 
 > **Note**: You can use the shortcut `Ctrl + q` to quit the application at any time.
 
-## Key Features
-1. Several brain-responsive outputs, including 
-2. Support for multiple biosensing devices, including the Muse 2 headband and the HEGduino.
-3. Modular architecture for easy extension and customization.
-4. System tray integration for seamless user experience.
-
-
-## Getting Started
 ### Connecting a Neurofeedback Device
 To connect your device, click on the brain icon in the system tray and select the Connect to Device option from the list.
 
@@ -34,7 +34,7 @@ You can save your selection by clicking on the Save Settings tray option.
 
 
 ## Development
-This application is built with [commoners](https://github.com/neuralinterfaces/commoners), allowing for a modular and extensible architecture.
+This application is built with [commoners], allowing for a modular and extensible architecture.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
@@ -206,3 +206,5 @@ npm rebuild.js
 
 This will rebuild the necessary modules for your current operating system.
 
+
+[Commoners]: https://github.com/neuralinterfaces/commoners

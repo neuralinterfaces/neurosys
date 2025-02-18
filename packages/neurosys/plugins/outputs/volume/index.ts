@@ -9,7 +9,7 @@ export default {
         const { url } = volume
 
         return {
-            label: 'System Volume',
+            label: 'Volume',
             set: async (score) => {
                 if (isNaN(score)) return // Only send valid scores
                 await fetch(url, { method: 'POST', body: JSON.stringify({ score }) })
