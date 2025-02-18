@@ -6,7 +6,7 @@ import mainProcessOutputPlugin from './outputs/index'
 
 export default {
     device: {
-        randomDataDevice: randomDataDevicePlugin,
+        random: randomDataDevicePlugin,
     },
     feature: {
         window: currentWindowFeaturePlugin,

@@ -41,7 +41,7 @@ This application is built with [commoners](https://github.com/neuralinterfaces/c
 ### Plugins
 Score and output plugins are automatically detected and loaded into the system tray.
 
-### Devices 
+#### Devices 
 
 <!-- export const name = 'Synthetic EEG'
 
@@ -173,7 +173,12 @@ export default {
 }
 ```
 
-## Extensions
-### robot.js
-This feature has been commented out in the `commoners.config.ts` file.
-- [rebuild.js](./rebuild.js) is used to build the correct version of robot.js for Electron
+### Common Issues
+#### Native Node Modules
+It's likely that `robot.js` (if included) will give you trouble when being used through Electron. To solve this, you can try the following:
+```
+npm rebuild.js
+```
+
+This will rebuild the necessary modules for your current operating system.
+

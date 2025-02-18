@@ -16,8 +16,8 @@ import * as robotOutputPlugin from './src/packages/neuro.sys/plugins/outputs/rob
 import * as textOutputPlugin from './src/packages/neuro.sys/plugins/outputs/text/index'
 import * as brightnessOutputPlugin from './src/packages/neuro.sys/plugins/outputs/brightness/index'
 import * as cursorOutputPlugin from './src/packages/neuro.sys/plugins/outputs/cursor/index'
-import spotifyOutputPlugin from './src/packages/neuro.sys/plugins/outputs/spotify/index'
 import inspectOutputPlugin from './src/packages/neuro.sys/plugins/outputs/inspect/index'
+import volumeOutputPlugin from './src/packages/neuro.sys/plugins/outputs/volume/index'
 
 // Scores
 import * as alphaScorePlugin from './src/packages/neuro.sys/plugins/scores/alpha/index'
@@ -62,7 +62,7 @@ const config = {
     icon: "./src/assets/icon.png",
 
     pages: {
-        // spotify: './src/plugins/outputs/spotify/index.html',
+
     },
 
     electron: {
@@ -70,9 +70,10 @@ const config = {
         window: OVERLAY ? TRANSPARENT_WINDOW_SETTINGS : {},
     },
 
-    // services: {
-    //     brainflow: "./src/services/brainflow.py",
-    // },
+    services: {
+        // brainflow: "./src/services/brainflow.py",
+        volume: "./src/packages/neuro.sys/services/volume/index.ts"
+    },
 
     plugins: {
 
@@ -89,14 +90,14 @@ const config = {
             
             ...exampleDevices,
 
-            mockDevices: mockDevicesPlugin,
+            mock: mockDevicesPlugin,
 
             // Synthetic Data Streams
-            syntheticDevices: syntheticDevicesPlugin,
+            synthetic: syntheticDevicesPlugin,
 
             // BLE
-            museDevice: museDevicePlugin,
-            hegDevice: hegDevicePlugin,
+            muse: museDevicePlugin,
+            heg: hegDevicePlugin,
 
             // brainflow {
             //     load: function () {
@@ -130,14 +131,14 @@ const config = {
         ...registerOutputPlugins({
             ...exampleOutputs,
 
-            textOutput: textOutputPlugin,
-            cursorOutput: cursorOutputPlugin,
-            brightnessOutput: brightnessOutputPlugin,
-            inspectOutput: inspectOutputPlugin,
+            text: textOutputPlugin,
+            cursor: cursorOutputPlugin,
+            brightness: brightnessOutputPlugin,
+            volume: volumeOutputPlugin,
+            inspect: inspectOutputPlugin,
             
             // // Experimental Plugins
-            // spotifyOutput: spotifyOutputPlugin
-            // robotOutput: robotPlugin,
+            // robot: robotPlugin,
 
         }),
 

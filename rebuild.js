@@ -1,6 +1,6 @@
 import { rebuild } from '@electron/rebuild';
 import path from 'node:path';
-import url from 'node: url';
+import url from 'node:url';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 

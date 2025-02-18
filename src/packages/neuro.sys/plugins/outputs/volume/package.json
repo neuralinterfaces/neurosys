@@ -1,0 +1,11 @@
+{
+    "name": "@neuro.sys/volume",
+    "version": "0.0.0",
+    "private": true,
+    "keywords": [
+        "output"
+    ],
+    "devDependencies": {
+        "loudness": "^0.4.2"
+    }
+}
