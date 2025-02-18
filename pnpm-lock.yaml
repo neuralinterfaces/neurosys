@@ -34,12 +34,12 @@ importers:
         version: 0.0.60-alpha.1(@types/node@22.13.4)(dmg-builder@24.13.3)(encoding@0.1.13)(rollup@4.34.8)(terser@5.39.0)
       neurosys:
         specifier: ^0.0.1
-        version: link:packages/neurosys/core
+        version: link:sdk/neurosys/core
       storybook:
         specifier: ^8.5.6
         version: 8.5.6
 
-  packages/neurosys/core:
+  sdk/neurosys/core:
     devDependencies:
       lit:
         specifier: ^3.2.1
@@ -48,45 +48,45 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0(@types/node@22.13.4)(terser@5.39.0)
 
-  packages/neurosys/plugins/devices/heg: {}
+  sdk/neurosys/plugins/devices/heg: {}
 
-  packages/neurosys/plugins/devices/muse:
+  sdk/neurosys/plugins/devices/muse:
     devDependencies:
       muse-js:
         specifier: ^3.3.0
         version: 3.3.0
 
-  packages/neurosys/plugins/features/bands:
+  sdk/neurosys/plugins/features/bands:
     devDependencies:
       timefreak:
         specifier: 0.0.0
         version: link:../../../../timefreak
 
-  packages/neurosys/plugins/outputs/cursor:
+  sdk/neurosys/plugins/outputs/cursor:
     devDependencies:
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
 
-  packages/neurosys/plugins/outputs/inspect:
+  sdk/neurosys/plugins/outputs/inspect:
     devDependencies:
       lit:
         specifier: ^3.2.1
         version: 3.2.1
 
-  packages/neurosys/plugins/outputs/text:
+  sdk/neurosys/plugins/outputs/text:
     devDependencies:
       lit:
         specifier: ^3.2.1
         version: 3.2.1
 
-  packages/neurosys/services/volume:
+  sdk/neurosys/services/volume:
     devDependencies:
       loudness:
         specifier: ^0.4.2
         version: 0.4.2
 
-  packages/timefreak:
+  sdk/timefreak:
     dependencies:
       fft.js:
         specifier: ^4.0.4

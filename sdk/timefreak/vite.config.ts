@@ -1,5 +1,4 @@
 import { defineConfig } from "vite";
-import pkgJSON from "./package.json" assert { type: "json" };
 
 const root = './src';
 const srcFile = `${root}/index`;

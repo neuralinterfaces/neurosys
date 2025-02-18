@@ -45,14 +45,14 @@ This repository uses PNPM for package management. Install PNPM by running the fo
 npm install -g pnpm
 ```
 
-Install all packages by running the following command:
+Install all dependencies by running the following command:
 ```bash
 pnpm install
 ```
 
-Finally, build all packages by running:
+Finally, build the SDK by running:
 ```bash
-pnpm build:packages
+pnpm build:sdk
 ```
 
 ## Running the Application
