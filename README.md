@@ -32,9 +32,8 @@ To define your outputs, click on the brain icon in the system tray and select an
 
 You can save your selection by clicking on the Save Settings tray option.
 
-
 ## Development
-This application is built with [commoners], allowing for a modular and extensible architecture.
+Built with [Commoners], Neurosis has a modular architecture that allows for easy extension and customization.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
