@@ -1,11 +1,10 @@
-import * as syntheticEEG from "./devices/eeg"
+import { Devices } from "../../../core/src/plugins"
+import syntheticEEG from "./devices/eeg"
 
 
 
 export default {
     load() {
-        return {
-            devices: [ syntheticEEG ]
-        }
+        return new Devices([ syntheticEEG ])
     }
 }

@@ -2,6 +2,7 @@ import { createCursor } from "./cursors/shader/shader"
 
 import redSquareShader from './shaders/redSquare.glsl?raw'
 import breathingCircle from './shaders/breathingCircle.glsl?raw'
+import { Output } from "../../../core/src/plugins/output"
 
 const cursorStyles = {
     width: '200px',
@@ -13,7 +14,7 @@ const cursorStyles = {
 
 export function load() {
 
-    return {
+    return new Output({
 
         label: 'Cursor Animation',
         
@@ -65,5 +66,5 @@ export function load() {
             outputs.cursor.remove()
             outputs.animate = false
         }
-    }
+    })
 }

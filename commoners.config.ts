@@ -34,8 +34,8 @@ import * as serialPlugin from './sdk/neurosys/plugins/other/devices/serial/index
 import protocolsPlugin from './sdk/neurosys/plugins/other/protocols/index'
 
 
-const OVERLAY = true
-// const OVERLAY = false
+// const OVERLAY = true
+const OVERLAY = false
 
 // const INCLUDE_EXAMPLES = true
 const INCLUDE_EXAMPLES = false

@@ -1,7 +1,8 @@
+import { Output } from "../../../core/src/plugins/output"
 
 export function load () {
     
-    return {
+    return new Output({
 
         label: 'Text',
 
@@ -26,5 +27,5 @@ export function load () {
         stop({ text }) {
             text.remove()
         }
-    }
+    })
 }

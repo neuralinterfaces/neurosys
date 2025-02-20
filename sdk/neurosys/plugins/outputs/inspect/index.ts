@@ -1,7 +1,8 @@
+import { Output } from '../../../core/src/plugins/output'
 
 export default {
     load() {
-        return {
+        return new Output({
             label: 'Inspect Features',
 
             async start() {
@@ -34,6 +35,6 @@ export default {
                 const { bands } = this.__features
                 if (bands) bandEl.data = bands
             }
-        }
+        })
     }
 }

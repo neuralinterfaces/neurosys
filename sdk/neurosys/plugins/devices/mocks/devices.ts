@@ -1,16 +1,17 @@
+import { Device } from "../../../core/src/plugins"
 
-export const openbci =  {
+export const openbci =  new Device({
     name: 'OpenBCI',
-    category: 'EEG',
+    type: 'EEG',
     protocols: {
         usb: { label: 'USB' },
     }
-}
+})
 
-export const mendi = {
+export const mendi = new Device({
     name: 'Mendi',
-    category: 'fNIRS',
+    type: 'fNIRS',
     protocols: {
-        ble: { label: 'Bluetooth'},
+        ble: { label: 'Bluetooth' },
     }
-}
+})

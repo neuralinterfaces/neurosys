@@ -1,10 +1,12 @@
+import { Feature } from "../../../core/src/plugins"
+
 export default {
     load() {
 
         const { PROD } = commoners
         if (PROD) return
 
-        return {
+        return new Feature({
             id: 'window',
             calculate( { data, sfreq }, windowDuration = 1) {
                 const window = [ -sfreq * windowDuration ] // Calculate using the specified window on the latest data 
@@ -13,6 +15,6 @@ export default {
                     return { ...acc, [ch]: sliced }
                 }, {})
             }
-        }
+        })
     }
 }

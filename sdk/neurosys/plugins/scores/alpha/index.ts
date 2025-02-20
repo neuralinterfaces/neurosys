@@ -5,9 +5,11 @@
 //     beta: [13, 30],
 //     gamma: [31, 50]
 
+import { Score } from "../../../core/src/plugins"
+
 export function load() {
 
-    return {
+    return new Score({
         label: 'Alpha Score',
         features: {
             bands: { 
@@ -18,5 +20,5 @@ export function load() {
         get({ bands = {} }) {
             return Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
         }
-    }
+    })
 }

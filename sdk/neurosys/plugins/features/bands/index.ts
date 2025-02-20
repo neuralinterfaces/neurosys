@@ -1,14 +1,7 @@
 import { bandpower as calculateBandPower } from "../../../../timefreak/src"
+import { Feature } from "../../../core/src/plugins"
 
 type BandSpecification = Record<string, [ number, number ]>
-
-type Data = Record<string, number[]>
-type SamplingRate = number
-
-type Client = {
-    data: Data
-    sfreq: SamplingRate
-}
 
 type Settings = {
     bands?: BandSpecification
@@ -18,11 +11,10 @@ type Settings = {
 
 export default {
     load() {
-        return {
+        return new Feature({
             id: 'bands',
-
             calculate(
-                { data, sfreq }: Client,
+                { data, sfreq },
                 settings: Settings
             ) {
 
@@ -44,7 +36,7 @@ export default {
                         acc[ch] = Object.keys(bands).reduce((acc, identifier, idx) => {
                             acc[identifier] = powers[idx]
                             return acc
-                        }, {})
+                        }, {}) as Record<string, number>
 
                         return acc
 
@@ -54,8 +46,7 @@ export default {
                     console.error(err)
                     return {}
                 }
-
             }
-        }
+        })
     }
 }

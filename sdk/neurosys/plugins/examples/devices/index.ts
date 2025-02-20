@@ -1,14 +1,17 @@
+import { Device, Devices } from "../../../core/src/plugins"
+
 export default {
     load() {
 
         const { PROD } = commoners
         if (PROD) return
 
-        return {
-            devices: [ {
+        return new Devices([
+
+            new Device({
                 name: 'Random Data',
                 protocols: { start: "Start" },
-                connect: ({ data, protocol }) => {
+                connect: ({ data }) => {
 
                     const sfreq = 512
                     const channels = [ 'Fp1', 'Fp2' ]
@@ -27,7 +30,8 @@ export default {
                     }
 
                 }
-            } ]
-        }
+            })
+
+        ])
     }
 }

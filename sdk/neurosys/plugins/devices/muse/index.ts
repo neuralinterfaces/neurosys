@@ -1,9 +1,8 @@
-import * as museInfo from "./info";
+import { Devices } from "../../../core/src/plugins";
+import museInfo from "./info";
 
 export default {
     load() {
-        return {
-            devices: [ museInfo ]
-        }
+        return new Devices([ museInfo ]);
     }
 }

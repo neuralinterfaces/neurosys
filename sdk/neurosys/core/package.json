@@ -10,6 +10,10 @@
       "./config": {
         "import": "./dist/config.mjs",
         "require": "./dist/config.cjs"
+      },
+      "./plugins": {
+        "import": "./dist/plugins.mjs",
+        "require": "./dist/plugins.cjs"
       }
     },
     "engine": {

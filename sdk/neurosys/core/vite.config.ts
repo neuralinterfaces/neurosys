@@ -1,8 +1,6 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
 
-const root = './src';
-
 export default defineConfig({
   server: {
     open: true,
@@ -12,6 +10,7 @@ export default defineConfig({
       entry: {
         main: resolve(__dirname, 'src', 'index'),
         config: resolve(__dirname, 'src', 'commoners', 'config'),
+        plugins: resolve(__dirname, 'src', 'plugins'),
       },
       name: 'neurosys',
       formats: ['es', 'cjs'],

@@ -1,9 +1,8 @@
-import * as hegInfo from "./info";
+import { Devices } from "../../../core/src/plugins";
+import hegInfo from "./info";
 
 export default {
     load() {
-        return {
-            devices: [ hegInfo ]
-        }
+        return new Devices([ hegInfo ])
     }
 }

@@ -42,7 +42,7 @@ export class DeviceList extends LitElement {
                 padding: 20px 0px;
             }
 
-            ul li {
+            button {
                 cursor: pointer;
             }
 
@@ -71,19 +71,21 @@ export class DeviceList extends LitElement {
     render() {
 
         const resolvedAndSortedDevices = this.devices.map((info) => {
-            // Resolve protocols
-            const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
-                const overrides = typeof protocol === 'string' ? { label: protocol } : {}
-                return { ...protocol, ...overrides, id }
-            })
-        
-            return { ...info, protocols: resolvedProtocols}
+
+                // Resolve protocols
+                const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
+                    const overrides = typeof protocol === 'string' ? { label: protocol } : {}
+                    return { ...protocol, ...overrides, id }
+                })
+            
+                return { ...info, protocols: resolvedProtocols}
             })
             .sort((a,b) => a.name.localeCompare(b.name))
             .sort((a,b) => {
+                
         
-            const firstAnyEnabled = a.protocols.find(({ enabled = true }) => enabled)
-            const secondAnyEnabled =  b.protocols.find(({ enabled = true }) => enabled)
+            const firstAnyEnabled = a.protocols.find(({ enabled = !!a.connect }) => enabled)
+            const secondAnyEnabled =  b.protocols.find(({ enabled = !!b.connect }) => enabled)
         
             if (!firstAnyEnabled && !secondAnyEnabled) return 0
             if (!firstAnyEnabled && secondAnyEnabled) return 1
@@ -95,12 +97,12 @@ export class DeviceList extends LitElement {
         return html`
             <ul>
                 ${resolvedAndSortedDevices.map((info) => {
-                const { name, protocols } = info
+                const { name, protocols, connect } = info
                 return html`
                     <li>
                         <strong>${name}</strong>
                         <div class="buttons">
-                            ${protocols.map(({ id: protocol, label, enabled = true }) => html`
+                            ${protocols.map(({ id: protocol, label, enabled = !!connect }) => html`
                                 <button ?disabled=${!enabled} @click=${async () => this.onSelect?.(info, protocol)}>${label}</button>
                             `)}
                         </div>

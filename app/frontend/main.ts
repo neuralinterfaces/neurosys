@@ -1,6 +1,7 @@
 import './style.css'
 
-import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from 'neurosys'
+// import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from 'neurosys'
+import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from '../../sdk/neurosys/core/src/index'
 
 const UPDATE_INVERVAL = 250
 

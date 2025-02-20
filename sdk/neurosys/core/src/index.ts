@@ -14,6 +14,7 @@ export {
 }
 
 // export * from './devices'
+export * from './plugins'
 export * as features from './features'
 export * from './settings'
 export * from './ui'
