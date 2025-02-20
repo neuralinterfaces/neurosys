@@ -1,37 +1,39 @@
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
+// import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners/config'
 
 // Devices
-import syntheticDevicesPlugin from './sdk/neurosys/plugins/devices/synthetic/index'
-import museDevicePlugin from './sdk/neurosys/plugins/devices/muse/index'
-import hegDevicePlugin from './sdk/neurosys/plugins/devices/heg/index'
 
-import mockDevicesPlugin from './sdk/neurosys/plugins/devices/mocks/index'
+import syntheticDevicesPlugin from './sdk/neurosys/src/plugins/devices/synthetic/index'
+import museDevicePlugin from './sdk/neurosys/src/plugins/devices/muse/index'
+import hegDevicePlugin from './sdk/neurosys/src/plugins/devices/heg/index'
+
+import mockDevicesPlugin from './sdk/neurosys/src/plugins/devices/mocks/index'
 
 // Features
-import bandsPlugin from './sdk/neurosys/plugins/features/bands/index'
-import hegRatioPlugin from './sdk/neurosys/plugins/features/heg/index'
+import bandsPlugin from './sdk/neurosys/src/plugins/features/bands/index'
+import hegRatioPlugin from './sdk/neurosys/src/plugins/features/heg/index'
 
 // Output
-import * as robotOutputPlugin from './sdk/neurosys/plugins/outputs/robot/index'
-import * as textOutputPlugin from './sdk/neurosys/plugins/outputs/text/index'
-import * as brightnessOutputPlugin from './sdk/neurosys/plugins/outputs/brightness/index'
-import * as cursorOutputPlugin from './sdk/neurosys/plugins/outputs/cursor/index'
-import inspectOutputPlugin from './sdk/neurosys/plugins/outputs/inspect/index'
-import volumeOutputPlugin from './sdk/neurosys/plugins/outputs/volume/index'
+import * as robotOutputPlugin from './sdk/neurosys/src/plugins/outputs/robot/index'
+import * as textOutputPlugin from './sdk/neurosys/src/plugins/outputs/text/index'
+import * as brightnessOutputPlugin from './sdk/neurosys/src/plugins/outputs/brightness/index'
+import * as cursorOutputPlugin from './sdk/neurosys/src/plugins/outputs/cursor/index'
+import inspectOutputPlugin from './sdk/neurosys/src/plugins/outputs/inspect/index'
+import volumeOutputPlugin from './sdk/neurosys/src/plugins/outputs/volume/index'
 
 // Scores
-import * as alphaScorePlugin from './sdk/neurosys/plugins/scores/alpha/index'
-import * as hegScorePlugin from './sdk/neurosys/plugins/scores/heg/index'
+import * as alphaScorePlugin from './sdk/neurosys/src/plugins/scores/alpha/index'
+import * as hegScorePlugin from './sdk/neurosys/src/plugins/scores/heg/index'
 
 // Examples
-import examplePlugins from './sdk/neurosys/plugins/examples/index'
+import examplePlugins from './sdk/neurosys/src/plugins/examples/index'
 
 // Other Plugins
-import * as systemOverlayPlugin from './sdk/neurosys/plugins/other/systemOverlay/index'
-import menuPlugin from './sdk/neurosys/plugins/other/menu/index'
-import * as bluetoothPlugin from './sdk/neurosys/plugins/other/devices/ble/index'
-import * as serialPlugin from './sdk/neurosys/plugins/other/devices/serial/index'
-import protocolsPlugin from './sdk/neurosys/plugins/other/protocols/index'
+import * as systemOverlayPlugin from './sdk/neurosys/src/plugins/other/systemOverlay/index'
+import menuPlugin from './sdk/neurosys/src/plugins/other/menu/index'
+import * as bluetoothPlugin from './sdk/neurosys/src/plugins/other/devices/ble/index'
+import * as serialPlugin from './sdk/neurosys/src/plugins/other/devices/serial/index'
+import protocolsPlugin from './sdk/neurosys/src/plugins/other/protocols/index'
 
 
 // const OVERLAY = true
@@ -72,7 +74,7 @@ const config = {
 
     services: {
         // brainflow: "./app/services/brainflow.py",
-        volume: "./sdk/neurosys/services/volume/index.ts"
+        volume: "./sdk/neurosys/src/services/volume/index.ts"
     },
 
     plugins: {

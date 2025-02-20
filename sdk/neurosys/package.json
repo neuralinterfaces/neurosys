@@ -1,0 +1,36 @@
+{
+    "name": "neurosys",
+    "version": "0.0.1",
+    "type": "module",
+    "exports": {
+      ".": {
+        "import": "./dist/main.mjs",
+        "require": "./dist/main.cjs"
+      },
+      "./config": {
+        "import": "./dist/config.mjs",
+        "require": "./dist/config.cjs"
+      },
+      "./plugins": {
+        "import": "./dist/plugins.mjs",
+        "require": "./dist/plugins.cjs"
+      }
+    },
+    "engine": {
+      "node": ">=20.0.0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/garrettmflynn/neurosys.git"
+    },
+    "author": {
+      "name": "Garrett Flynn",
+      "email": "garrettmflynn@gmail.com"
+    },
+    "scripts": {
+      "build": "vite build"
+    },
+    "devDependencies": {
+      "vite": "^6.1.0"
+    }
+  }

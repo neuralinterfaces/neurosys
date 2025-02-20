@@ -1,7 +1,8 @@
 import './style.css'
 
 // import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from 'neurosys'
-import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from '../../sdk/neurosys/core/src/index'
+import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback, setDeviceRequestHandler } from '../../sdk/neurosys/src/core/index'
+import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
 
 const UPDATE_INVERVAL = 250
 
@@ -73,4 +74,32 @@ outputs.onToggle(async (key, enabled) => {
       if (!enabled) return
 
       ref.set(__score, ref.__info) // Set the plugin score immediately when toggled
+  })
+
+
+  setDeviceRequestHandler(async (devices) => {
+
+    return new Promise((resolve, reject) => {
+
+        const list = new DeviceList({ 
+          devices, 
+
+          // Success
+          onSelect: async (device, protocol) => {
+            resolve({ device, protocol })
+            modal.close()
+          } 
+        })
+      
+        const modal = createModal({ title: 'Neurofeedback Devices', content: list })
+      
+        modal.addEventListener('close', () => {
+          modal.remove()
+          reject('No device selected')
+        })
+      
+        document.body.append(modal)
+        modal.showModal()
+      })
+
   })
