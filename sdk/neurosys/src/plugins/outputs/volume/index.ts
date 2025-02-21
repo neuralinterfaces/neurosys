@@ -1,20 +1,19 @@
 // NOTE: This plugin requires a specific service to be configured
 
-import { Score } from "../../../core/plugins"
 import { Output } from "../../../core/plugins/output"
 
-export default {
+export default ( serviceName: string ) => ({
     load() {
 
-        if (!commoners.SERVICES.volume) return
+        if (!commoners.SERVICES[serviceName]) return
 
         return new Output({
             label: 'Volume',
             set: async (score) => {
-                const { url } = commoners.SERVICES.volume
+                const { url } = commoners.SERVICES[serviceName]
                 if (isNaN(score)) return // Only send valid scores
                 await fetch(url, { method: 'POST', body: JSON.stringify({ score }) })
             }
         })
     }
-}
+})

@@ -1,8 +1,8 @@
 import { Devices } from "../../../core/plugins";
 import hegInfo from "./info";
 
-export default {
-    load() {
-        return new Devices([ hegInfo ])
-    }
+
+export function load() {
+    return new Devices([ hegInfo ])
 }
+

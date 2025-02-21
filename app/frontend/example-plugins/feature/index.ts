@@ -1,4 +1,4 @@
-import { Feature } from "../../../core/plugins"
+import { Feature } from "../../../../sdk/neurosys/src/core/plugins"
 
 export default {
     load() {

@@ -10,7 +10,8 @@ export default defineConfig({
       entry: {
         main: resolve(__dirname, 'src', 'core'),
         plugins: resolve(__dirname, 'src', 'plugins'),
-        config: resolve(__dirname, 'src', 'core', 'commoners', 'config')
+        config: resolve(__dirname, 'src', 'core', 'commoners', 'config'),
+        ["services/volume"]: resolve(__dirname, 'src', 'services', 'volume'),
       },
       name: 'neurosys',
       formats: ['es', 'cjs'],

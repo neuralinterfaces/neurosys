@@ -1,4 +1,4 @@
-import { Output } from "../../../core/plugins/output"
+import { Output } from "../../../../sdk/neurosys/src/core/plugins/output"
 
 export default {
     load() {

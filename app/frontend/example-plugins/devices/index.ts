@@ -1,4 +1,4 @@
-import { Device, Devices } from "../../../core/plugins"
+import { Device, Devices } from "../../../../sdk/neurosys/src/core/plugins"
 
 export default {
     load() {

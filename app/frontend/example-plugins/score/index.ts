@@ -1,4 +1,4 @@
-import { Score } from "../../../core/plugins"
+import { Score } from "../../../../sdk/neurosys/src/core/plugins"
 
 export default {
     load: () => {

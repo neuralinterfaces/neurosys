@@ -1,32 +1,15 @@
 // import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
+// import { devices, features, scores, outputs }from 'neurosys/plugins'
+
 import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners/config'
+import { devices, features, scores, outputs } from './sdk/neurosys/src/plugins'
 
-// Devices
-
-import syntheticDevicesPlugin from './sdk/neurosys/src/plugins/devices/synthetic/index'
-import museDevicePlugin from './sdk/neurosys/src/plugins/devices/muse/index'
-import hegDevicePlugin from './sdk/neurosys/src/plugins/devices/heg/index'
-
-import mockDevicesPlugin from './sdk/neurosys/src/plugins/devices/mocks/index'
-
-// Features
-import bandsPlugin from './sdk/neurosys/src/plugins/features/bands/index'
-import hegRatioPlugin from './sdk/neurosys/src/plugins/features/heg/index'
-
-// Output
-import * as robotOutputPlugin from './sdk/neurosys/src/plugins/outputs/robot/index'
-import * as textOutputPlugin from './sdk/neurosys/src/plugins/outputs/text/index'
-import * as brightnessOutputPlugin from './sdk/neurosys/src/plugins/outputs/brightness/index'
-import * as cursorOutputPlugin from './sdk/neurosys/src/plugins/outputs/cursor/index'
-import inspectOutputPlugin from './sdk/neurosys/src/plugins/outputs/inspect/index'
-import volumeOutputPlugin from './sdk/neurosys/src/plugins/outputs/volume/index'
-
-// Scores
-import * as alphaScorePlugin from './sdk/neurosys/src/plugins/scores/alpha/index'
-import * as hegScorePlugin from './sdk/neurosys/src/plugins/scores/heg/index'
+const neurosysVolumeServiceSrcPath = "./sdk/neurosys/src/services/volume/index.ts"
+import packagedNeurosysVolumeService from "neurosys/services/volume?url"
+// import unpackagedNeurosysVolumeService from "./sdk/neurosys/src/services/volume/index?url"
 
 // Examples
-import examplePlugins from './sdk/neurosys/src/plugins/examples/index'
+import examplePlugins from './app/frontend/example-plugins/index'
 
 // Other Plugins
 import * as systemOverlayPlugin from './sdk/neurosys/src/plugins/other/systemOverlay/index'
@@ -74,7 +57,10 @@ const config = {
 
     services: {
         // brainflow: "./app/services/brainflow.py",
-        volume: "./sdk/neurosys/src/services/volume/index.ts"
+        volume: neurosysVolumeServiceSrcPath,
+        // volume: unpackagedNeurosysVolumeService,
+        // volume: packagedNeurosysVolumeService
+        
     },
 
     plugins: {
@@ -92,14 +78,7 @@ const config = {
             
             ...exampleDevices,
 
-            mock: mockDevicesPlugin,
-
-            // Synthetic Data Streams
-            synthetic: syntheticDevicesPlugin,
-
-            // BLE
-            muse: museDevicePlugin,
-            heg: hegDevicePlugin,
+            ...devices
 
             // brainflow {
             //     load: function () {
@@ -125,29 +104,18 @@ const config = {
             
         ...registerFeaturePlugins({
             ...exampleFeatures,
-
-            bands: bandsPlugin,
-            hegRatio: hegRatioPlugin,
+            ...features
         }),
 
         ...registerOutputPlugins({
             ...exampleOutputs,
-
-            text: textOutputPlugin,
-            brightness: brightnessOutputPlugin,
-            volume: volumeOutputPlugin,
-            cursor: cursorOutputPlugin,
-            inspect: inspectOutputPlugin,
-            
-            // // Experimental Plugins
-            // robot: robotPlugin,
-
+            ...outputs,
+            volume: outputs.volume('volume') // Register volume service explicitly
         }),
 
         ...registerScorePlugins({
             ...exampleScores,
-            alphaScore: alphaScorePlugin,
-            hegScore: hegScorePlugin,
+            ...scores
         }),
     }
 }
