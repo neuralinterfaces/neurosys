@@ -9,8 +9,9 @@ export default defineConfig({
     lib: {
       entry: {
         main: resolve(__dirname, 'src', 'core'),
-        plugins: resolve(__dirname, 'src', 'plugins'),
-        config: resolve(__dirname, 'src', 'core', 'commoners', 'config'),
+        features: resolve(__dirname, 'src', 'plugins'),
+        plugins: resolve(__dirname, 'src', 'core', 'plugins'),
+        commoners: resolve(__dirname, 'src', 'core', 'commoners'),
         services: resolve(__dirname, 'src', 'services'),
         ["services/volume"]: resolve(__dirname, 'src', 'services', 'volume'),
       },

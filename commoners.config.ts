@@ -1,11 +1,11 @@
-// import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
-// import { devices, features, scores, outputs, system } from 'neurosys/plugins'
+// import { devices, features, scores, outputs, system } from 'neurosys/features'
+// import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins } from 'neurosys/plugins'
 
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners/config'
-import { devices, features, scores, outputs, system } from './sdk/neurosys/src/plugins'
+import { devices, features, scores, outputs, system } from './sdk/neurosys/src/features'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/plugins'
 
 // Examples
-import examplePlugins from './app/frontend/example-plugins/index'
+import examplePlugins from './app/examples/plugins/index'
 
 // const OVERLAY = true
 const OVERLAY = false
@@ -13,10 +13,10 @@ const OVERLAY = false
 // const INCLUDE_EXAMPLES = true
 const INCLUDE_EXAMPLES = false
 
-const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.feature : {}
-const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.device : {}
+const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.features : {}
+const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.devices : {}
 const exampleOutputs = INCLUDE_EXAMPLES ? examplePlugins.outputs : {}
-const exampleScores = INCLUDE_EXAMPLES ? examplePlugins.score : {}
+const exampleScores = INCLUDE_EXAMPLES ? examplePlugins.scores : {}
 
 const TRANSPARENT_WINDOW_SETTINGS = {
     frame: false,
@@ -43,6 +43,7 @@ const config = {
     },
 
     services: {
+        example: './app/examples/service.ts', // Example service
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"
     },

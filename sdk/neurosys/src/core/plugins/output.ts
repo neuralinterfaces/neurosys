@@ -1,13 +1,14 @@
 import { MenuLabel, Score } from "./types"
 
 
-type Refs = any
+type StartRefs = any
+type StopRefs = any
 
 type OutputProps = {
     label: MenuLabel,
-    start?: () => Refs,
-    set: (score: Score, refs: Refs) => void,
-    stop?: (refs: Refs) => void
+    start?: (refs: StopRefs) => StartRefs,
+    set: (score: Score, refs: StartRefs) => void,
+    stop?: (refs: StartRefs) => StopRefs
 }
 
 export class Output {

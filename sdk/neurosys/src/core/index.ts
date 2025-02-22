@@ -5,16 +5,20 @@ import { loadSettings } from "./settings"
 
 import * as outputs from './outputs'
 import * as score from './score'
-import { getServicePlugins, sendToOutputPlugin } from "./services"
+import * as features from './features'
+// import * as devices from './devices/'
+
+import { getServicePlugins, sendToServicePlugin } from "./services"
+import { getNamespace, getOriginalKey } from "./plugins"
 
 export {
     outputs,
-    score
+    score,
+    features
 }
 
 // export * from './devices'
 export * from './plugins'
-export * as features from './features'
 export * from './settings'
 
 let client: null | any = null
@@ -31,43 +35,81 @@ const urlsByService = Object.entries(SERVICES).reduce((acc, [key, value]) => {
   return acc
 }, {})
 
+const getServiceUrl = (url, encoded) => {
+  const key = getOriginalKey(encoded)
+  const namespace = getNamespace(encoded)
 
-// // NOTE: This plugin requires a specific service to be configured
+  if (namespace) return new URL(`${namespace}/${key}`, url)
+  return new URL(key, url)
+}
 
-// import { Output } from "../../../core/plugins/output"
+const methodsForType = {
+  output: ['start', 'set', 'stop'],
+  score: ['calculate'],
+  feature: ['calculate'],
+  // device: ['connect', 'disconnect']
+}
 
-// export default ( serviceName: string ) => ({
-//     load() {
+const getRegisterFunction = (type) => {
+  if (type === 'output') return outputs.registerPlugin
+  // if (type === 'score') return score.registerPlugin
+  return null
+}
 
-//         if (!commoners.SERVICES[serviceName]) return
+const preFetchMethods = {
+  output: {
+    set: async (...args: any[]) => {
+      const score = args[0]
+      if (isNaN(score)) return null // Don't send null to services | NOTE: Should this apply across the board?
+      return args
+    }
+  }
+}
 
-//         return new Output({
-//             label: 'Volume',
-//             set: async (score) => {
-//                 const { url } = commoners.SERVICES[serviceName]
-//                 if (isNaN(score)) return // Only send valid scores
-//                 await fetch(url, { method: 'POST', body: JSON.stringify({ score }) })
-//             }
-//         })
-//     }
-// })
+const getCollection = (type) => {
+  if (type === 'output') return outputs.getPlugins()
+  if (type === 'score') return score.getPlugins()
+  if (type == 'feature') return features.getAllFeatures()
+  if (type === 'device') return getAllDevices()
+  return null
+}
 
-Object.entries(urlsByService).forEach(([ service, baseUrl ]) => {
+Object.values(urlsByService).forEach(baseUrl=> {
   getServicePlugins(baseUrl).then(plugins => {
+    console.warn('Registering Service Plugins:', baseUrl, plugins)
     plugins.forEach(async plugin => {
-      const { plugin: name, type, info } = plugin
-      const pluginUrl = new URL(name, baseUrl)
-      if (type === 'output') {
-        const outputPlugins = await outputs.getPlugins()
-        outputs.registerPlugin(
-          name, 
-          {
-            ...info,
-            set: (score) => sendToOutputPlugin(pluginUrl, score)
-          },
-          outputPlugins
-        )
-      }
+      const { plugin: identifier, type, info } = plugin
+
+      const methods = methodsForType[type]
+      if (!methods) return
+
+      const pluginCollection = await getCollection(type)
+      if (!pluginCollection) return
+
+      const url = getServiceUrl(baseUrl, identifier)
+
+      const overrides = methods.reduce((acc, method) => {
+        acc[method] = async (...args) => {
+          const preFetch = preFetchMethods[type]?.[method]
+          if (preFetch) {
+            const result = await preFetch(...args)
+            if (result == null) return
+            args = Array.isArray(result) ? result : [ result ]
+          }
+          return sendToServicePlugin(url, method, ...args)
+        }
+        return acc
+      }, {})
+
+      const register = getRegisterFunction(type)
+      if (!register) return
+
+      register(
+        identifier, 
+        { ...info, ...overrides }, 
+        pluginCollection
+      )
+
     })
   })
 })

@@ -5,13 +5,13 @@ import mainProcessOutputPlugin from './outputs/index'
 
 
 export default {
-    device: {
+    devices: {
         random: randomDataDevicePlugin,
     },
-    feature: {
+    features: {
         window: currentWindowFeaturePlugin,
     },
-    score: {
+    scores: {
         averageVoltage: averageVoltageScorePlugin,
     },
     outputs: {

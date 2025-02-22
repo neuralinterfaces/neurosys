@@ -24,8 +24,8 @@ export const createServer = (handlers: Handlers) => {
         req.on('data', (chunk) => body += chunk.toString());
         req.on('end', async () => {
           res.writeHead(200, { 'Content-Type': "application/json" });
-          const json = JSON.parse(body);
-          const result = await handlers.post(resolvedURL, json);
+          const args = JSON.parse(body);
+          const result = await handlers.post(resolvedURL, ...args);
           res.end(JSON.stringify(result));
         });
         return;

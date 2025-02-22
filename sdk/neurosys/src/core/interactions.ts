@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners/utils"
+import { resolvePlugins } from "./commoners"
 
 export const setIgnoreMouseEvents = async (ignore: boolean) => {
   const { overlay } = await resolvePlugins()

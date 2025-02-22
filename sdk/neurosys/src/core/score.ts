@@ -1,4 +1,5 @@
-import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners/utils"
+import { resolvePlugins } from "./commoners"
+import { isPluginInNamespace, NAMESPACES } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
   const { menu: { onScoreToggle } } = await resolvePlugins()

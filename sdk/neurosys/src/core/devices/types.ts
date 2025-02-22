@@ -1,5 +1,5 @@
 import { createModal, DeviceDiscoveryList } from "../../../../../app/frontend/ui";
-import { resolvePlugins } from "../commoners/utils";
+import { resolvePlugins } from "../commoners";
 
 export const enableSerial = async () => {
 

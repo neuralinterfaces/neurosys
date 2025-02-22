@@ -1,4 +1,4 @@
-import { resolvePlugins } from "./commoners/utils"
+import { resolvePlugins } from "./commoners"
 
 // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
 const searchParams = new URLSearchParams(window.location.search)
@@ -53,6 +53,7 @@ export const setValueInSettings = async (path: string, value: any) => {
 
 // ----------------------- Start Default Behaviors -----------------------
 onSaveSettings(async () => {
+    const plugins = await resolvePlugins()
     const { settings: { set } } = await resolvePlugins()
     const { name, data } = SETTINGS
     set(name, await data)

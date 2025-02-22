@@ -1,4 +1,5 @@
-import { isPluginInNamespace, NAMESPACES, resolvePlugins } from "./commoners/utils";
+import { resolvePlugins } from "./commoners"
+import { isPluginInNamespace, NAMESPACES } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
     const { menu: { onOutputToggle } } = await resolvePlugins()
@@ -10,7 +11,7 @@ let outputOptions: any;
 type RegisterFunction = (key: string, info: any) => void
 
 export const registerPlugin = async (
-  key: string, 
+  identifier: string, 
   plugin: any, 
   collection,
   register?: RegisterFunction
@@ -25,8 +26,8 @@ export const registerPlugin = async (
     const resolvedRegisterFn = register as RegisterFunction
 
     const { label, enabled, start, stop, set } = plugin
-    collection[key] = { start, stop, set, enabled, __score: null, __info: {} }
-    resolvedRegisterFn(key, { label, enabled })
+    collection[identifier] = { start, stop, set, enabled, __score: null, __info: {} }
+    resolvedRegisterFn(identifier, { label, enabled })
 
     return collection
 
