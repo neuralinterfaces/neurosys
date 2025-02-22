@@ -59,7 +59,7 @@ const getRegisterFunction = (type) => {
 const preFetchMethods = {
   output: {
     set: async (...args: any[]) => {
-      const score = args[0]
+      const { score } = args[0]
       if (isNaN(score)) return null // Don't send null to services | NOTE: Should this apply across the board?
       return args
     }
@@ -89,14 +89,14 @@ Object.values(urlsByService).forEach(baseUrl=> {
       const url = getServiceUrl(baseUrl, identifier)
 
       const overrides = methods.reduce((acc, method) => {
-        acc[method] = async (...args) => {
+        acc[method] = async function (...args) {
           const preFetch = preFetchMethods[type]?.[method]
           if (preFetch) {
             const result = await preFetch(...args)
             if (result == null) return
             args = Array.isArray(result) ? result : [ result ]
           }
-          return sendToServicePlugin(url, method, ...args)
+          return sendToServicePlugin.call(this, url, method, ...args)
         }
         return acc
       }, {})

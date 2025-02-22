@@ -55,8 +55,9 @@ export class ScoreText extends LitElement {
   }
 
   render() {
+    const hasScore = this.score !== undefined && this.score === this.score;
     return html`<div>
-       <b>Score</b><span>${this.score != this.score ? "—" : this.score.toFixed(3)}</span>
+       <b>Score</b><span>${hasScore ? this.score.toFixed(3) :  "—"}</span>
     </div>`;
   }
 }

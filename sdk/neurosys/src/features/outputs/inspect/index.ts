@@ -29,9 +29,8 @@ export function load () {
         stop({ container }) {
             container.remove()
         },
-        set(score, info) {
+        set({ bands }, info) {
             const { bandpowers: bandEl } = info
-            const { bands } = this.__features
             if (bands) bandEl.data = bands
         }
     })

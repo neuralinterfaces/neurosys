@@ -21,18 +21,21 @@ export const getServicePlugins = async (url: URL): Promise<ServicePluginInfo[]> 
 }
 
 
-export const sendToServicePlugin = async (
+export async function sendToServicePlugin (
     url: string | URL, 
     pathname?: string,
     ...args: any[]
-) => {
+) {
 
     if (pathname) {
         const existing = new URL(url).pathname
         const merged = [existing, pathname].join('/')
         url = new URL(merged, url).toString()
     }
-    const result = await fetch(url, { method: 'POST',  body: JSON.stringify(args) }).then(res => res.json())
+
+    const ctx = this ?? {}
+
+    const result = await fetch(url, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
     if (!result.success) throw new Error(result.error)
     return result.result
 }

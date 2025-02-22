@@ -12,9 +12,17 @@ const port = process.env.PORT
 
 const volumeOutputPlugin = new Output({
     label: "Volume",
+    settings: {
+        range: [ 0.1, 0.75 ],
+    },
     start: () => console.log('Volume plugin started'),
     stop: () => console.log('Volume plugin stopped'),
-    set: async (score: number) =>  setVolume(score)
+    async set({ score }) {
+        const { range } = this.settings
+        const [ min = 0, max = 1 ] = range
+        const level = min + (max - min) * score // Normalize in level
+        return setVolume(level)
+    }
 });
 
 const server = createService({

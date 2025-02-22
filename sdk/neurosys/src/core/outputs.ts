@@ -25,8 +25,17 @@ export const registerPlugin = async (
 
     const resolvedRegisterFn = register as RegisterFunction
 
-    const { label, enabled, start, stop, set } = plugin
-    collection[identifier] = { start, stop, set, enabled, __score: null, __info: {} }
+    const { label, enabled, start, stop, set, settings } = plugin
+    collection[identifier] = { 
+      start, 
+      stop, 
+      set, 
+      enabled,
+      settings,
+      __latest: {}, 
+      __info: {}
+    }
+
     resolvedRegisterFn(identifier, { label, enabled })
 
     return collection
@@ -47,8 +56,6 @@ const registerAllOutputOptions = async () => {
 
 export const getPlugins = async () => outputOptions ?? (outputOptions = await registerAllOutputOptions())
 
-
-
 export const set = async (score: number, features: any) => {
 
     if (score === null && features === null) return // No active score plugin
@@ -56,8 +63,9 @@ export const set = async (score: number, features: any) => {
     const outputOptions = await getPlugins()
 
     for (const [ key, plugin ] of Object.entries(outputOptions)) {
-      plugin.__score = score // Always set score
-      plugin.__features = features
-      if (plugin.enabled) plugin.set(score, plugin.__info)
+
+      const resolvedFeatures = plugin.__latest = { score, ...features ?? {} }
+
+      if (plugin.enabled) plugin.set(resolvedFeatures, plugin.__info)
     }
 }

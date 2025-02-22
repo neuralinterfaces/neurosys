@@ -58,7 +58,7 @@ export function load() {
             return outputs
         },
 
-        set(score, info) {
+        set({ score }, info) {
             info.score = score
         },
 

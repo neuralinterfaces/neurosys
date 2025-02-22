@@ -31,7 +31,7 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
     }, {})
 
     return createServer({
-      post: async (url, ...args) => {
+      async post(url, ...args) {
 
           const resolvedPluginName = url.slice(1); // Plugin ID is the URL without the slash
           const [ namespace, name, ...rest ] = resolvedPluginName.split('/');
@@ -46,7 +46,7 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
             const resolved = plugin.info as Output
             const method = resolved[methodName];
             if (!method) return { success: false, error: 'Method not found' };
-            const result = await method(...args); // NOTE: No refs from the start method for now
+            const result = await method.call(this, ...args); // NOTE: No refs from the start method for now
             return { success: true, result };
           } catch (error) {
             return { success: false, error: error.message };

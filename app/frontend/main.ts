@@ -58,24 +58,23 @@ outputs.onToggle(async (key, enabled) => {
 
       if (!ref) return
 
-      const { start, stop, __info, __score } = ref
+      const { __info, __latest } = ref
     
       const toggledFromPrevState = enabled == !ref.enabled
 
       const hasNotChanged = !enabled && !toggledFromPrevState
 
-      const callback = enabled ? start : stop
-      const info = (callback && !hasNotChanged) ? (ref.__info = (await callback(__info)) ?? {}) : __info
+      const callback = enabled ? 'start' : 'stop'
+      const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
 
       // Ensure the appropriate callback is called before the state is toggled
       ref.enabled = enabled
       await setValueInSettings(`outputs.${key}.enabled`, enabled)
 
       if (hasNotChanged) return
-      if (__score === null) return
       if (!enabled) return
 
-      ref.set(__score, info) // Set the plugin score immediately when toggled
+      ref.set(__latest, info) // Set the plugin score immediately when toggled
   })
 
 

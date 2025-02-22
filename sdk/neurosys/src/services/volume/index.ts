@@ -13,8 +13,8 @@ export async function setMuted(muted: boolean) {
     return await loudness.setMuted(muted)
 }
 
-export async function setVolume(score: null | number) {
-    if (score === null) throw new Error("Invalid volume value");
-    const volume = Math.max(0, Math.min(1, score)) * 100
+export async function setVolume(pct: null | number) {
+    if (pct === null) throw new Error("Invalid volume value");
+    const volume = Math.max(0, Math.min(1, pct))  * 100
     return await loudness.setVolume(volume)
 }
