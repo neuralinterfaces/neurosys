@@ -43,6 +43,10 @@ importers:
         version: 8.5.6
 
   sdk/neurosys:
+    dependencies:
+      loudness:
+        specifier: ^0.4.2
+        version: 0.4.2
     devDependencies:
       vite:
         specifier: ^6.1.0

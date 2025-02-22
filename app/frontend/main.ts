@@ -56,6 +56,8 @@ outputs.onToggle(async (key, enabled) => {
       const plugins = await outputs.getPlugins()
       const ref = plugins[key]
 
+      if (!ref) return
+
       const { start, stop, __info, __score } = ref
     
       const toggledFromPrevState = enabled == !ref.enabled

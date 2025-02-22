@@ -6,25 +6,46 @@ export const onToggle = async (fn: Function) => {
 }
 
 let outputOptions: any;
+
+type RegisterFunction = (key: string, info: any) => void
+
+export const registerPlugin = async (
+  key: string, 
+  plugin: any, 
+  collection,
+  register?: RegisterFunction
+) => {
+    
+    if (!register) {
+      const PLUGINS = await resolvePlugins()
+      const { menu: { registerOutput } } = PLUGINS
+      register = registerOutput
+    }
+
+    const resolvedRegisterFn = register as RegisterFunction
+
+    const { label, enabled, start, stop, set } = plugin
+    collection[key] = { start, stop, set, enabled, __score: null, __info: {} }
+    resolvedRegisterFn(key, { label, enabled })
+
+    return collection
+
+}
+
 const registerAllOutputOptions = async () => {
   const PLUGINS = await resolvePlugins()
   const { menu: { registerOutput } } = PLUGINS
+
   return Object.keys(PLUGINS).reduce((acc, key) => {
-
     if (!isPluginInNamespace(NAMESPACES.outputs, key)) return acc
-    
     const plugin = PLUGINS[key]
-    const { label, enabled, start, stop, set } = plugin
-    registerOutput(key, { label, enabled })
-
-    acc[key] = { start, stop, set, enabled, __score: null, __info: {} }
-
-
+    registerPlugin(key, plugin, acc, registerOutput)
     return acc
   }, {})
 }
 
 export const getPlugins = async () => outputOptions ?? (outputOptions = await registerAllOutputOptions())
+
 
 
 export const set = async (score: number, features: any) => {

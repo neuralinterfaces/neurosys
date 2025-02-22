@@ -15,6 +15,10 @@
         "import": "./dist/plugins.mjs",
         "require": "./dist/plugins.cjs"
       },
+      "./services": {
+        "import": "./dist/services.mjs",
+        "require": "./dist/services.cjs"
+      },
       "./services/volume": {
         "import": "./dist/services/volume.mjs",
         "require": "./dist/services/volume.cjs"
@@ -33,6 +37,9 @@
     },
     "scripts": {
       "build": "vite build"
+    },
+    "dependencies": {
+      "loudness": "^0.4.2"
     },
     "devDependencies": {
       "vite": "^6.1.0"

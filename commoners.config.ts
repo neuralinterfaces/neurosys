@@ -1,30 +1,17 @@
 // import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/config'
-// import { devices, features, scores, outputs }from 'neurosys/plugins'
+// import { devices, features, scores, outputs, system } from 'neurosys/plugins'
 
 import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners/config'
-import { devices, features, scores, outputs } from './sdk/neurosys/src/plugins'
-
-const neurosysVolumeServiceSrcPath = "./sdk/neurosys/src/services/volume/index.ts"
-import packagedNeurosysVolumeService from "neurosys/services/volume?url"
-// import unpackagedNeurosysVolumeService from "./sdk/neurosys/src/services/volume/index?url"
+import { devices, features, scores, outputs, system } from './sdk/neurosys/src/plugins'
 
 // Examples
 import examplePlugins from './app/frontend/example-plugins/index'
-
-// Other Plugins
-import * as systemOverlayPlugin from './sdk/neurosys/src/plugins/other/systemOverlay/index'
-import menuPlugin from './sdk/neurosys/src/plugins/other/menu/index'
-import * as bluetoothPlugin from './sdk/neurosys/src/plugins/other/devices/ble/index'
-import * as serialPlugin from './sdk/neurosys/src/plugins/other/devices/serial/index'
-import protocolsPlugin from './sdk/neurosys/src/plugins/other/protocols/index'
-
 
 // const OVERLAY = true
 const OVERLAY = false
 
 // const INCLUDE_EXAMPLES = true
 const INCLUDE_EXAMPLES = false
-
 
 const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.feature : {}
 const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.device : {}
@@ -57,20 +44,17 @@ const config = {
 
     services: {
         // brainflow: "./app/services/brainflow.py",
-        volume: neurosysVolumeServiceSrcPath,
-        // volume: unpackagedNeurosysVolumeService,
-        // volume: packagedNeurosysVolumeService
-        
+        volume: "./app/services/volume/main.ts"
     },
 
     plugins: {
 
 
         // --------------------------------- Required Plugins --------------------------------- //
-        menu: menuPlugin({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
-        settings: protocolsPlugin, // Allow for managing and saving the active protocol
-        bluetooth: bluetoothPlugin, // For Desktop Support
-        serial: serialPlugin, // For Desktop Support
+        menu: system.menu({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
+        settings: system.settings, // Allow for managing and saving the active protocol
+        bluetooth: system.bluetooth, // For Desktop Support
+        serial: system.serial, // For Desktop Support
 
 
         // --------------------------------- Optional Plugins --------------------------------- //
@@ -110,7 +94,6 @@ const config = {
         ...registerOutputPlugins({
             ...exampleOutputs,
             ...outputs,
-            volume: outputs.volume('volume') // Register volume service explicitly
         }),
 
         ...registerScorePlugins({
@@ -120,7 +103,7 @@ const config = {
     }
 }
 
-if (OVERLAY) config.plugins.systemOverlay = systemOverlayPlugin
+if (OVERLAY) config.plugins.overlay = system.overlay
 
  
 export default config
