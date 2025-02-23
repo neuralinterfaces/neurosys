@@ -1,5 +1,4 @@
 import { resolvePlugins } from "./commoners"
-import { getPluginType } from "./plugins"
 import type { RegisterFunction } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
@@ -7,10 +6,11 @@ export const onToggle = async (fn: Function) => {
   onScoreToggle(fn)
 }
 
+const scoreOptions: Record<string, any> = {}
+
 export const registerPlugin = async (
   identifier: string, 
   plugin: any, 
-  collection: Record<string, any>,
   register?: RegisterFunction
 ) => {
     
@@ -29,31 +29,19 @@ export const registerPlugin = async (
       features  // Features requested
     } = plugin
 
-    collection[identifier] = { enabled, get, features, __ctx: {} }
+    scoreOptions[identifier] = { enabled, get, features, __ctx: {} }
     resolvedRegisterFn(identifier, { label, enabled })
-    return collection
+
 }
 
-const registerAllScores = async () => {
-  
-  const PLUGINS = await resolvePlugins()
+export const getPlugin = (key: string) => scoreOptions[key]
 
-  const { menu: { registerScore } } = PLUGINS
-
-  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
-
-    const type = getPluginType(key, plugin)
-    if (type !== 'score') return acc
-    registerPlugin(key, plugin, acc, registerScore)
-    return acc
-  }, {})
+export const togglePlugin = (key: string, state?: boolean) => {
+  const plugin = getPlugin(key)
+  return plugin.enabled = typeof state === 'boolean' ? state : !plugin.enabled
 }
-
-let allScores: any;
-export const getPlugins = async () => allScores ?? (allScores = registerAllScores())
 
 export const getActivePlugin = async () => {
-    const scoreOptions = await getPlugins()
     return Object.values(scoreOptions).find(({ enabled }) => enabled)
 }
   

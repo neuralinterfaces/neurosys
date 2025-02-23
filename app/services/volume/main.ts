@@ -1,11 +1,9 @@
 import { getMuted, setVolume } from '../../../sdk/neurosys/src/services/volume';
-import { createService } from '../../../sdk/neurosys/src/services';
-import { Output, registerOutputPlugins } from '../../../sdk/neurosys/src/core/plugins';
+import { createService, Output, registerOutputPlugins } from '../../../sdk/neurosys/src/services';
 
 // import { createService } from 'neurosys/services';
 // import { setVolume } from 'neurosys/services/volume';
 // import { Output } from 'neurosys/plugins';
-
 
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT

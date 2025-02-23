@@ -1,60 +1,54 @@
 import './style.css'
 
-// import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback } from 'neurosys'
-import { score, outputs, features, getClient, setValueInSettings, readyToOutputFeedback, setDeviceRequestHandler } from '../../sdk/neurosys/src/core/index'
+// import { score, outputs, features, getClient, setValueInSettings } from 'neurosys'
+import { score, outputs, setValueInSettings, setDeviceRequestHandler, registerPlugins, requestAllServicePlugins, loadSettings } from '../../sdk/neurosys/src/core/index'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
+import { calculate } from './calculate'
+
+
+const { SERVICES, READY } = commoners
 
 const UPDATE_INVERVAL = 250
 
-let scoreNormalization = {
-  min: 0,
-  max: 1
-}
+const loadStart = performance.now()
 
-const calculate = async (
-  client: any = getClient(),
-) => {
+READY.then(async (PLUGINS) => {
 
-  // Request the current score plugin
-  const plugin = await score.getActivePlugin()
+  console.log(`Commoners loaded in ${performance.now() - loadStart}ms`)
 
-  if (!plugin) return
+  await registerPlugins(PLUGINS)
 
-  // Use score plugin to define the features to calculate
-  const calculatedFeatures = await features.calculate(plugin.features, client)
+  console.log(`Main plugins loaded in ${performance.now() - loadStart}ms`)
 
-  // Calculate a score from the provided features
-  const calculatedScore = await score.calculate(calculatedFeatures)
+  // Register all service plugins
+  const urlsByService = Object.entries(SERVICES).reduce((acc, [key, value]) => ({...acc, [key]: value.url}), {})
+  const servicePlugins = await requestAllServicePlugins(urlsByService)
+  for (const serviceName in servicePlugins) {
+    const plugins = servicePlugins[serviceName]
+    console.log(serviceName, plugins)
+    await registerPlugins(plugins)
+  }
 
+  console.log(`Service plugins loaded in ${performance.now() - loadStart}ms`)
 
-  // Normalize the score between 0 and 1
-  if (calculatedScore < scoreNormalization.min) scoreNormalization.min = calculatedScore
-  if (calculatedScore > scoreNormalization.max) scoreNormalization.max = calculatedScore
-
-  const { min, max } = scoreNormalization
-  const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - min) / (max - min)))
-
-  // Set the feedback from the calculated score and features
-  outputs.set(normalizedScore, calculatedFeatures)
+  // Load settings after all services are available
+  loadSettings()
 
 
-}
+  // Start calculating
+  setInterval(calculate, UPDATE_INVERVAL)
 
-
-readyToOutputFeedback.then(() => setInterval(calculate, UPDATE_INVERVAL))
+})
 
 score.onToggle(async (key, enabled) => {
-  const plugins = await score.getPlugins()
-  const ref = plugins[key]
-  ref.enabled = enabled
-  await setValueInSettings(`score.${key}.enabled`, enabled)
+  const state = score.togglePlugin(key, enabled)
+  await setValueInSettings(`score.${key}.enabled`, state)
   calculate() // Set the plugin score immediately when toggled
 })
 
 outputs.onToggle(async (key, enabled) => {
 
-      const plugins = await outputs.getPlugins()
-      const ref = plugins[key]
+      const ref = outputs.getPlugin(key)
 
       if (!ref) return
 
@@ -68,11 +62,11 @@ outputs.onToggle(async (key, enabled) => {
       const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
 
       // Ensure the appropriate callback is called before the state is toggled
-      ref.enabled = enabled
-      await setValueInSettings(`outputs.${key}.enabled`, enabled)
+      const state = outputs.togglePlugin(key, enabled)
+      await setValueInSettings(`outputs.${key}.enabled`, state)
 
       if (hasNotChanged) return
-      if (!enabled) return
+      if (!state) return
 
       ref.set(__latest, info) // Set the plugin score immediately when toggled
   })

@@ -45,7 +45,6 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
           try {
             const resolved = plugin.info as Plugin
             const method = resolved[methodName];
-            
             if (!method) return { success: false, error: 'Method not found' };
             const result = await method.call(this, ...args); // NOTE: No refs from the start method for now
             return { success: true, result };

@@ -1,5 +1,4 @@
-import { resolvePlugins } from "./commoners"
-import { getOriginalKey, getPluginType } from "./plugins"
+import { getOriginalKey } from "./plugins"
 
 export type UserFeatures = {
   bands: string[],
@@ -13,35 +12,16 @@ type CalculatedFeatures = {
   hegRatio?: number
 }
 
+const featureOptions: Record<string, any> = {}
+
 
 export const registerPlugin = (
   identifier: string, 
-  plugin: any, 
-  collection: Record<string, any>
+  plugin: any
 ) => {
-
     const { id = getOriginalKey(identifier) } = plugin
-    collection[id] = plugin
-
-    return collection
-
+    featureOptions[id] = plugin
 }
-
-let allFeatures: any;
-const registerAllFeatures = async () => {
-
-  const PLUGINS = await resolvePlugins()
-
-  return Object.entries(PLUGINS).reduce((acc, [key, plugin = {}]) => {
-    const type = getPluginType(key, plugin)
-    if (type !== 'feature') return acc
-    registerPlugin(key, plugin, acc)
-    return acc
-  }, {})
-
-}
-
-export const getAllFeatures = async () => allFeatures ?? (allFeatures = registerAllFeatures())
 
 // ------------ Calculate Score ------------
 export const calculate = async (
@@ -51,13 +31,11 @@ export const calculate = async (
 
   client = client ?? { data: {} }
 
-  const featurePlugins = await getAllFeatures()
-
   const results = {}
   
 
   for (const [id, settings] of Object.entries(features)) {
-    const plugin = featurePlugins[id]
+    const plugin = featureOptions[id]
     if (!plugin) continue
 
     const { duration, calculate } = plugin
