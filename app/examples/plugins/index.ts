@@ -1,7 +1,7 @@
 import randomDataDevicePlugin from './devices/index'
 import currentWindowFeaturePlugin from './feature/index'
 import averageVoltageScorePlugin from './score/index'
-import mainProcessOutputPlugin from './outputs/index'
+import { print, printInMainProcess} from './outputs/index'
 
 
 export default {
@@ -15,6 +15,7 @@ export default {
         averageVoltage: averageVoltageScorePlugin,
     },
     outputs: {
-        mainProcess: mainProcessOutputPlugin,
+        printInMainProcess,
+        print,
     }
 }

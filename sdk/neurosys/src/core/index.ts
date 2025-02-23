@@ -85,13 +85,15 @@ const getAllServicePlugins = (services) => {
       plugins.forEach(async plugin => {
         const { plugin: identifier, type, info } = plugin
 
-        const methods = methodsForType[type]
-        if (!methods) return
+        const allowedMethods = methodsForType[type]
+        if (!allowedMethods) return
 
         const pluginCollection = await getCollection(type)
         if (!pluginCollection) return
 
         const url = getServiceUrl(baseUrl, identifier)
+
+        const methods = Object.keys(info).filter(method => allowedMethods.includes(method))
 
         const overrides = methods.reduce((acc, method) => {
           acc[method] = async function (...args) {

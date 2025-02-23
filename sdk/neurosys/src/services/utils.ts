@@ -5,6 +5,16 @@ export type Handlers = {
   get: (path: string) => any,
 }
 
+function encodeFunctions(obj: any): string {
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'function') {
+      return value.toString();
+    }
+    return value;
+  });
+}
+
+
 export const createServer = (handlers: Handlers) => {
 
     const server = http.createServer(async (
@@ -33,7 +43,7 @@ export const createServer = (handlers: Handlers) => {
 
       if (req.method === 'GET' && handlers.get) {
         const result = await handlers.get(resolvedURL);
-        res.end(JSON.stringify(result));
+        res.end(encodeFunctions(result));
         return;
       }
     

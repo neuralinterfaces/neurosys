@@ -1,4 +1,4 @@
-import { MenuLabel, Score } from "./types"
+import { MenuLabel } from "./types"
 
 
 type StartRefs = any

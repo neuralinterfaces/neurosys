@@ -1,38 +1,35 @@
 import { Output } from "../../../core/plugins/output"
 
-export function load () {
-    
-    return new Output({
+export default new Output({
 
-        label: 'Text',
+    label: 'Text',
 
-        settings: {
-            xAnchor: "right",
-            yAnchor: "top",
-        },
+    settings: {
+        xAnchor: "right",
+        yAnchor: "top",
+    },
 
-        async start() {
+    async start() {
 
-            const { xAnchor, yAnchor } = this.settings
+        const { xAnchor, yAnchor } = this.settings
 
-            // Dynamic import to avoid conflict with Commoners
-            const { ScoreText } = await import("./ScoreText")
-            const scoreText = new ScoreText()
-            scoreText.style.position = "absolute"
-            scoreText.style[yAnchor] = "50px"
-            scoreText.style[xAnchor] = "25px"
+        // Dynamic import to avoid conflict with Commoners
+        const { ScoreText } = await import("./ScoreText")
+        const scoreText = new ScoreText()
+        scoreText.style.position = "absolute"
+        scoreText.style[yAnchor] = "50px"
+        scoreText.style[xAnchor] = "25px"
 
-            document.body.append(scoreText)
+        document.body.append(scoreText)
 
-            return { text: scoreText }
-        },
+        return { text: scoreText }
+    },
 
-        set({ score }, info){
-            info.text.score = score
-        },
+    set({ score }, info){
+        info.text.score = score
+    },
 
-        stop({ text }) {
-            text.remove()
-        }
-    })
-}
+    stop({ text }) {
+        text.remove()
+    }
+})

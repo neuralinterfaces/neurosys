@@ -25,7 +25,7 @@ export const registerPlugin = async (
 
     const resolvedRegisterFn = register as RegisterFunction
 
-    const { label, enabled, start, stop, set, settings } = plugin
+    const { label, enabled, start, stop, set, settings, __commoners } = plugin
 
     collection[identifier] = { 
       start, 
@@ -33,6 +33,7 @@ export const registerPlugin = async (
       set, 
       enabled,
       settings,
+      __commoners,
       __latest: {}, 
       __info: {}
     }

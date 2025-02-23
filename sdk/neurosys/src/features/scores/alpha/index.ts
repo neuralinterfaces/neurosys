@@ -7,20 +7,17 @@
 
 import { Score } from "../../../core/plugins"
 
-export function load() {
-
-    return new Score({
-        label: 'Alpha Score',
-        features: {
+export default new Score({
+    label: 'Alpha Score',
+    features: {
+        bands: { 
             bands: { 
-                bands: { 
-                    alpha: [ 8, 12 ] 
-                },
-                 windowDuration: 1  // Custom duration setting
-            }
-        },
-        get({ bands = {} }) {
-            return Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
+                alpha: [ 8, 12 ] 
+            },
+             windowDuration: 1  // Custom duration setting
         }
-    })
-}
+    },
+    get({ bands = {} }) {
+        return Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
+    }
+})

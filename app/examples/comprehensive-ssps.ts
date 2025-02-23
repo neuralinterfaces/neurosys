@@ -1,10 +1,9 @@
-import { createService } from '../../sdk/neurosys/src/services';
-import { Feature, Output, registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins, Score } from '../../sdk/neurosys/src/core/plugins';
+import { createService, Feature, Output, registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins, Score } from '../../sdk/neurosys/src/services';
 
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
-const output = new Output({
+const exampleOutput = new Output({
     label: 'Print — Service',
     start () {
         console.log('Starting Print Output')
@@ -19,13 +18,13 @@ const output = new Output({
 
 const featureId = Math.random().toString(36).substring(7);
 
-const feature = new Feature({
+const exampleFeature = new Feature({
     id: featureId,
     duration: 0, // No data should be passed
     calculate: () => Math.random()
 });
 
-const score = new Score({
+const exampleScore = new Score({
     label: "Random - Service",
     features: { [featureId]: {} },
     get: function (features) {
@@ -35,9 +34,9 @@ const score = new Score({
 });
 
 const server = createService({
-    ...registerOutputPlugins({ print: output }),
-    ...registerScorePlugins({ random: score }),
-    ...registerFeaturePlugins({ random: feature }),
+    ...registerOutputPlugins({ exampleOutput }),
+    ...registerScorePlugins({ exampleScore }),
+    ...registerFeaturePlugins({ exampleFeature }),
     // ...registerDevicePlugins({ ...examplePlugins.devices })
 });
 

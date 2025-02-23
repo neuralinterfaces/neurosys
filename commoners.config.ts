@@ -2,7 +2,7 @@
 // import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins } from 'neurosys/plugins'
 
 import { devices, features, scores, outputs, system } from './sdk/neurosys/src/features'
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/plugins'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners'
 
 // Examples
 import examplePlugins from './app/examples/plugins/index'
@@ -27,6 +27,11 @@ const TRANSPARENT_WINDOW_SETTINGS = {
     roundedCorners: false // MacOS
 }
 
+const resolvedOutputPlugin = registerOutputPlugins({
+    ...exampleOutputs,
+    ...outputs
+})
+
 const config = {
     name: "Neurosys",
     target: "electron",
@@ -43,7 +48,11 @@ const config = {
     },
 
     services: {
-        example: './app/examples/service.ts', // Example service
+
+        // Example SSPs
+        example: './app/examples/example-ssp.ts',
+        examples: './app/examples/comprehensive-ssps.ts', 
+
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"
     },
@@ -92,10 +101,12 @@ const config = {
             ...features
         }),
 
-        ...registerOutputPlugins({
-            ...exampleOutputs,
-            ...outputs,
-        }),
+        ...resolvedOutputPlugin,
+
+        // ...registerOutputPlugins({
+        //     ...exampleOutputs,
+        //     ...outputs,
+        // }),
 
         ...registerScorePlugins({
             ...exampleScores,

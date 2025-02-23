@@ -1,37 +1,29 @@
 import { Device, Devices } from "../../../../sdk/neurosys/src/core/plugins"
 
-export default {
-    load() {
+export default new Devices([
 
-        const { PROD } = commoners
-        if (PROD) return
+    new Device({
+        name: 'Random Data',
+        protocols: { start: "Start" },
+        connect: ({ data }) => {
 
-        return new Devices([
+            const sfreq = 512
+            const channels = [ 'Fp1', 'Fp2' ]
+            const interval = setInterval(() => {
 
-            new Device({
-                name: 'Random Data',
-                protocols: { start: "Start" },
-                connect: ({ data }) => {
+                channels.forEach((ch) => {
+                    const arr = data[ch] || (data[ch] = [])
+                    arr.push(Math.random() * 100)
+                })
 
-                    const sfreq = 512
-                    const channels = [ 'Fp1', 'Fp2' ]
-                    const interval = setInterval(() => {
+            }, 1000 / sfreq)
 
-                        channels.forEach((ch) => {
-                            const arr = data[ch] || (data[ch] = [])
-                            arr.push(Math.random() * 100)
-                        })
+            return {
+                disconnect: () => clearInterval(interval),
+                sfreq,
+            }
 
-                    }, 1000 / sfreq)
+        }
+    })
 
-                    return {
-                        disconnect: () => clearInterval(interval),
-                        sfreq,
-                    }
-
-                }
-            })
-
-        ])
-    }
-}
+])

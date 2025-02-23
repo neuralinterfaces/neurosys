@@ -1,2 +1,2 @@
-export * as heg from './heg'
-export * as bands from './bands'
+export { default as heg } from './heg'
+export { default as bands } from './bands'

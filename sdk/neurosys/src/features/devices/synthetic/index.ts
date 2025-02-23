@@ -1,6 +1,4 @@
 import { Devices } from "../../../core/plugins"
 import syntheticEEG from "./devices/eeg"
 
-export function load() {
-    return new Devices([ syntheticEEG ])
-}
+export default new Devices([ syntheticEEG ])

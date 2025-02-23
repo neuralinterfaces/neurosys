@@ -1,2 +1,3 @@
-export * as alpha from './alpha'
-export * as heg from './heg'
+export { default as alpha } from './alpha'
+export { default as heg } from './heg'
+

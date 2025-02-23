@@ -12,7 +12,7 @@ type ProtocolInformation = string | { label: string, enabled?: false }
 
 type DeviceInformation = {
     name: string
-    type: string
+    type?: string
     protocols: Record<ProtocolId, ProtocolInformation>
     connect?: (request: ConnectionRequest) => ClientInfo | Promise<ClientInfo>
 }
