@@ -35,8 +35,6 @@ export async function sendToServicePlugin (
     }
 
     const ctx = this ?? {}
-
-    console.log('SENDING', url)
     const result = await fetch(url, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
     if (!result.success) throw new Error(result.error)
     return result.result

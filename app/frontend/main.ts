@@ -25,7 +25,6 @@ READY.then(async (PLUGINS) => {
   const servicePlugins = await requestAllServicePlugins(urlsByService)
   for (const serviceName in servicePlugins) {
     const plugins = servicePlugins[serviceName]
-    console.log(serviceName, plugins)
     await registerPlugins(plugins)
   }
 
