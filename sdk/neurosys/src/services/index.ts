@@ -11,7 +11,7 @@ export type ServerResponse = {
 export * from '../core/plugins/feature'
 export * from '../core/plugins/score'
 export * from  '../core/plugins/output'
-export * from  '../core/plugins/device'
+export * from  '../core/plugins/devices'
 
 // Use special handlers for service plugins
 const registerPlugins = (plugins: Plugins, namespace: string) => Object.entries(plugins).reduce((acc, [ key, plugin ]) => ({...acc, [getTransformedKey(namespace, key, true)]: plugin}), {})

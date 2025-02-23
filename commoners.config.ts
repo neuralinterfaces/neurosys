@@ -5,32 +5,18 @@ import { devices, features, scores, outputs, system } from './sdk/neurosys/src/f
 import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners'
 
 // Examples
-import examplePlugins from './app/examples/plugins/index'
+// import examplePlugins from './app/examples/plugins/index'
+// const exampleFeatures = examplePlugins.features
+// const exampleDevices = examplePlugins.devices
+// const exampleOutputs = examplePlugins.outputs
+// const exampleScores = examplePlugins.scores
+const exampleFeatures = {}
+const exampleDevices = {}
+const exampleOutputs = {}
+const exampleScores = {}
 
-// const OVERLAY = true
-const OVERLAY = false
-
-// const INCLUDE_EXAMPLES = true
-const INCLUDE_EXAMPLES = false
-
-const exampleFeatures = INCLUDE_EXAMPLES ? examplePlugins.features : {}
-const exampleDevices = INCLUDE_EXAMPLES ? examplePlugins.devices : {}
-const exampleOutputs = INCLUDE_EXAMPLES ? examplePlugins.outputs : {}
-const exampleScores = INCLUDE_EXAMPLES ? examplePlugins.scores : {}
-
-const TRANSPARENT_WINDOW_SETTINGS = {
-    frame: false,
-    transparent: true,
-    focusable: false,
-    hasShadow: false,
-    thickFrame: false, // Windows
-    roundedCorners: false // MacOS
-}
-
-const resolvedOutputPlugin = registerOutputPlugins({
-    ...exampleOutputs,
-    ...outputs
-})
+// const DEBUG = false
+const DEBUG = true
 
 const config = {
     name: "Neurosys",
@@ -43,15 +29,14 @@ const config = {
     },
 
     electron: {
-        protocol: { scheme: 'neurosys', privileges: { secure: true, standard: true, supportFetchAPI: true } },
-        window: OVERLAY ? TRANSPARENT_WINDOW_SETTINGS : {},
+        protocol: { scheme: 'neurosys', privileges: { secure: true, standard: true, supportFetchAPI: true } }
     },
 
     services: {
 
-        // Example SSPs
-        example: './app/examples/example-ssp.ts',
-        examples: './app/examples/comprehensive-ssps.ts', 
+        // // Example SSPs
+        // example: './app/examples/example-ssp.ts',
+        // examples: './app/examples/comprehensive-ssps.ts', 
 
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"
@@ -61,11 +46,12 @@ const config = {
 
 
         // --------------------------------- Required Plugins --------------------------------- //
+        overlay: system.overlay({ debug: DEBUG }),
         menu: system.menu({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
         settings: system.settings, // Allow for managing and saving the active protocol
         bluetooth: system.bluetooth, // For Desktop Support
         serial: system.serial, // For Desktop Support
-
+        
 
         // --------------------------------- Optional Plugins --------------------------------- //
         ...registerDevicePlugins({
@@ -101,12 +87,10 @@ const config = {
             ...features
         }),
 
-        ...resolvedOutputPlugin,
-
-        // ...registerOutputPlugins({
-        //     ...exampleOutputs,
-        //     ...outputs,
-        // }),
+        ...registerOutputPlugins({
+            ...exampleOutputs,
+            ...outputs
+        }),
 
         ...registerScorePlugins({
             ...exampleScores,
@@ -115,7 +99,4 @@ const config = {
     }
 }
 
-if (OVERLAY) config.plugins.overlay = system.overlay
-
- 
 export default config

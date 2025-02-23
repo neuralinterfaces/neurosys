@@ -1,4 +1,4 @@
-import { Devices } from './device'
+import { Devices } from './devices'
 import { Feature } from './feature'
 import { Output } from './output'
 import { Score } from './score'
@@ -6,19 +6,19 @@ import { Score } from './score'
 export type RegisterFunction = (key: string, info: any) => void
 export type Plugin = Output | Score | Feature | Devices
 export type Plugins = Record<string, Plugin>
-export type PluginType = 'feature' | 'device' | 'output' | 'score'
+export type PluginType = 'feature' | 'devices' | 'output' | 'score'
 
 export * from './feature'
 export * from './score'
 export * from './output'
-export * from './device'
+export * from './devices'
 
 const PREFIX = 'neurosys:'
 
 // Plugin Managemement Features
 export const NAMESPACES = {
     features: 'feature',
-    devices: 'device',
+    devices: 'devices',
     outputs: 'outputs',
     scores: 'score'
 }
@@ -26,7 +26,7 @@ export const NAMESPACES = {
 export const getTypeFromNamespace = (namespace: string) => {
     switch (namespace) {
         case NAMESPACES.features: return 'feature'
-        case NAMESPACES.devices: return 'device'
+        case NAMESPACES.devices: return 'devices'
         case NAMESPACES.outputs: return 'output'
         case NAMESPACES.scores: return 'score'
         default: return null

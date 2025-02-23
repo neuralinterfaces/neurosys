@@ -65,7 +65,7 @@ pnpm start
 Score and output plugins are automatically detected and loaded into the system tray.
 
 #### Devices 
-Each **device** plugin has a `devices` array, where each item has a `name`, a dictionary of `protocols`, and a `connect` function that starts the data stream and provides metadata about the device.
+Each **devices** plugin has a `devices` array, where each item has a `name`, a dictionary of `protocols`, and a `connect` function that starts the data stream and provides metadata about the device.
 
 ```javascript
 import { Devices, Device } from 'neurosys/plugins'
@@ -188,7 +188,9 @@ printInMainProcess.desktop = {
 ```
 
 #### Server-Side Plugins
-You can declare server-side plugins and expose them using a standardized REST API.
+You can declare server-side plugins (SSPs) and expose them using a standardized REST API.
+
+> **Note:** Currently, Devices SSPs are **not** supported.
 
 ##### Neurosys SDK
 The Neurosys SDK provides a set of utilities for creating server-side plugins, which can be used as follows:
