@@ -124,13 +124,8 @@ export default {
     load() {
         return {
             id: 'window',
-            calculate( { data, sfreq }, windowDuration = 1) {
-                const window = [ -sfreq * windowDuration ] // Calculate using the specified window on the latest data 
-                return Object.entries(data).reduce((acc, [ch, chData]) => {
-                    const sliced = chData.slice(...window)
-                    return { ...acc, [ch]: sliced }
-                }, {})
-            }
+            duration: 1, // Automatically window the data by 1s
+            calculate( { data, sfreq }) { return data }
         }
     }
 }
@@ -185,7 +180,7 @@ export default {
                 console.log('Plugin deactivated')
                 return { cache: counter }
             },
-            set: (score, info) => this.send("score", score) 
+            set: ({ score }, info) => this.send("score", score) // Get score from the returned feature set
         }
     },
     desktop: {

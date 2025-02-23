@@ -1,8 +1,10 @@
 import { generateSignal } from "../../../../../../timefreak/src"
 import { Device } from "../../../../core/plugins"
 
-const channelNames = [ 'Fp1', 'Fp2', 'C3', 'C4', 'O1', 'O2', 'AUX1', 'AUX2' ]
-const sfreq = 512
+const channelNames = [ 'Fp1', 'Fp2', 'AUX1' ]
+const sfreq = 100
+
+const updateFrequency = 10
 
 export default new Device({
     name: "Synthetic EEG",
@@ -31,7 +33,8 @@ export default new Device({
             const interpComponentTwo = { ...componentTwo, amp: componentTwo.amp * score }
             const components = [ interpComponentOne, interpComponentTwo ]
 
-            let generated = generatedData(channelNames, components, sfreq, updateDuration)
+            const durationToGenerate = (updateDuration / 1000) * updateFrequency
+            const generated = generatedData(channelNames, components, sfreq, durationToGenerate)
 
             for (const [ i, samples ] of generated.entries()) {
                 const chName = channelNames[i]
@@ -39,7 +42,7 @@ export default new Device({
                 signal.push(...samples)
             }
 
-        }, updateDuration);
+        }, updateFrequency);
 
         return {
             sfreq,

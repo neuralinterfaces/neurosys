@@ -1,22 +1,26 @@
 import { resolvePlugins } from "./commoners"
-import { isPluginInNamespace, NAMESPACES } from "./plugins"
+import { getPluginType } from "./plugins"
+import type { RegisterFunction } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
   const { menu: { onScoreToggle } } = await resolvePlugins()
   onScoreToggle(fn)
 }
 
-const registerAllScores = async () => {
-  
-  const PLUGINS = await resolvePlugins()
-
-  const { menu: { registerScore } } = PLUGINS
-
-  return Object.keys(PLUGINS).reduce((acc, key) => {
-
-    if (!isPluginInNamespace(NAMESPACES.scores, key)) return acc
+export const registerPlugin = async (
+  identifier: string, 
+  plugin: any, 
+  collection: Record<string, any>,
+  register?: RegisterFunction
+) => {
     
-    const plugin = PLUGINS[key]
+    if (!register) {
+      const PLUGINS = await resolvePlugins()
+      const { menu: { registerScore } } = PLUGINS
+      register = registerScore
+    }
+
+    const resolvedRegisterFn = register as RegisterFunction
 
     const { 
       label,    // Menu Information
@@ -25,15 +29,28 @@ const registerAllScores = async () => {
       features  // Features requested
     } = plugin
 
-    registerScore(key, { label, enabled })
+    collection[identifier] = { enabled, get, features, __ctx: {} }
+    resolvedRegisterFn(identifier, { label, enabled })
+    return collection
+}
 
-    acc[key] = { enabled, get, features, __ctx: {} }
+const registerAllScores = async () => {
+  
+  const PLUGINS = await resolvePlugins()
+
+  const { menu: { registerScore } } = PLUGINS
+
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+
+    const type = getPluginType(key, plugin)
+    if (type !== 'score') return acc
+    registerPlugin(key, plugin, acc, registerScore)
     return acc
   }, {})
 }
 
 let allScores: any;
-export const getPlugins = async () => allScores ?? (allScores = await registerAllScores())
+export const getPlugins = async () => allScores ?? (allScores = registerAllScores())
 
 export const getActivePlugin = async () => {
     const scoreOptions = await getPlugins()

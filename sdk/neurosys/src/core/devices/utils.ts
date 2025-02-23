@@ -1,18 +1,19 @@
 import { resolvePlugins } from "../commoners"
-import { isPluginInNamespace, NAMESPACES } from "../plugins"
+import { getPluginType } from "../plugins"
 
 let devices: any
 const registerAllDevices = async () => {
     const PLUGINS = await resolvePlugins()
-    return Object.keys(PLUGINS).reduce((acc, key) => {
-      if (!isPluginInNamespace(NAMESPACES.devices, key)) return acc
-      const { devices } = PLUGINS[key]
+    return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+      const type = getPluginType(key, plugin)
+      if (type !== 'device') return acc
+      const { devices } = plugin
       acc.push(...devices)
       return acc
     }, [])
 }
 
-export const getAllDevices = async () => devices ?? (devices = await registerAllDevices())
+export const getAllDevices = async () => devices ?? (devices = registerAllDevices())
 
 export const onShowDevices = async (fn: Function) => {
     const { menu: { showDeviceSelector } } = await resolvePlugins()

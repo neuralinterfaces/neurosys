@@ -6,29 +6,30 @@ const port = process.env.PORT
 
 const output = new Output({
     label: 'Print — Service',
-    start: function () {
+    start () {
         console.log('Starting Print Output')
     },
-    stop: function () {
+    stop () {
         console.log('Stopping Print Output')
     },
-    set: function (score) {
-        console.log(score)
+    set (features) {
+        console.log(features)
     }
 });
 
+const featureId = Math.random().toString(36).substring(7);
+
 const feature = new Feature({
-    id: 'random:service',
-    calculate: function (data) {
-        return Math.random()
-    }
+    id: featureId,
+    duration: 0, // No data should be passed
+    calculate: () => Math.random()
 });
 
 const score = new Score({
     label: "Random - Service",
-    features: { ["random:service"]: {} },
+    features: { [featureId]: {} },
     get: function (features) {
-        const { ["random:service"]: random } = features
+        const { [featureId]: random } = features
         return random
     }
 });

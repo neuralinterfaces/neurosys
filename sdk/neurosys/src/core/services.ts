@@ -1,10 +1,11 @@
+import { PluginType } from "./plugins"
 
 type URL = string
 
 type ServicePluginInfo = {
     service: string
     plugin: string
-    type: string
+    type: PluginType
     info: Record<string, any>
 }
 

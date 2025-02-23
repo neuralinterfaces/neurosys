@@ -1,4 +1,12 @@
-export type Plugins = Record<string, any>
+import { Device } from './device'
+import { Feature } from './feature'
+import { Output } from './output'
+import { Score } from './score'
+
+export type RegisterFunction = (key: string, info: any) => void
+export type Plugin = Output | Score | Feature | Device
+export type Plugins = Record<string, Plugin>
+export type PluginType = 'feature' | 'device' | 'output' | 'score'
 
 export * from './feature'
 export * from './score'
@@ -54,7 +62,20 @@ export const getOriginalKey = (key: string) => {
     return key
 }
 
-export const isPluginInNamespace = (namespace: string, key: string) => key.startsWith(`${PREFIX}${namespace}:`)
+export const getPluginType = (encoded: string, plugin: Plugin): PluginType | null => {
+
+    // Handle plugins that have been properly registered
+    const namespace = getNamespace(encoded)
+    if (namespace) return getTypeFromNamespace(namespace)
+
+    // Handle plugins that have been directly passed based on classes
+    if (plugin instanceof Output)  return 'output'
+    if (plugin instanceof Score)   return 'score'
+    if (plugin instanceof Feature) return 'feature'
+    if (plugin instanceof Device)  return 'device'
+    return null
+}
+
 
 export const registerPlugins = (plugins: Plugins, namespace: string) => {
     return Object.entries(plugins).reduce((acc, [ key, plugin ]) => {

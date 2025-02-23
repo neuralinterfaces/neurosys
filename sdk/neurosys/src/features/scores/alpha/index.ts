@@ -13,8 +13,10 @@ export function load() {
         label: 'Alpha Score',
         features: {
             bands: { 
-                bands: { alpha: [ 8, 12 ] },
-                 windowDuration: 1 
+                bands: { 
+                    alpha: [ 8, 12 ] 
+                },
+                 windowDuration: 1  // Custom duration setting
             }
         },
         get({ bands = {} }) {

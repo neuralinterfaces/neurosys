@@ -9,7 +9,7 @@ import * as features from './features'
 // import * as devices from './devices/'
 
 import { getServicePlugins, sendToServicePlugin } from "./services"
-import { getNamespace, getOriginalKey } from "./plugins"
+import { getNamespace, getOriginalKey, PluginType } from "./plugins"
 
 export {
     outputs,
@@ -45,14 +45,16 @@ const getServiceUrl = (url, encoded) => {
 
 const methodsForType = {
   output: ['start', 'set', 'stop'],
-  score: ['calculate'],
+  score: ['get'],
   feature: ['calculate'],
   // device: ['connect', 'disconnect']
 }
 
-const getRegisterFunction = (type) => {
+const getRegisterFunction = (type: PluginType) => {
   if (type === 'output') return outputs.registerPlugin
-  // if (type === 'score') return score.registerPlugin
+  if (type === 'score') return score.registerPlugin
+  if (type === 'feature') return features.registerPlugin
+  if (type === 'device') return null
   return null
 }
 
@@ -74,55 +76,69 @@ const getCollection = (type) => {
   return null
 }
 
-Object.values(urlsByService).forEach(baseUrl=> {
-  getServicePlugins(baseUrl).then(plugins => {
-    console.warn('Registering Service Plugins:', baseUrl, plugins)
-    plugins.forEach(async plugin => {
-      const { plugin: identifier, type, info } = plugin
+const getAllServicePlugins = (services) => {
 
-      const methods = methodsForType[type]
-      if (!methods) return
+  return Object.values(services).map(baseUrl=> {
 
-      const pluginCollection = await getCollection(type)
-      if (!pluginCollection) return
+    return getServicePlugins(baseUrl).then(plugins => {
 
-      const url = getServiceUrl(baseUrl, identifier)
+      plugins.forEach(async plugin => {
+        const { plugin: identifier, type, info } = plugin
 
-      const overrides = methods.reduce((acc, method) => {
-        acc[method] = async function (...args) {
-          const preFetch = preFetchMethods[type]?.[method]
-          if (preFetch) {
-            const result = await preFetch(...args)
-            if (result == null) return
-            args = Array.isArray(result) ? result : [ result ]
+        const methods = methodsForType[type]
+        if (!methods) return
+
+        const pluginCollection = await getCollection(type)
+        if (!pluginCollection) return
+
+        const url = getServiceUrl(baseUrl, identifier)
+
+        const overrides = methods.reduce((acc, method) => {
+          acc[method] = async function (...args) {
+            const preFetch = preFetchMethods[type]?.[method]
+            if (preFetch) {
+              const result = await preFetch(...args)
+              if (result == null) return
+              args = Array.isArray(result) ? result : [ result ]
+            }
+            return sendToServicePlugin.call(this, url, method, ...args)
           }
-          return sendToServicePlugin.call(this, url, method, ...args)
-        }
-        return acc
-      }, {})
+          return acc
+        }, {})
 
-      const register = getRegisterFunction(type)
-      if (!register) return
+        const register = getRegisterFunction(type)
+        if (!register) return
 
-      register(
-        identifier, 
-        { ...info, ...overrides }, 
-        pluginCollection
-      )
+        register(
+          identifier, 
+          { ...info, ...overrides }, 
+          pluginCollection
+        )
 
+      })
+
+      return plugins
     })
   })
-})
+}
 
+const loadStart = performance.now()
 const promises = [
     outputs.getPlugins(),
-    score.getPlugins()
+    score.getPlugins(),
+    Promise.allSettled(getAllServicePlugins(urlsByService))
 ]
+
 
 
 
 // Load settings in Electron after all related plugins have been registered
 export const readyToOutputFeedback = Promise.all(promises).then(async () => loadSettings())
+
+readyToOutputFeedback.then(() => {
+  console.log(`All plugins loaded in ${performance.now() - loadStart}ms`)
+})
+
 
 // ------------ Default Device Handling Behaviors ------------
 

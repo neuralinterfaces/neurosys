@@ -1,5 +1,7 @@
 import { resolvePlugins } from "./commoners"
-import { isPluginInNamespace, NAMESPACES } from "./plugins"
+import { getPluginType } from "./plugins"
+
+import type { RegisterFunction } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
     const { menu: { onOutputToggle } } = await resolvePlugins()
@@ -8,12 +10,10 @@ export const onToggle = async (fn: Function) => {
 
 let outputOptions: any;
 
-type RegisterFunction = (key: string, info: any) => void
-
 export const registerPlugin = async (
   identifier: string, 
   plugin: any, 
-  collection,
+  collection: Record<string, any>,
   register?: RegisterFunction
 ) => {
     
@@ -26,6 +26,7 @@ export const registerPlugin = async (
     const resolvedRegisterFn = register as RegisterFunction
 
     const { label, enabled, start, stop, set, settings } = plugin
+
     collection[identifier] = { 
       start, 
       stop, 
@@ -46,15 +47,15 @@ const registerAllOutputOptions = async () => {
   const PLUGINS = await resolvePlugins()
   const { menu: { registerOutput } } = PLUGINS
 
-  return Object.keys(PLUGINS).reduce((acc, key) => {
-    if (!isPluginInNamespace(NAMESPACES.outputs, key)) return acc
-    const plugin = PLUGINS[key]
+  return Object.entries(PLUGINS).reduce((acc, [ key, plugin ]) => {
+     const type = getPluginType(key, plugin)
+      if (type !== 'output') return acc
     registerPlugin(key, plugin, acc, registerOutput)
     return acc
   }, {})
 }
 
-export const getPlugins = async () => outputOptions ?? (outputOptions = await registerAllOutputOptions())
+export const getPlugins = async () => outputOptions ?? (outputOptions = registerAllOutputOptions())
 
 export const set = async (score: number, features: any) => {
 
