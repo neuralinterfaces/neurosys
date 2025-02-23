@@ -1,13 +1,18 @@
 # Neurosys SDK
+
 The Neurosys software suite provides real-time neurofeedback for multiple EEG + fNIRS devices using a system overlay.
 
 This repository contains the `neurosys` SDK and a fully-functional [Commoners] application for system-level neurofeedback.
+
+### Why It Matters
+Neurosys intends to meet people where they’re at. Most neurofeedback systems ask you to interrupt your routine for a dedicated session. We allow you to leverage your daily activities for neurofeedback, making it easier to integrate into your life.
 
 ### Key Application Features
 1. System-level neurofeedback outputs like Brightness, Volume, and Cursor Animation.
 2. Support for multiple EEG devices, including the Muse 2 and the HEGduino.
 3. System tray integration for a seamless user experience.
 4. Modular architecture for easy extension and customization.
+
 
 ## Getting Started
 
