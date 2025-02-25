@@ -52,33 +52,33 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0(@types/node@22.13.4)(terser@5.39.0)
 
-  sdk/neurosys/src/plugins/devices/heg: {}
+  sdk/neurosys/src/features/devices/heg: {}
 
-  sdk/neurosys/src/plugins/devices/muse:
+  sdk/neurosys/src/features/devices/muse:
     devDependencies:
       muse-js:
         specifier: ^3.3.0
         version: 3.3.0
 
-  sdk/neurosys/src/plugins/features/bands:
+  sdk/neurosys/src/features/features/bands:
     devDependencies:
       timefreak:
         specifier: 0.0.0
         version: link:../../../../../timefreak
 
-  sdk/neurosys/src/plugins/outputs/cursor:
+  sdk/neurosys/src/features/outputs/cursor:
     devDependencies:
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
 
-  sdk/neurosys/src/plugins/outputs/inspect:
+  sdk/neurosys/src/features/outputs/inspect:
     devDependencies:
       lit:
         specifier: ^3.2.1
         version: 3.2.1
 
-  sdk/neurosys/src/plugins/outputs/text:
+  sdk/neurosys/src/features/outputs/text:
     devDependencies:
       lit:
         specifier: ^3.2.1

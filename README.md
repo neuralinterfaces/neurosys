@@ -75,7 +75,7 @@ Each **devices** plugin has a `devices` array, where each item has a `name`, a d
 ```javascript
 import { Devices, Device } from 'neurosys/plugins'
 
-export default new Devices([
+export const devices = new Devices([
     new Device({
         name: 'Random Data',
         protocols: { start: "Start" },
@@ -110,19 +110,11 @@ The `calculate` function receives an `info` object that includes all data organi
 ```javascript
 import { Feature } from 'neurosys/plugins'
 
-export default new Feature({
-    id: 'window',
+export const windowData = new Feature({
+    id: 'window', // Unique identifier for the feature to be requested
     duration: 1, // Automatically window the data by 1s
     calculate({ data }, settings) { return data }
 })
-```
-
-This will be later referenced by the key used in the `commoners.config.ts` file (e.g. `window`).
-
-```javascript
-export default {
-    plugins: { window: windowFeaturePlugin }
-}
 ```
 
 See the [Scores](#score) section for an example of how to request this feature.
@@ -133,7 +125,7 @@ Each **score** plugin has a `label` field for the tray option names, `features` 
 ```javascript
 import { Score } from 'neurosys/plugins'
 
-export default Score({
+export const averageVoltage = Score({
     label: 'Average Voltage',
     get({ window }) {
 
@@ -154,7 +146,7 @@ Use the `start` and `stop` fields to specify reactions to being enabled / disabl
 ```javascript
 import { Output } from 'neurosys/plugins'
 
-export default new Output({
+export const printOutput = new Output({
     label: 'Print',
     start({ cache = 0 }) {
         const counter = cache + 1
@@ -165,7 +157,7 @@ export default new Output({
         console.log('Plugin deactivated')
         return { cache: counter }
     },
-    set: ({ score }, info) => console.log(`Score (${info.counter})`, score)
+    set: (features, info) => console.log(`Features (${info.counter})`, features)
 })
 ```
 
@@ -179,15 +171,15 @@ import { Output } from 'neurosys/plugins'
 
 const printInMainProcess = new Output({
     label: 'Print — Main Process',
-    set ({ score }) {
-        this.__commoners.send("score", score) 
+    set (features) {
+        this.__commoners.send("features", features) 
     }
 })
 
 // Hijack the desktop methods
 printInMainProcess.desktop = {
     load() { 
-        this.on("score", (_, score) => console.log("Score:", score) ) 
+        this.on("features", (_, features) => console.log("Features:", features) ) 
     }
 }
 ```
@@ -201,17 +193,25 @@ You can declare server-side plugins (SSPs) and expose them using a standardized 
 The Neurosys SDK provides a set of utilities for creating server-side plugins, which can be used as follows:
 
 ```javascript
-import { createService, registerOutputPlugins, Output } from 'neurosys/services';
+import { Output } from 'neurosys/plugins';
+import { createService } from 'neurosys/services';
+
+import * as examples from './examples'; // A collection of the plugins defined above
 
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
 const print = new Output({
-    label: "Print — Server-Side Plugin",
+    label: "Print (SSP)",
     set: ({ score }) => console.log("Score", score)
 });
 
-const server = createService({ ...registerOutputPlugins({ print }) });
+const server = createService({ 
+    device: examples.devices, // NOTE: Not yet supported
+    feature: examples.windowData,
+    score: examples.averageVoltage,
+    output: examples.printOutput
+ });
 
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));
 ```
@@ -224,7 +224,7 @@ All `GET` requests return a collection of available plugins.
 {
     "print": {
         "info": {
-            "label": "Print — Server-Side Plugin",
+            "label": "Print — Example SSP",
             "settings": {},
             "start": null,
             "stop": null,

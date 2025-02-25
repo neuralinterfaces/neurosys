@@ -1,5 +1,5 @@
-import { getTransformedKey, getPluginType, NAMESPACES } from '../core/plugins';
-import type { Plugin, Plugins } from '../core/plugins';
+import { getPluginType } from '../core/plugins';
+import type { Plugin } from '../core/plugins';
 import { createServer } from './utils';
 
 
@@ -7,18 +7,6 @@ export type ServerResponse = {
   success: boolean
   error?: string
 }
-
-export * from '../core/plugins/feature'
-export * from '../core/plugins/score'
-export * from  '../core/plugins/output'
-export * from  '../core/plugins/devices'
-
-// Use special handlers for service plugins
-const registerPlugins = (plugins: Plugins, namespace: string) => Object.entries(plugins).reduce((acc, [ key, plugin ]) => ({...acc, [getTransformedKey(namespace, key, true)]: plugin}), {})
-export const registerFeaturePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.features)
-export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.devices)
-export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.outputs)
-export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.scores)
 
 export const createService = (plugins: Record<string, Plugin> = {}) => {
 
@@ -33,12 +21,10 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
       async post(url, ...args) {
         
           const resolvedPluginName = url.slice(1); // Plugin ID is the URL without the slash
-          const [ namespace, name, ...rest ] = resolvedPluginName.split('/');
+          const [ name, ...rest ] = resolvedPluginName.split('/');
           const methodName = rest.join('/');
-
-          const pluginName = getTransformedKey(namespace, name, true);
           
-          const plugin = resolvedPluginInfo[pluginName]; // Plugin ID is the URL without the slash
+          const plugin = resolvedPluginInfo[name]; // Plugin ID is the URL without the slash
 
           if (!plugin) return { success: false, error: 'Plugin not found' };
 

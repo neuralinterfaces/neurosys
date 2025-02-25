@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
       entry: {
         main: resolve(__dirname, 'src', 'core'),
-        features: resolve(__dirname, 'src', 'plugins'),
+        features: resolve(__dirname, 'src', 'features'),
         plugins: resolve(__dirname, 'src', 'core', 'plugins'),
         commoners: resolve(__dirname, 'src', 'core', 'commoners'),
         services: resolve(__dirname, 'src', 'services'),

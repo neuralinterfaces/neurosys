@@ -1,4 +1,4 @@
-import { getNamespace, getOriginalKey, PluginType } from "./plugins"
+import { getTransformedKey, PluginType } from "./plugins"
 
 type URL = string
 
@@ -9,7 +9,7 @@ type ServicePluginInfo = {
     info: Record<string, any>
 }
 
-export const getServicePlugins = async (url: URL): Promise<ServicePluginInfo[]> => {
+export const getServerSidePlugins = async (url: URL): Promise<ServicePluginInfo[]> => {
     return await fetch(url).then(res => res.json()).then(result => {
         const plugins = Object.entries(result).reduce((acc, [ plugin, value ]) => {
             const { type, info } = value
@@ -40,15 +40,6 @@ export async function sendToServicePlugin (
     return result.result
 }
 
-
-const getServiceUrl = (url: string | URL, encoded: string) => {
-  const key = getOriginalKey(encoded)
-  const namespace = getNamespace(encoded)
-
-  if (namespace) return new URL(`${namespace}/${key}`, url)
-  return new URL(key, url)
-}
-
 const methodsForType = {
   output: ['start', 'set', 'stop'],
   score: ['get'],
@@ -67,23 +58,23 @@ const preFetchMethods = {
 }
 
 
-export const requestAllServicePlugins = async (
+export const getAllServerSidePlugins = async (
     services: Record<string, string>
 ) => {
 
   const serviceIds = Object.keys(services)
 
-  const servicePromises = Object.values(services).map(baseUrl => {
+  const servicePromises = Object.entries(services).map(([ serviceId, baseUrl ]) => {
 
-    return getServicePlugins(baseUrl).then(plugins => {
+    return getServerSidePlugins(baseUrl).then(plugins => {
 
       return plugins.reduce((acc, plugin) => {
         const { plugin: identifier, type, info } = plugin
 
         const allowedMethods = methodsForType[type]
-        if (!allowedMethods) return
+        if (!allowedMethods) return acc
 
-        const url = getServiceUrl(baseUrl, identifier)
+        const url = new URL(identifier, baseUrl)
 
         const methods = Object.keys(info).filter(method => allowedMethods.includes(method))
 
@@ -102,8 +93,8 @@ export const requestAllServicePlugins = async (
           return acc
         }, {})
 
-        acc[identifier] = { ...info, ...overrides }
-
+        const transformed = getTransformedKey(type, identifier, serviceId)
+        acc[transformed] = { ...info, ...overrides }
         return acc
       }, {})
     })
@@ -111,9 +102,12 @@ export const requestAllServicePlugins = async (
 
   return Promise.allSettled(servicePromises).then(settled => {
     return settled.reduce((acc, info, idx) => {
-      const { status, value } = info
-      if (status === 'fulfilled') acc[serviceIds[idx]] = value
+      const { status, value, reason } = info
+      if (status === 'fulfilled') return {...acc, [serviceIds[idx]]: value}
+      
+      console.error(`Failed to load service plugins for ${serviceIds[idx]}`, reason)
       return acc
+
     }, {})
   })
 }

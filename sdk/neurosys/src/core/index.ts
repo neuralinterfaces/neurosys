@@ -8,7 +8,7 @@ import * as score from './score'
 import * as features from './features'
 // import * as devices from './devices/'
 
-import { requestAllServicePlugins } from "./services"
+import { getAllServerSidePlugins } from "./services"
 import { getPluginType } from "./plugins"
 import { resolvePlugins } from "./commoners"
 
@@ -20,7 +20,7 @@ export {
     features,
 
     // Utilities
-    requestAllServicePlugins,
+    getAllServerSidePlugins,
     loadSettings
 }
 
@@ -42,7 +42,8 @@ export const registerPlugins = async (plugins: any) => {
     if (type === 'output') await outputs.registerPlugin(key, plugin, registerOutput)
     else if (type === 'feature') features.registerPlugin(key, plugin)
     else if (type === 'devices') registerDevices(plugin)
-    else if (type === 'score') score.registerPlugin(key, plugin, registerScore)
+    else if (type === 'score') await score.registerPlugin(key, plugin, registerScore)
+    else if (type) console.warn(`Plugin ${key} not registered because of type ${type}`)
   }
 
 }

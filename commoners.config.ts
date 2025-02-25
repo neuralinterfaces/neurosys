@@ -1,19 +1,23 @@
 // import { devices, features, scores, outputs, system } from 'neurosys/features'
-// import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins } from 'neurosys/plugins'
+// import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins } from 'neurosys/commoners'
 
 import { devices, features, scores, outputs, system } from './sdk/neurosys/src/features'
 import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners'
 
 // Examples
-// import examplePlugins from './app/examples/plugins/index'
-// const exampleFeatures = examplePlugins.features
-// const exampleDevices = examplePlugins.devices
-// const exampleOutputs = examplePlugins.outputs
-// const exampleScores = examplePlugins.scores
+import examplePlugins from './app/examples/plugins/index'
+
 const exampleFeatures = {}
 const exampleDevices = {}
 const exampleOutputs = {}
 const exampleScores = {}
+const examples = {
+    ...examplePlugins,
+    features: {},
+    devices: {},
+    outputs: {},
+    scores: {}
+}
 
 // const DEBUG = false
 const DEBUG = true
@@ -34,9 +38,8 @@ const config = {
 
     services: {
 
-        // // Example SSPs
-        // example: './app/examples/example-ssp.ts',
-        // examples: './app/examples/comprehensive-ssps.ts', 
+        // Example SSPs
+        exampleSSPs: './app/examples/examples-in-service.ts', 
 
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"
@@ -56,7 +59,7 @@ const config = {
         // --------------------------------- Optional Plugins --------------------------------- //
         ...registerDevicePlugins({
             
-            ...exampleDevices,
+            ...examples.devices,
 
             ...devices
 
@@ -83,17 +86,17 @@ const config = {
         }),
             
         ...registerFeaturePlugins({
-            ...exampleFeatures,
+            ...examples.features,
             ...features
         }),
 
         ...registerOutputPlugins({
-            ...exampleOutputs,
+            ...examples.outputs,
             ...outputs
         }),
 
         ...registerScorePlugins({
-            ...exampleScores,
+            ...examples.scores,
             ...scores
         }),
     }
