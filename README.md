@@ -221,9 +221,8 @@ server.listen(port, host, () => console.log(`Server running at http://${host}:${
 
 All `GET` requests to the `.neurosys` sub-route return a collection of available plugins.
 
+###### Response Structure
 ```json
-
-// Successful post requests
 {
     "success": true,
     "result": {
@@ -239,14 +238,23 @@ All `GET` requests to the `.neurosys` sub-route return a collection of available
         }
     }
 }
+```
 
-{ "success": false, "error": "Error message" } // Error message
+###### Error Structure
+```json
+{ "success": false, "error": "Error message" }
 ```
 
 `POST` requests the `.neurosys` sub-route are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. 
+
+###### Response Structure 
 ```json
-{ "success": true, "result": {} } // Success. Result can be anything.
-{ "success": false, "error": "Error message" } // Error.
+{ "success": true, "result": {} }
+```
+
+###### Error Structure
+```json
+{ "success": false, "error": "Error message" }
 ```
 
 ### Common Issues
