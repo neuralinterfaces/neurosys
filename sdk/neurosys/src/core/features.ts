@@ -20,6 +20,7 @@ export const registerPlugin = (
   plugin: any
 ) => {
     const { id = getOriginalKey(identifier) } = plugin
+    if (featureOptions[id]) return console.error('Feature plugin is already registered', id, plugin)
     featureOptions[id] = plugin
 }
 
@@ -36,10 +37,12 @@ export const calculate = async (
 
   for (const [id, settings] of Object.entries(features)) {
     const plugin = featureOptions[id]
-    if (!plugin) continue
+    if (!plugin) {
+      console.warn('Feature plugin not found', id)
+      continue
+    }
 
-    const { duration, calculate } = plugin
-    if (!calculate) continue
+    const { duration } = plugin
 
     // Pre-window the data if necessary
     let data = client.data

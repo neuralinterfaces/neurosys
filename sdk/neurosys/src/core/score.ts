@@ -14,6 +14,8 @@ export const registerPlugin = async (
   register?: RegisterFunction
 ) => {
     
+  if (scoreOptions[identifier]) return console.error('Score plugin is already registered', identifier, plugin)
+
     if (!register) {
       const PLUGINS = await resolvePlugins()
       const { menu: { registerScore } } = PLUGINS

@@ -1,5 +1,6 @@
 import { getPluginType } from '../core/plugins';
 import type { Plugin } from '../core/plugins';
+import { NEUROSYS_SUBROUTE } from './globals';
 import { createServer } from './utils';
 
 
@@ -19,7 +20,9 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
 
     return createServer({
       async post(url, ...args) {
-        
+
+        if (!url.startsWith(NEUROSYS_SUBROUTE)) return { code: 404, success: false, error: 'Not Found' }
+
           const resolvedPluginName = url.slice(1); // Plugin ID is the URL without the slash
           const [ name, ...rest ] = resolvedPluginName.split('/');
           const methodName = rest.join('/');
@@ -38,7 +41,10 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
             return { success: false, error: error.message };
           }
       },
-      get: async () => resolvedPluginInfo
+      get: async (url) => {
+        if (!url.startsWith(NEUROSYS_SUBROUTE)) return { code: 404, success: false, error: 'Not Found' }
+        return { success: true, result: resolvedPluginInfo }
+      }
 
     })
 

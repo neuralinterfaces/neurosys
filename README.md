@@ -127,9 +127,10 @@ import { Score } from 'neurosys/plugins'
 
 export const averageVoltage = Score({
     label: 'Average Voltage',
-    get({ window }) {
+    features: { window: true },
+    get({ window: windowedData }) {
 
-        const averagePerChannel = Object.entries(window).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})
+        const averagePerChannel = Object.entries(windowedData).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})
 
         return Object.values(averagePerChannel).reduce((acc, val) => acc + val, 0) / Object.values(averagePerChannel).length
     }
@@ -218,27 +219,33 @@ server.listen(port, host, () => console.log(`Server running at http://${host}:${
 
 ##### REST API
 
-All `GET` requests return a collection of available plugins.
+All `GET` requests to the `.neurosys` sub-route return a collection of available plugins.
 
 ```json
+
+// Successful post requests
 {
-    "print": {
-        "info": {
-            "label": "Print — Example SSP",
-            "settings": {},
-            "start": null,
-            "stop": null,
-            "set": "[Function: set]"
-        },
-        "type": "output"
+    "success": true,
+    "result": {
+        "print": {
+            "info": {
+                "label": "Print — Example SSP",
+                "settings": {},
+                "start": null,
+                "stop": null,
+                "set": "[Function: set]"
+            },
+            "type": "output"
+        }
     }
 }
+
+{ "success": false, "error": "Error message" } // Error message
 ```
 
-`POST` requests are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. Resonses are structured as follows:
-
+`POST` requests the `.neurosys` sub-route are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. 
 ```json
-{ "success": true, "result": null } // Success. Result can be anything.
+{ "success": true, "result": {} } // Success. Result can be anything.
 { "success": false, "error": "Error message" } // Error.
 ```
 

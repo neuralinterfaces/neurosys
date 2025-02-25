@@ -21,6 +21,7 @@ READY.then(async (PLUGINS) => {
   console.log(`Main plugins loaded in ${performance.now() - loadStart}ms`)
 
   // Register all service plugins
+  // NOTE: Declaring this after the main plugins ensures that the main plugins are loaded with priority
   const urlsByService = Object.entries(SERVICES).reduce((acc, [key, value]) => ({...acc, [key]: value.url}), {})
   const servicePlugins = await getAllServerSidePlugins(urlsByService)
   for (const serviceName in servicePlugins) {

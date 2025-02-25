@@ -1,3 +1,4 @@
+import { NEUROSYS_SUBROUTE } from "../services/globals"
 import { getTransformedKey, PluginType } from "./plugins"
 
 type URL = string
@@ -10,7 +11,10 @@ type ServicePluginInfo = {
 }
 
 export const getServerSidePlugins = async (url: URL): Promise<ServicePluginInfo[]> => {
-    return await fetch(url).then(res => res.json()).then(result => {
+    return await fetch(url).then(res => res.json()).then(({ success, error, result }) => {
+
+        if (!success) throw new Error(error)
+
         const plugins = Object.entries(result).reduce((acc, [ plugin, value ]) => {
             const { type, info } = value
             acc.push({ plugin, type, info })
@@ -66,15 +70,17 @@ export const getAllServerSidePlugins = async (
 
   const servicePromises = Object.entries(services).map(([ serviceId, baseUrl ]) => {
 
-    return getServerSidePlugins(baseUrl).then(plugins => {
+    const scopedUrl = new URL(NEUROSYS_SUBROUTE, baseUrl)
 
+    return getServerSidePlugins(scopedUrl).then((plugins) => {
+      
       return plugins.reduce((acc, plugin) => {
         const { plugin: identifier, type, info } = plugin
 
         const allowedMethods = methodsForType[type]
         if (!allowedMethods) return acc
 
-        const url = new URL(identifier, baseUrl)
+        const url = new URL(`${NEUROSYS_SUBROUTE}/${identifier}`, baseUrl) // Scope the requests to the Neurosys route
 
         const methods = Object.keys(info).filter(method => allowedMethods.includes(method))
 
@@ -94,7 +100,12 @@ export const getAllServerSidePlugins = async (
         }, {})
 
         const transformed = getTransformedKey(type, identifier, serviceId)
-        acc[transformed] = { ...info, ...overrides }
+        
+        acc[transformed] = { 
+          ...info, 
+          ...overrides, 
+        }
+
         return acc
       }, {})
     })
@@ -104,7 +115,6 @@ export const getAllServerSidePlugins = async (
     return settled.reduce((acc, info, idx) => {
       const { status, value, reason } = info
       if (status === 'fulfilled') return {...acc, [serviceIds[idx]]: value}
-      
       console.error(`Failed to load service plugins for ${serviceIds[idx]}`, reason)
       return acc
 

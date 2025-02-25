@@ -14,7 +14,7 @@ export * from './output'
 export * from './devices'
 
 const PREFIX = 'neurosys:'
-const SERVICE_PREFIX = `${PREFIX}services:`
+export const SERVICE_PREFIX = `${PREFIX}services:`
 
 // Plugin Managemement Features
 

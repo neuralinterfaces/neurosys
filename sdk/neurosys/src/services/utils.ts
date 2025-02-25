@@ -29,27 +29,26 @@ export const createServer = (handlers: Handlers) => {
     
       const resolvedURL = req.url as string;
 
+      let result = { code: 404, error: "Not Found" };
+
+      const isGet = req.method === 'GET';
       if (req.method === 'POST' && handlers.post) {
-        let body = '';
-        req.on('data', (chunk) => body += chunk.toString());
-        req.on('end', async () => {
-          res.writeHead(200, { 'Content-Type': "application/json" });
-          const { args, ctx } = JSON.parse(body);
-          const result = await handlers.post.call(ctx, resolvedURL, ...args);
-          res.end(JSON.stringify(result));
-        });
-        return;
+        result = await new Promise((resolve) => {;
+          let body = '';
+          req.on('data', (chunk) => body += chunk.toString());
+          req.on('end', async () => {
+            const { args, ctx } = JSON.parse(body);
+            const result = await handlers.post.call(ctx, resolvedURL, ...args);
+            resolve(result);
+          });
+        })
       }
 
-      if (req.method === 'GET' && handlers.get) {
-        const result = await handlers.get(resolvedURL);
-        res.end(encodeFunctions(result));
-        return;
-      }
-    
-      // Fail on all other requests
-      res.writeHead(404, { 'Content-Type': "application/json" });
-      res.end(JSON.stringify({ error: "Not Found" }));
+      else if (isGet && handlers.get) result = await handlers.get(resolvedURL);
+
+      const { code = 200, ...rest } = result;
+      res.writeHead(code, { 'Content-Type': "application/json" });
+      res.end(encodeFunctions(rest))
     });
     
     return server

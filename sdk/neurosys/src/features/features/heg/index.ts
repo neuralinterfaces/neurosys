@@ -1,7 +1,7 @@
 import { Feature } from "../../../core/plugins"
 
 export default new Feature({
-    id: 'HEG',
+    id: 'heg', // Feature ID for consumers
     devices: [ 'HEG' ],
     calculate({ data }) {
 

@@ -7,10 +7,6 @@ import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, r
 // Examples
 import examplePlugins from './app/examples/plugins/index'
 
-const exampleFeatures = {}
-const exampleDevices = {}
-const exampleOutputs = {}
-const exampleScores = {}
 const examples = {
     ...examplePlugins,
     features: {},
@@ -38,8 +34,8 @@ const config = {
 
     services: {
 
-        // Example SSPs
-        exampleSSPs: './app/examples/examples-in-service.ts', 
+        // // Example SSPs
+        // exampleSSPs: './app/examples/examples-in-service.ts', 
 
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"

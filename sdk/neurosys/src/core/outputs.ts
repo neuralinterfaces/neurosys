@@ -15,6 +15,9 @@ export const registerPlugin = async (
   register?: RegisterFunction
 ) => {
     
+  if (outputOptions[identifier]) return console.error('Output plugin is already registered', identifier, plugin)
+
+
     if (!register) {
       const PLUGINS = await resolvePlugins()
       const { menu: { registerOutput } } = PLUGINS
