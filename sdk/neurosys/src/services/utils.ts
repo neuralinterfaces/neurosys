@@ -14,6 +14,7 @@ function encodeFunctions(obj: any): string {
   });
 }
 
+const SUBSCRIBABLE: Record<string, Function> = {}
 
 export const createServer = (handlers: Handlers) => {
 
@@ -29,14 +30,9 @@ export const createServer = (handlers: Handlers) => {
     
       const resolvedURL = req.url as string;
 
-      // Check if request is for an event stream
-      
-
-      console.log('PINGING', req.method, resolvedURL)
-
       let result = { code: 404, error: "Not Found" }
 
-      const isGet = req.method === 'GET';
+      // Handle post requests
       if (req.method === 'POST' && handlers.post) {
         result = await new Promise((resolve) => {;
           let body = '';
@@ -44,41 +40,40 @@ export const createServer = (handlers: Handlers) => {
           req.on('end', async () => {
             const { args, ctx } = JSON.parse(body);
             const result = await handlers.post.call(ctx, resolvedURL, ...args);
-            console.log('result', result)
-
             resolve(result);
           });
         })
       }
 
-      else if (isGet && handlers.get) result = await handlers.get(resolvedURL);
+      // Handle get requests
+      else if (req.method === 'GET') {
+        const hasSubscribe = SUBSCRIBABLE[resolvedURL]
 
-      if (result.subscribe) {
-
-          const { code = 200, ...rest } = result;
-
-          console.log('SPECIAL', resolvedURL)
-
-          res.writeHead(code, { 
+        if (hasSubscribe) {
+          
+          res.writeHead(200, { 
             'Content-Type': "text/event-stream",
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive'
           });
 
-          res.write(`result: ${encodeFunctions(rest)}\n\n`);
-
-          result.subscribe((event) => {
-            res.write(`data: ${encodeFunctions(event)}\n\n`);
+          hasSubscribe((...args) => {
+            res.write(`data: ${encodeFunctions(args)}\n\n`);
           })
 
-          req.on('close', () => {
+          // Don't end the response immediately
+          return req.on('close', () => {
             res.end();
           });
+        }
 
-        return
+        else if (handlers.get) result = await handlers.get(resolvedURL);
+        
       }
 
-      const { code = 200, ...rest } = result;
+      const { code = 200, subscribe, ...rest } = result;
+      if (subscribe) SUBSCRIBABLE[resolvedURL] = subscribe
+
       res.writeHead(code, { 'Content-Type': "application/json" });
       res.end(encodeFunctions(rest))
     });

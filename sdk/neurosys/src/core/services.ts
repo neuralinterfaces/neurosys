@@ -88,31 +88,18 @@ const getOverridesForPlugin = (identifier, type, info, baseUrl) => {
         args = Array.isArray(result) ? result : [ result ]
       }
 
+
+      const result = await sendToServicePlugin.call(this, url, method, ...args)
+
+      // Connect to the event stream for devices
       if (type === 'devices' && method === 'connect') {
-
-        const resolvedUrl = getURL(url, method)
-
-        // Wait for the result to resolve
-        return new Promise((resolve, reject) => {
-          
-          console.log("resolvedUrl", resolvedUrl)
-          const eventSource = new EventSource(resolvedUrl)
-
-          eventSource.onmessage = (event) => {
-              const data = JSON.parse(event.data)
-              console.log('New message:', data);
-              resolve(data)
-          };
-
-          eventSource.onerror = (error) => {
-              console.error('EventSource failed:', error);
-              reject(error)
-          };
-        })
-
+          const [ _, notify ] = args
+          const eventSource = new EventSource(getURL(url, method))
+          eventSource.onmessage = (event) =>  notify(...JSON.parse(event.data))
+          eventSource.onerror = (error) =>  console.error('EventSource failed:', error);
       }
 
-      return sendToServicePlugin.call(this, url, method, ...args)
+      return result
     }
     return acc
   }, {})

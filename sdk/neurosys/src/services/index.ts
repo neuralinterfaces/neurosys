@@ -35,30 +35,33 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
 
           try {
             const resolved = isDevices ? plugin.info.devices[rest[0]] : plugin.info 
-            const method = resolved[methodName];
-            if (!method) return { success: false, error: 'Method not found' };
+            if (!resolved[methodName]) return { success: false, error: 'Method not found' };
 
-            if (isDevices && methodName === 'connect') {
+            if (isDevices) {
+              if (methodName === 'connect') {
+                const [ info ] = args
 
-              const [ info ] = args
+                let subscriber: any;
 
-              let subscriber: any;
+                // Pass through to a EventSoure on the browser
+                const notify = (...args) => subscriber && subscriber(...args)
+                const result = await resolved[methodName](info, notify); // Use server context
 
-              // Pass through to a EventSoure on the browser
-              const notify = (...args) => {
-                if (!subscriber) return
-                subscriber(args)
+                return { 
+                  success: true, 
+                  result, 
+                  subscribe: (callback: Function) => subscriber = callback
+                }
+
+              // Disconnect
+              } else {
+                const result = await resolved[methodName](...args); // Use server context
+                return { success: true, result };
               }
+            }
 
-              const result = await method.call(this, info, notify); // NOTE: No refs from the start method for now
-              return { 
-                success: true, 
-                result, 
-                subscribe: (callback: Function) => subscriber = callback
-              }
-
-            } else {
-              const result = await method.call(this, ...args); // NOTE: No refs from the start method for now
+            else {
+              const result = await resolved[methodName].call(this, ...args); // NOTE: No refs from the start method for now
               return { success: true, result };
             }
 
