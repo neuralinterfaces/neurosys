@@ -34,8 +34,8 @@ const config = {
 
     services: {
 
-        // // Example SSPs
-        // exampleSSPs: './app/examples/examples-in-service.ts', 
+        // Example SSPs
+        exampleSSPs: './app/examples/examples-in-service.ts', 
 
         // brainflow: "./app/services/brainflow.py",
         volume: "./app/services/volume/main.ts"

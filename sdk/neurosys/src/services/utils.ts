@@ -29,7 +29,12 @@ export const createServer = (handlers: Handlers) => {
     
       const resolvedURL = req.url as string;
 
-      let result = { code: 404, error: "Not Found" };
+      // Check if request is for an event stream
+      
+
+      console.log('PINGING', req.method, resolvedURL)
+
+      let result = { code: 404, error: "Not Found" }
 
       const isGet = req.method === 'GET';
       if (req.method === 'POST' && handlers.post) {
@@ -39,12 +44,39 @@ export const createServer = (handlers: Handlers) => {
           req.on('end', async () => {
             const { args, ctx } = JSON.parse(body);
             const result = await handlers.post.call(ctx, resolvedURL, ...args);
+            console.log('result', result)
+
             resolve(result);
           });
         })
       }
 
       else if (isGet && handlers.get) result = await handlers.get(resolvedURL);
+
+      if (result.subscribe) {
+
+          const { code = 200, ...rest } = result;
+
+          console.log('SPECIAL', resolvedURL)
+
+          res.writeHead(code, { 
+            'Content-Type': "text/event-stream",
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+          });
+
+          res.write(`result: ${encodeFunctions(rest)}\n\n`);
+
+          result.subscribe((event) => {
+            res.write(`data: ${encodeFunctions(event)}\n\n`);
+          })
+
+          req.on('close', () => {
+            res.end();
+          });
+
+        return
+      }
 
       const { code = 200, ...rest } = result;
       res.writeHead(code, { 'Content-Type': "application/json" });

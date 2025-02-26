@@ -25,6 +25,17 @@ export const getServerSidePlugins = async (url: URL): Promise<ServicePluginInfo[
     })
 }
 
+export const getURL = (url: string | URL, pathname?: string) => {
+
+  if (pathname) {
+    const existing = new URL(url).pathname
+    const merged = [existing, pathname].join('/')
+    url = new URL(merged, url).toString()
+  }
+
+  return url
+}
+
 
 export async function sendToServicePlugin (
     url: string | URL, 
@@ -32,14 +43,10 @@ export async function sendToServicePlugin (
     ...args: any[]
 ) {
 
-    if (pathname) {
-        const existing = new URL(url).pathname
-        const merged = [existing, pathname].join('/')
-        url = new URL(merged, url).toString()
-    }
+    const resolvedUrl = getURL(url, pathname)
 
     const ctx = this ?? {}
-    const result = await fetch(url, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
+    const result = await fetch(resolvedUrl, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
     if (!result.success) throw new Error(result.error)
     return result.result
 }
@@ -48,7 +55,7 @@ const methodsForType = {
   output: ['start', 'set', 'stop'],
   score: ['get'],
   feature: ['calculate'],
-  // device: ['connect', 'disconnect']
+  devices: [ 'connect', 'disconnect' ]
 }
 
 const preFetchMethods = {
@@ -59,6 +66,57 @@ const preFetchMethods = {
       return args
     }
   }
+}
+
+const getOverridesForPlugin = (identifier, type, info, baseUrl) => {
+
+  const allowedMethods = methodsForType[type]
+
+  if (!allowedMethods) return
+
+  const url = new URL(`${NEUROSYS_SUBROUTE}/${identifier}`, baseUrl) // Scope the requests to the Neurosys route
+
+  const methods = Object.keys(info).filter(method => allowedMethods.includes(method))
+
+  return methods.reduce((acc, method) => {
+    acc[method] = async function (...args) {
+      const preFetch = preFetchMethods[type]?.[method]
+
+      if (preFetch) {
+        const result = await preFetch(...args)
+        if (result == null) return
+        args = Array.isArray(result) ? result : [ result ]
+      }
+
+      if (type === 'devices' && method === 'connect') {
+
+        const resolvedUrl = getURL(url, method)
+
+        // Wait for the result to resolve
+        return new Promise((resolve, reject) => {
+          
+          console.log("resolvedUrl", resolvedUrl)
+          const eventSource = new EventSource(resolvedUrl)
+
+          eventSource.onmessage = (event) => {
+              const data = JSON.parse(event.data)
+              console.log('New message:', data);
+              resolve(data)
+          };
+
+          eventSource.onerror = (error) => {
+              console.error('EventSource failed:', error);
+              reject(error)
+          };
+        })
+
+      }
+
+      return sendToServicePlugin.call(this, url, method, ...args)
+    }
+    return acc
+  }, {})
+
 }
 
 
@@ -75,37 +133,30 @@ export const getAllServerSidePlugins = async (
     return getServerSidePlugins(scopedUrl).then((plugins) => {
       
       return plugins.reduce((acc, plugin) => {
+
         const { plugin: identifier, type, info } = plugin
 
-        const allowedMethods = methodsForType[type]
-        if (!allowedMethods) return acc
-
-        const url = new URL(`${NEUROSYS_SUBROUTE}/${identifier}`, baseUrl) // Scope the requests to the Neurosys route
-
-        const methods = Object.keys(info).filter(method => allowedMethods.includes(method))
-
-        const overrides = methods.reduce((acc, method) => {
-          acc[method] = async function (...args) {
-            const preFetch = preFetchMethods[type]?.[method]
-
-            if (preFetch) {
-              const result = await preFetch(...args)
-              if (result == null) return
-              args = Array.isArray(result) ? result : [ result ]
-            }
-
-            return sendToServicePlugin.call(this, url, method, ...args)
-          }
-          return acc
-        }, {})
-
         const transformed = getTransformedKey(type, identifier, serviceId)
-        
-        acc[transformed] = { 
-          ...info, 
-          ...overrides, 
-        }
 
+        // Handle devices differently
+        if (type === 'devices') {
+
+          // NOTE: Handle this so that the proper device is targeted
+          const newDevices = info.devices.map((device: any, i: number) => {
+            const deviceId = `${identifier}/${i}`
+            const overrides = getOverridesForPlugin(deviceId, type, device, baseUrl)
+            if (!overrides) return device
+            return { ...device, ...overrides }
+          })
+
+          acc[transformed] = { devices: newDevices }
+
+        } else {
+          const overrides =  getOverridesForPlugin(identifier, type, info, baseUrl)
+          if (!overrides) return acc
+          acc[transformed] = {  ...info,  ...overrides }
+        }
+      
         return acc
       }, {})
     })

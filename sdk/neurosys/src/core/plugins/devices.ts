@@ -1,10 +1,10 @@
-import { ClientInfo, Data, Timestamps } from "./types"
+import { ClientDataStructure, Montage, NotifyCallback } from "./types"
+
+export { DataCollection } from './types'
 
 type ProtocolId = string
 
 type ConnectionRequest = {
-    data: Data, // Live reference to this client's data
-    timestamps: Timestamps, // Live reference to this client's timestamps
     protocol: ProtocolId
 }
 
@@ -14,7 +14,9 @@ type DeviceInformation = {
     name: string
     type?: string
     protocols: Record<ProtocolId, ProtocolInformation>
-    connect?: (request: ConnectionRequest) => ClientInfo | Promise<ClientInfo>
+    // montage: Montage // Montage getter
+    connect: (this: Device, request: ConnectionRequest, notify: NotifyCallback) => ClientDataStructure | Promise<ClientDataStructure>
+    disconnect: (this: Device) => void
 }
 
 type DeviceProps = {
@@ -35,12 +37,16 @@ export class Device {
     name: DeviceInformation['name']
     type: DeviceInformation['type']
     protocols: DeviceInformation['protocols']
+    // montage: DeviceInformation['montage']
     connect: DeviceInformation['connect']
+    disconnect: DeviceInformation['disconnect']
 
     constructor(props: DeviceInformation) {
         this.name = props.name
         this.type = props.type
         this.protocols = props.protocols
+        // this.montage = props.montage
         this.connect = props.connect
+        this.disconnect = props.disconnect
     }
 }

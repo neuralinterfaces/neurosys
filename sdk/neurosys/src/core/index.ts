@@ -9,8 +9,9 @@ import * as features from './features'
 // import * as devices from './devices/'
 
 import { getAllServerSidePlugins } from "./services"
-import { getPluginType } from "./plugins"
+import { DataCollection, getPluginType } from "./plugins"
 import { resolvePlugins } from "./commoners"
+import { Client, NotifyCallback } from "./plugins/types"
 
 export {
 
@@ -28,7 +29,7 @@ export {
 export * from './plugins'
 export * from './settings'
 
-let client: null | any = null
+let client: null | Client = null
 
 export const getClient = () => client
 const reset = () => client = null
@@ -51,7 +52,7 @@ export const registerPlugins = async (plugins: any) => {
 // ------------ Default Device Handling Behaviors ------------
 
 onDeviceDisconnect(async () => {
-  await client?.disconnect()
+  if (client) await client.disconnect()
   reset()
   toggleDeviceConnection(true)
   client = null
@@ -68,12 +69,28 @@ onShowDevices(async () => {
   if (!deviceRequestHandler) return console.error('No device request handler set')
     
   const { device, protocol } = await deviceRequestHandler(deviceOptions)
-  const { connect } = device
 
   reset()
-  const states = { data: {}, timestamps: [] }
-  client = await connect({ ...states, protocol })
-  Object.assign(client, states)
+
+
+  const collections: Record<string | symbol, DataCollection> = {}
+
+  const notify: NotifyCallback = (update, collection = 'default') => {
+      const selected = collections[collection]
+      if (!selected) return console.warn('Data collection not found', collection)
+      selected.update(update) 
+  }
+
+  const structure = await device.connect({ protocol }, notify)
+
+  if (structure.sfreq) collections['default'] = new DataCollection(structure)
+  else for (const collection in structure) collections[collection] = new DataCollection(structure[collection])
+
+  client = { 
+    data: collections,
+    disconnect: () => device.disconnect()
+  }
+
   toggleDeviceConnection(false) // Success
 })
 

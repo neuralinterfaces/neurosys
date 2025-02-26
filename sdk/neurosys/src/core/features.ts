@@ -1,4 +1,5 @@
 import { getOriginalKey } from "./plugins"
+import { Client } from "./plugins/types"
 
 export type UserFeatures = {
   bands: string[],
@@ -27,10 +28,10 @@ export const registerPlugin = (
 // ------------ Calculate Score ------------
 export const calculate = async (
   features: UserFeatures,
-  client?: any
+  client?: Client
 ): Promise<CalculatedFeatures> => {
 
-  client = client ?? { data: {} }
+  if (!client) return {} // No default behavior 
 
   const results = {}
   
@@ -44,18 +45,27 @@ export const calculate = async (
 
     const { duration } = plugin
 
-    // Pre-window the data if necessary
-    let data = client.data
-    if (duration != undefined) {
-        const { sfreq } = client
-        const window = [ -sfreq * duration ]
-        data = Object.entries(data).reduce((acc, [ch, chData]) => {
-          acc[ch] = chData.slice(...window)
-          return acc
-        }, {})
-    }
+    const collections = client.data
+    // for (const cId in collections) {
+      // const collection = collections[cId]
+      const collection = collections['default'] // Only calculate for default collection
 
-    results[id] = await plugin.calculate({ ...client, data }, settings) // NOTE: Support multiple requesteres in the future
+      // Pre-window the data if necessary
+      let data = collection.data
+      if (Object.keys(data).length === 0) return {} // No data = No features
+
+      if (duration != undefined) {
+          const { sfreq } = collection
+          const window = [ -sfreq * duration ]
+          data = Object.entries(data).reduce((acc, [ch, chData]) => {
+            acc[ch] = chData.slice(...window)
+            return acc
+          }, {})
+      }
+
+      const result = await plugin.calculate({ data, sfreq: collection.sfreq }, settings) // NOTE: Support multiple requesters in the future
+      results[id] = result
+    // }
   }
 
   return results
