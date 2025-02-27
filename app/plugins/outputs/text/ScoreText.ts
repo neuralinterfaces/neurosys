@@ -1,19 +1,5 @@
 import { LitElement, html, css } from 'lit';
 
-
-// const element = document.createElement('p')
-// element.style.padding = "10px 20px"
-// element.style.color = "white"
-// element.style.background = "#111"
-// element.style.borderRadius = "10px"
-// element.style.position = "absolute"
-// element.style.top = "35px"
-// element.style.right = "25px"
-// element.innerHTML = "<b>Score:</b> <span class='score'>—</span>"
-// document.body.append(element)
-// const scoreEl = element.querySelector(".score") as HTMLSpanElement
-
-
 export interface ScoreTextProps {
     score: number | typeof NaN
 }

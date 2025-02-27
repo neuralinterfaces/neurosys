@@ -2,43 +2,23 @@
 
 The Neurosys software suite provides real-time neurofeedback for multiple EEG + fNIRS devices using a system overlay.
 
-This repository contains the `neurosys` SDK and a fully-functional [Commoners] application for system-level neurofeedback.
+This repository contains the `neurosys` SDK and a fully-functional template application for system-level neurofeedback.
 
 ### Why It Matters
 Neurosys intends to meet people where they’re at. Most neurofeedback systems ask you to interrupt your routine for a dedicated session. We allow you to leverage your daily activities for neurofeedback, making it easier to integrate into your life.
 
-### Key Application Features
+### Key Features
 1. System-level neurofeedback outputs like Brightness, Volume, and Cursor Animation.
 2. Support for multiple EEG devices, including the Muse 2 and the HEGduino.
 3. System tray integration for a seamless user experience.
 4. Modular architecture for easy extension and customization.
 
+### Applications
+- **[Neurosys](./app/README.md)**: A template application for providing system-level neurofeedback.
+- **[HEGBeta](https://github.com/garrettmflynn/HEGBeta)**: An HEGduino-focused release for training your HEG ratio.
 
 ## Getting Started
-
-> **Note**: You can use the shortcut `Ctrl + q` to quit the application at any time.
-
-### Connecting a Neurofeedback Device
-To connect your device, click on the brain icon in the system tray and select the Connect to Device option from the list.
-
-![Neurosys Device Connection Workflow](./docs/assets/screenshots/DeviceConnection-min.png)
-
-After completing the device connection workflow, you'll be able to configure other settings.
-
-## Changing the Score
-The first score option will be chosen automatically. To change the score, click on the brain icon in the system tray and select an alternative Score option from the list.
-
-> **Note**: Currently, there's only one EEG-related score (Alpha Score) and one HEG-related score (HEG Score). More scores will be added in the future.
-
-### Defining your Outputs
-To define your outputs, click on the brain icon in the system tray and select any of the available Outputs—as many as you like!
-
-![Neurosys Output Selection](./docs/assets/screenshots/OutputSelection-min.png)
-
-You can save your selection by clicking on the Save Settings tray option.
-
-## Development
-Built with [Commoners], Neurosis has a modular architecture that allows for easy extension and customization.
+Neurosys has a modular architecture that allows for easy extension and customization.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
@@ -60,16 +40,16 @@ Finally, build the SDK by running:
 pnpm build:sdk
 ```
 
-## Running the Application
-To run the application, use the following command:
+## Running the Template Application
+To run the Neurosys application, use the following command:
 ```bash
 pnpm start
 ```
 
-### Plugins
-Score and output plugins are automatically detected and loaded into the system tray.
+## Customizing the Plugins
+Neurosys declares plugins in the `commoners.config.ts` file. From this, score and output plugins are automatically detected and loaded into the system tray.
 
-#### Devices 
+### Devices 
 Each **devices** plugin has:
 1. A `devices` array, where each item has a `name`
 2. A dictionary of `protocols`
@@ -105,7 +85,7 @@ export const devices = new Devices([
 ])
 ```
 
-#### Features
+### Features
 Each **feature** plugin has an `id` field to allow references from other plugins, a `duration` (optional) in seconds that controls the amount of data received, and a `calculate` function that returns the relevant feature data.
 
 The `calculate` function receives an `info` object that includes all data organized by channel name, which has been windowed by the `duration` value. A `settings` value is also provided, which is provided by the requesting **score** plugin.
@@ -122,7 +102,7 @@ export const windowData = new Feature({
 
 See the [Scores](#score) section for an example of how to request this feature.
 
-#### Score
+### Score
 Each **score** plugin has a `label` field for the tray option names, `features` for feature requirements with related settings, and a `get` function that calculates a score value based on the resolved features.
 
 ```javascript
@@ -142,7 +122,7 @@ export const averageVoltage = Score({
 
 Once calculated, scores are auto-normalized using baseline data and min/max values detected during the session.
 
-#### Outputs
+### Outputs
 Each **output** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
 
 Use the `start` and `stop` fields to specify reactions to being enabled / disabled, including the management of visualization.
@@ -165,7 +145,7 @@ export const printOutput = new Output({
 })
 ```
 
-#### Commoners-Based Electron Support 
+### Commoners-Based Electron Support 
 To add Electron support for your plugin through Commoners, you can attach the `desktop` Commoners field to your plugin.
 
 Below is an example using an **Output** plugin.
@@ -188,11 +168,11 @@ printInMainProcess.desktop = {
 }
 ```
 
-#### Server-Side Plugins
+### Server-Side Plugins
 You can declare server-side plugins (SSPs) and expose them using a standardized REST API.
 
-##### Neurosys SDK
-The Neurosys SDK provides a set of utilities for creating server-side plugins, which can be used as follows:
+#### SDK
+`neurosys/services` provides a set of utilities for creating server-side plugins, which can be used as follows:
 
 ```javascript
 import { Output } from 'neurosys/plugins';
@@ -218,11 +198,11 @@ const server = createService({
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));
 ```
 
-##### REST API
+#### REST API
 
 All `GET` requests to the `.neurosys` sub-route return a collection of available plugins.
 
-###### Response Structure
+##### Response Structure
 ```json
 {
     "success": true,
@@ -241,31 +221,28 @@ All `GET` requests to the `.neurosys` sub-route return a collection of available
 }
 ```
 
-###### Error Structure
+##### Error Structure
 ```json
 { "success": false, "error": "Error message" }
 ```
 
 `POST` requests the `.neurosys` sub-route are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. 
 
-###### Response Structure 
+##### Response Structure 
 ```json
 { "success": true, "result": {} }
 ```
 
-###### Error Structure
+##### Error Structure
 ```json
 { "success": false, "error": "Error message" }
 ```
 
-### Common Issues
-#### Native Node Modules
+## Common Issues
+### Native Node Modules
 It's likely that `robot.js` (if included) will give you trouble when being used through Electron. To solve this, you can try the following:
 ```
 npm rebuild.js
 ```
 
 This will rebuild the necessary modules for your current operating system.
-
-
-[Commoners]: https://github.com/neuralinterfaces/commoners

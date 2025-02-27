@@ -1,18 +1,11 @@
 import { Device } from "../../../core/plugins"
 import { HEGClient } from "./client"
 
-export const name = 'HEGduino'
-export const category = 'fNIRS'
-export const protocols = {
-    ble: { label: 'Bluetooth', enabled: true },
-    serial: { label: 'USB', enabled: true },
-}
-
 // const montage = [ 'red', 'ir' ]
 
 export default new Device({
     name: "HEGduino",
-    type: "fNIRS",
+    type: "HEG",
     protocols: {
         ble: { label: 'Bluetooth' },
         serial: { label: 'USB' }
