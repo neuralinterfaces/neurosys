@@ -15,6 +15,10 @@
         "import": "./dist/plugins.mjs",
         "require": "./dist/plugins.cjs"
       },
+      "./features": {
+        "import": "./dist/features.mjs",
+        "require": "./dist/features.cjs"
+      },
       "./services": {
         "import": "./dist/services.mjs",
         "require": "./dist/services.cjs"

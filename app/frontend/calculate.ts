@@ -1,4 +1,4 @@
-import { score, outputs, features, getClient } from '../../sdk/neurosys/src/core/index'
+import { score, outputs, features, getClient } from 'neurosys'
 
 const scoreNormalization = {
     min: 0,

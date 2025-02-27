@@ -1,4 +1,4 @@
-import { enableBluetooth, enableSerial } from "./devices/types"
+import { enableBluetooth, enableSerial, setDeviceDiscoveryHandler } from "./devices/types"
 
 import { deviceOptions, onDeviceDisconnect, onShowDevices, registerDevices, toggleDeviceConnection } from "./devices/utils"
 import { loadSettings } from "./settings"
@@ -14,6 +14,9 @@ import { resolvePlugins } from "./commoners"
 import { Client, NotifyCallback } from "./plugins/types"
 
 export {
+
+    // Handlers
+    setDeviceDiscoveryHandler,
 
     // Grouped Methods
     outputs,
@@ -59,9 +62,10 @@ onDeviceDisconnect(async () => {
 })
 
 
-type deviceRequestHandler = (devices: any) => any // Device
-let deviceRequestHandler: null | Function = null
-export const setDeviceRequestHandler = async (callback) => deviceRequestHandler = callback
+type DeviceRequestHandler = (devices: any) => any // Device
+let deviceRequestHandler: null | DeviceRequestHandler = null
+export const setDeviceRequestHandler = async (callback: DeviceRequestHandler) => deviceRequestHandler = callback
+
 
 // Allow Device Type Selection with a User Action (to bypass security restrictions)
 onShowDevices(async () => {

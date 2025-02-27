@@ -1,6 +1,6 @@
-import { setVolume } from '../../../sdk/neurosys/src/services/volume';
-import { createService } from '../../../sdk/neurosys/src/services';
-import { Output } from '../../../sdk/neurosys/src/core/plugins';
+import { setVolume } from 'neurosys/services/volume';
+import { createService } from 'neurosys/services';
+import { Output } from 'neurosys/plugins';
 
 // import { createService } from 'neurosys/services';
 // import { setVolume } from 'neurosys/services/volume';

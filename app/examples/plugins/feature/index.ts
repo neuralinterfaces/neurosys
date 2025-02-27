@@ -1,4 +1,4 @@
-import { Feature } from "../../../../sdk/neurosys/src/core/plugins"
+import { Feature } from "neurosys/plugins";
 
 export default new Feature({
     id: 'window', // Unique identifier for the feature to be requested

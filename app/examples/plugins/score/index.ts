@@ -1,4 +1,4 @@
-import { Score } from "../../../../sdk/neurosys/src/core/plugins"
+import { Score } from "neurosys/plugins"
 
 export default new Score({
     label: 'Average Voltage',

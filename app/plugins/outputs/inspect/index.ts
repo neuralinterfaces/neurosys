@@ -1,4 +1,4 @@
-import { Output } from '../../../core/plugins/output'
+import { Output } from 'neurosys/plugins'
 
 export default new Output({
     label: 'Inspect Features',

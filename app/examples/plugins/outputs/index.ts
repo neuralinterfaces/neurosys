@@ -1,4 +1,4 @@
-import { Output } from "../../../../sdk/neurosys/src/core/plugins/output"
+import { Output } from "neurosys/plugins"
 
 export const print = new Output({
     label: 'Print',

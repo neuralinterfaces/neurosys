@@ -1,5 +1,3 @@
 // export * as robot from './robot'
 export { default as brightness } from './brightness'
 export { default as cursor } from './cursor'
-export { default as inspect } from './inspect'
-export { default as text } from './text'

@@ -1,9 +1,5 @@
-// import { Output, Feature, Devices, Score } from 'neurosys/plugins';
-// import { createService } from 'neurosys/services';
-
-import { Output, Feature, Devices, Score, Device } from '../../sdk/neurosys/src/core/plugins';
-import { createService } from '../../sdk/neurosys/src/services';
-
+import { Output, Feature, Devices, Score } from 'neurosys/plugins';
+import { createService } from 'neurosys/services';
 
 import examplePlugins from './plugins/index'
 

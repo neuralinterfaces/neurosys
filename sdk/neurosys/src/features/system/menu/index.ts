@@ -43,6 +43,7 @@ export default (icons: Icon) => {
                     outputs: "outputs"
                 }
 
+
                 const template = [
                     { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
                     { type: 'separator' },
@@ -52,7 +53,32 @@ export default (icons: Icon) => {
                     { label: 'Quit', role: 'quit' }
                 ]
 
-                const rebuildMenu = () => Menu.buildFromTemplate(template)
+                const rebuildMenu = () => {
+
+                    // Remove empty submenus
+                    const templateWithoutEmptySubmenus = template.filter(item => {
+                        if (item.submenu && item.submenu.length === 0) return false
+                        return true
+                    })
+
+                    
+                    // Remove settings menu item if no submenu is active
+                    const anyActiveSubmenus = templateWithoutEmptySubmenus.some(item => item.submenu)
+                    if (!anyActiveSubmenus) {
+                        const settingsIdx = templateWithoutEmptySubmenus.findIndex(item => item.id === "settings")
+                        if (settingsIdx > -1) templateWithoutEmptySubmenus.splice(settingsIdx, 1)
+                    }
+                        
+                    // Remove duplicate separators
+                    const noDuplicateSeparators = templateWithoutEmptySubmenus.reduce((acc, item, idx) => {
+                        if (item.type === 'separator' && acc[acc.length - 1]?.type === 'separator') return acc
+                        acc.push(item)
+                        return acc
+                    }, [])
+
+                    // Build the menu
+                    return Menu.buildFromTemplate(noDuplicateSeparators)
+                }
                 const updateContextMenu = () => tray.setContextMenu(rebuildMenu())
 
                 const toggleConnection = (on = true) => {
