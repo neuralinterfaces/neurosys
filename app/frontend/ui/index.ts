@@ -1,4 +1,4 @@
-import { setIgnoreMouseEvents } from '../../../sdk/neurosys/src/core/interactions'
+import { setIgnoreMouseEvents } from 'neurosys'
 
 export * from './DeviceDiscoveryList'
 export * from './DeviceList'

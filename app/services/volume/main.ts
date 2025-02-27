@@ -2,10 +2,6 @@ import { setVolume } from 'neurosys/services/volume';
 import { createService } from 'neurosys/services';
 import { Output } from 'neurosys/plugins';
 
-// import { createService } from 'neurosys/services';
-// import { setVolume } from 'neurosys/services/volume';
-// import { Output } from 'neurosys/plugins';
-
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 

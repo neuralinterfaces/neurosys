@@ -10,13 +10,22 @@ export const calculate = async (
   client: any = getClient(),
 ) => {
 
-  // Request the current score plugin
-  const plugin = await score.getActivePlugin()
+  if (!client) return // No client connected yet
 
-  if (!plugin) return
+  // Request the current score plugin
+  const scorePlugin = await score.getActivePlugin()
+  if (!scorePlugin) return // No score plugin selected
+
+  const featureSettings = scorePlugin.features
+  const featurePlugins = features.getPlugins(featureSettings)
 
   // Use score plugin to define the features to calculate
-  const calculatedFeatures = await features.calculate(plugin.features, client)
+  const calculatedFeatures: Record<string, any> = {}
+  for (const id in featurePlugins) {
+    const plugin = featurePlugins[id]
+    const settings = featureSettings[id]
+    calculatedFeatures[id] = await features.calculate(plugin, settings, client)
+  }
 
   // Calculate a score from the provided features
   const calculatedScore = await score.calculate(calculatedFeatures)

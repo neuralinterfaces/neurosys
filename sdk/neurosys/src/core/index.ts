@@ -1,14 +1,19 @@
 import { enableBluetooth, enableSerial, setDeviceDiscoveryHandler } from "./devices/types"
 
 import { deviceOptions, onDeviceDisconnect, onShowDevices, registerDevices, toggleDeviceConnection } from "./devices/utils"
-import { loadSettings } from "./settings"
 
+// System Plugin Utilities
+export { setIgnoreMouseEvents } from './interactions'
+export { loadSettings } from "./settings"
+
+// Plugin Management
 import * as outputs from './outputs'
 import * as score from './score'
 import * as features from './features'
 // import * as devices from './devices/'
 
-import { getAllServerSidePlugins } from "./services"
+// SSPs
+export { getAllServerSidePlugins } from "./services"
 import { DataCollection, getPluginType } from "./plugins"
 import { resolvePlugins } from "./commoners"
 import { Client, NotifyCallback } from "./plugins/types"
@@ -22,10 +27,6 @@ export {
     outputs,
     score,
     features,
-
-    // Utilities
-    getAllServerSidePlugins,
-    loadSettings
 }
 
 // export * from './devices'
