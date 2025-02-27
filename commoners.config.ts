@@ -5,15 +5,15 @@ import { devices, features, scores, outputs, system } from './sdk/neurosys/src/f
 import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from './sdk/neurosys/src/core/commoners'
 
 // Examples
-// import examplePlugins from './app/examples/plugins/index'
-// const exampleFeatures = examplePlugins.features
-// const exampleDevices = examplePlugins.devices
-// const exampleOutputs = examplePlugins.outputs
-// const exampleScores = examplePlugins.scores
-const exampleFeatures = {}
-const exampleDevices = {}
-const exampleOutputs = {}
-const exampleScores = {}
+import examplePlugins from './app/examples/plugins/index'
+
+const examples = {
+    ...examplePlugins,
+    features: {},
+    devices: {},
+    outputs: {},
+    scores: {}
+}
 
 // const DEBUG = false
 const DEBUG = true
@@ -56,7 +56,7 @@ const config = {
         // --------------------------------- Optional Plugins --------------------------------- //
         ...registerDevicePlugins({
             
-            ...exampleDevices,
+            ...examples.devices,
 
             ...devices
 
@@ -83,17 +83,17 @@ const config = {
         }),
             
         ...registerFeaturePlugins({
-            ...exampleFeatures,
+            ...examples.features,
             ...features
         }),
 
         ...registerOutputPlugins({
-            ...exampleOutputs,
+            ...examples.outputs,
             ...outputs
         }),
 
         ...registerScorePlugins({
-            ...exampleScores,
+            ...examples.scores,
             ...scores
         }),
     }
