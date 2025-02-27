@@ -1,11 +1,16 @@
 
-import { FeatureId, DeviceFilter, Client, Settings } from "./types"
+import { FeatureId, DeviceFilter, Settings, Data } from "./types"
+
+type FeatureInputs = {
+    data: Data,
+    sfreq: number,
+}
 
 type FeatureProps = {
     id: FeatureId,
     devices?: DeviceFilter
     duration?: number
-    calculate: (client: Client, settings: Settings) => any
+    calculate: (inputs: FeatureInputs, settings: Settings) => any
 }
 
 export class Feature {

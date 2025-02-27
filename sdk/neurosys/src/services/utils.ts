@@ -14,6 +14,7 @@ function encodeFunctions(obj: any): string {
   });
 }
 
+const SUBSCRIBABLE: Record<string, Function> = {}
 
 export const createServer = (handlers: Handlers) => {
 
@@ -29,27 +30,52 @@ export const createServer = (handlers: Handlers) => {
     
       const resolvedURL = req.url as string;
 
+      let result = { code: 404, error: "Not Found" }
+
+      // Handle post requests
       if (req.method === 'POST' && handlers.post) {
-        let body = '';
-        req.on('data', (chunk) => body += chunk.toString());
-        req.on('end', async () => {
-          res.writeHead(200, { 'Content-Type': "application/json" });
-          const { args, ctx } = JSON.parse(body);
-          const result = await handlers.post.call(ctx, resolvedURL, ...args);
-          res.end(JSON.stringify(result));
-        });
-        return;
+        result = await new Promise((resolve) => {;
+          let body = '';
+          req.on('data', (chunk) => body += chunk.toString());
+          req.on('end', async () => {
+            const { args, ctx } = JSON.parse(body);
+            const result = await handlers.post.call(ctx, resolvedURL, ...args);
+            resolve(result);
+          });
+        })
       }
 
-      if (req.method === 'GET' && handlers.get) {
-        const result = await handlers.get(resolvedURL);
-        res.end(encodeFunctions(result));
-        return;
+      // Handle get requests
+      else if (req.method === 'GET') {
+        const hasSubscribe = SUBSCRIBABLE[resolvedURL]
+
+        if (hasSubscribe) {
+          
+          res.writeHead(200, { 
+            'Content-Type': "text/event-stream",
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+          });
+
+          hasSubscribe((...args) => {
+            res.write(`data: ${encodeFunctions(args)}\n\n`);
+          })
+
+          // Don't end the response immediately
+          return req.on('close', () => {
+            res.end();
+          });
+        }
+
+        else if (handlers.get) result = await handlers.get(resolvedURL);
+        
       }
-    
-      // Fail on all other requests
-      res.writeHead(404, { 'Content-Type': "application/json" });
-      res.end(JSON.stringify({ error: "Not Found" }));
+
+      const { code = 200, subscribe, ...rest } = result;
+      if (subscribe) SUBSCRIBABLE[resolvedURL] = subscribe
+
+      res.writeHead(code, { 'Content-Type': "application/json" });
+      res.end(encodeFunctions(rest))
     });
     
     return server

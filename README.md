@@ -70,33 +70,36 @@ pnpm start
 Score and output plugins are automatically detected and loaded into the system tray.
 
 #### Devices 
-Each **devices** plugin has a `devices` array, where each item has a `name`, a dictionary of `protocols`, and a `connect` function that starts the data stream and provides metadata about the device.
+Each **devices** plugin has:
+1. A `devices` array, where each item has a `name`
+2. A dictionary of `protocols`
+3. A `connect` function that starts the data stream, uses the provided `notify` function to update the application with new data, and returns metadata about the structure of returned data
+4. A `disconnect` function that stops the data stream.
 
 ```javascript
 import { Devices, Device } from 'neurosys/plugins'
 
-export default new Devices([
-    new Device({
+export const devices = new Devices([
+       new Device({
         name: 'Random Data',
         protocols: { start: "Start" },
-        connect: ({ data, protocol }) => {
+        disconnect() {
+            clearInterval(this.__interval)
+        },
+        connect( { protocol }, notify ) {
 
+            const montage = [ 'Fp1', 'Fp2' ]
             const sfreq = 512
-            const channels = [ 'Fp1', 'Fp2' ]
+
+            // Genereate data every 1/sfreq seconds
             const interval = setInterval(() => {
-
-                channels.forEach((ch) => {
-                    const arr = data[ch] || (data[ch] = [])
-                    arr.push(Math.random() * 100)
-                })
-
+                const data = montage.reduce((acc, ch) => ({ ...acc, [ch]: [ Math.random() * 100 ] }), {})
+                notify({ data, timestamps: [ performance.now() ] })
             }, 1000 / sfreq)
 
-            return {
-                disconnect: () => clearInterval(interval),
-                sfreq,
-            }
+            this.__interval = interval  // Set the interval reference in the device context
 
+            return { sfreq }
         }
     })
 ])
@@ -110,19 +113,11 @@ The `calculate` function receives an `info` object that includes all data organi
 ```javascript
 import { Feature } from 'neurosys/plugins'
 
-export default new Feature({
-    id: 'window',
+export const windowData = new Feature({
+    id: 'window', // Unique identifier for the feature to be requested
     duration: 1, // Automatically window the data by 1s
     calculate({ data }, settings) { return data }
 })
-```
-
-This will be later referenced by the key used in the `commoners.config.ts` file (e.g. `window`).
-
-```javascript
-export default {
-    plugins: { window: windowFeaturePlugin }
-}
 ```
 
 See the [Scores](#score) section for an example of how to request this feature.
@@ -133,11 +128,12 @@ Each **score** plugin has a `label` field for the tray option names, `features` 
 ```javascript
 import { Score } from 'neurosys/plugins'
 
-export default Score({
+export const averageVoltage = Score({
     label: 'Average Voltage',
-    get({ window }) {
+    features: { window: true },
+    get({ window: windowedData }) {
 
-        const averagePerChannel = Object.entries(window).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})
+        const averagePerChannel = Object.entries(windowedData).reduce((acc, [ch, chData]) => ({ ...acc, [ch]: chData.reduce((acc, val) => acc + val, 0) / chData.length }), {})
 
         return Object.values(averagePerChannel).reduce((acc, val) => acc + val, 0) / Object.values(averagePerChannel).length
     }
@@ -154,7 +150,7 @@ Use the `start` and `stop` fields to specify reactions to being enabled / disabl
 ```javascript
 import { Output } from 'neurosys/plugins'
 
-export default new Output({
+export const printOutput = new Output({
     label: 'Print',
     start({ cache = 0 }) {
         const counter = cache + 1
@@ -165,7 +161,7 @@ export default new Output({
         console.log('Plugin deactivated')
         return { cache: counter }
     },
-    set: ({ score }, info) => console.log(`Score (${info.counter})`, score)
+    set: (features, info) => console.log(`Features (${info.counter})`, features)
 })
 ```
 
@@ -179,15 +175,15 @@ import { Output } from 'neurosys/plugins'
 
 const printInMainProcess = new Output({
     label: 'Print — Main Process',
-    set ({ score }) {
-        this.__commoners.send("score", score) 
+    set (features) {
+        this.__commoners.send("features", features) 
     }
 })
 
 // Hijack the desktop methods
 printInMainProcess.desktop = {
     load() { 
-        this.on("score", (_, score) => console.log("Score:", score) ) 
+        this.on("features", (_, features) => console.log("Features:", features) ) 
     }
 }
 ```
@@ -195,51 +191,71 @@ printInMainProcess.desktop = {
 #### Server-Side Plugins
 You can declare server-side plugins (SSPs) and expose them using a standardized REST API.
 
-> **Note:** Currently, Devices SSPs are **not** supported.
-
 ##### Neurosys SDK
 The Neurosys SDK provides a set of utilities for creating server-side plugins, which can be used as follows:
 
 ```javascript
-import { createService, registerOutputPlugins, Output } from 'neurosys/services';
+import { Output } from 'neurosys/plugins';
+import { createService } from 'neurosys/services';
+
+import * as examples from './examples'; // A collection of the plugins defined above
 
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
 const print = new Output({
-    label: "Print — Server-Side Plugin",
+    label: "Print (SSP)",
     set: ({ score }) => console.log("Score", score)
 });
 
-const server = createService({ ...registerOutputPlugins({ print }) });
+const server = createService({ 
+    device: examples.devices, // NOTE: Not yet supported
+    feature: examples.windowData,
+    score: examples.averageVoltage,
+    output: examples.printOutput
+ });
 
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));
 ```
 
 ##### REST API
 
-All `GET` requests return a collection of available plugins.
+All `GET` requests to the `.neurosys` sub-route return a collection of available plugins.
 
+###### Response Structure
 ```json
 {
-    "print": {
-        "info": {
-            "label": "Print — Server-Side Plugin",
-            "settings": {},
-            "start": null,
-            "stop": null,
-            "set": "[Function: set]"
-        },
-        "type": "output"
+    "success": true,
+    "result": {
+        "print": {
+            "info": {
+                "label": "Print — Example SSP",
+                "settings": {},
+                "start": null,
+                "stop": null,
+                "set": "[Function: set]"
+            },
+            "type": "output"
+        }
     }
 }
 ```
 
-`POST` requests are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. Resonses are structured as follows:
-
+###### Error Structure
 ```json
-{ "success": true, "result": null } // Success. Result can be anything.
-{ "success": false, "error": "Error message" } // Error.
+{ "success": false, "error": "Error message" }
+```
+
+`POST` requests the `.neurosys` sub-route are handled to reference `<type>/<name>/<method>`, receiving the necessary data for that plugin. 
+
+###### Response Structure 
+```json
+{ "success": true, "result": {} }
+```
+
+###### Error Structure
+```json
+{ "success": false, "error": "Error message" }
 ```
 
 ### Common Issues

@@ -1,6 +1,6 @@
 import { Output } from "../../../../sdk/neurosys/src/core/plugins/output"
 
-const print = new Output({
+export const print = new Output({
     label: 'Print',
     start({ cache = 0 }) {
         const counter = cache + 1
@@ -11,25 +11,20 @@ const print = new Output({
         console.log('Plugin deactivated')
         return { cache: counter }
     },
-    set: ({ score }, info) => console.log(`Score (${info.counter})`, score)
+    set: (features, info) => console.log(`Features (${info.counter})`, features)
 })
 
 
-const printInMainProcess = new Output({
+export const printInMainProcess = new Output({
     label: 'Print — Main Process',
-    set ({ score }) {
-        this.__commoners.send("score", score) 
+    set (features) {
+        this.__commoners.send("features", features) 
     }
 })
 
 // Hijack the desktop methods
 printInMainProcess.desktop = {
     load() { 
-        this.on("score", (_, score) => console.log("Score:", score) ) 
+        this.on("features", (_, features) => console.log("Features:", features) ) 
     }
-}
-
-export {
-    print,
-    printInMainProcess
 }

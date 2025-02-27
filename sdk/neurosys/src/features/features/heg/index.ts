@@ -1,8 +1,9 @@
 import { Feature } from "../../../core/plugins"
 
 export default new Feature({
-    id: 'HEG',
+    id: 'heg', // Feature ID for consumers
     devices: [ 'HEG' ],
+    duration: 1,
     calculate({ data }) {
 
         const averaged =  Object.entries(data).reduce((acc, [ch, chData]) => {

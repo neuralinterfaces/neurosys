@@ -8,6 +8,8 @@ export const protocols = {
     serial: { label: 'USB', enabled: true },
 }
 
+// const montage = [ 'red', 'ir' ]
+
 export default new Device({
     name: "HEGduino",
     type: "fNIRS",
@@ -15,24 +17,23 @@ export default new Device({
         ble: { label: 'Bluetooth' },
         serial: { label: 'USB' }
     },
-    async connect({ data, timestamps, protocol }) {
 
+    async disconnect() {
+        if (!this.__client) return
+        await this.__client?.disconnect()
+        this.__client = null
+    },
+
+    async connect({ protocol }, notify) {
         const client = new HEGClient()
         await client.connect({ protocol });
         await client.start();
-
         client.subscribe(({ red, ir, time }) => {
-            const redArray = data['red'] || (data['red'] = [])
-            const irArray = data['ir'] || (data['ir'] = [])
-            redArray.push(red)
-            irArray.push(ir)
-            timestamps.push(time)
+            notify({ data: { red: [ red ], ir: [ ir ] }, timestamps: [ time ] }) // Same time for all updates
         })
 
+        this.__client = client
 
-        return {
-            disconnect: () => client.disconnect(),
-            sfreq: client.sfreq
-        }
+        return { sfreq: client.sfreq }
     }
 })

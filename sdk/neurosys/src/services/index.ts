@@ -1,5 +1,6 @@
-import { getTransformedKey, getPluginType, NAMESPACES } from '../core/plugins';
-import type { Plugin, Plugins } from '../core/plugins';
+import { getPluginType } from '../core/plugins';
+import type { Plugin } from '../core/plugins';
+import { NEUROSYS_SUBROUTE } from './globals';
 import { createServer } from './utils';
 
 
@@ -7,18 +8,6 @@ export type ServerResponse = {
   success: boolean
   error?: string
 }
-
-export * from '../core/plugins/feature'
-export * from '../core/plugins/score'
-export * from  '../core/plugins/output'
-export * from  '../core/plugins/devices'
-
-// Use special handlers for service plugins
-const registerPlugins = (plugins: Plugins, namespace: string) => Object.entries(plugins).reduce((acc, [ key, plugin ]) => ({...acc, [getTransformedKey(namespace, key, true)]: plugin}), {})
-export const registerFeaturePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.features)
-export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.devices)
-export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.outputs)
-export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.scores)
 
 export const createService = (plugins: Record<string, Plugin> = {}) => {
 
@@ -31,28 +20,59 @@ export const createService = (plugins: Record<string, Plugin> = {}) => {
 
     return createServer({
       async post(url, ...args) {
-        
+
+        if (!url.startsWith(NEUROSYS_SUBROUTE)) return { code: 404, success: false, error: 'Not Found' }
+
           const resolvedPluginName = url.slice(1); // Plugin ID is the URL without the slash
-          const [ namespace, name, ...rest ] = resolvedPluginName.split('/');
-          const methodName = rest.join('/');
-
-          const pluginName = getTransformedKey(namespace, name, true);
+          const [ prefix, name, ...rest ] = resolvedPluginName.split('/');
           
-          const plugin = resolvedPluginInfo[pluginName]; // Plugin ID is the URL without the slash
-
+          const plugin = resolvedPluginInfo[name]; // Plugin ID is the URL without the slash
           if (!plugin) return { success: false, error: 'Plugin not found' };
 
+          const { type } = plugin || {}
+          const isDevices = type === 'devices'
+          const methodName = (isDevices ? rest.slice(1) : rest).join('/')
+
           try {
-            const resolved = plugin.info as Plugin
-            const method = resolved[methodName];
-            if (!method) return { success: false, error: 'Method not found' };
-            const result = await method.call(this, ...args); // NOTE: No refs from the start method for now
-            return { success: true, result };
+            const resolved = isDevices ? plugin.info.devices[rest[0]] : plugin.info 
+            if (!resolved[methodName]) return { success: false, error: 'Method not found' };
+
+            if (isDevices) {
+              if (methodName === 'connect') {
+                const [ info ] = args
+
+                let subscriber: any;
+
+                // Pass through to a EventSoure on the browser
+                const notify = (...args) => subscriber && subscriber(...args)
+                const result = await resolved[methodName](info, notify); // Use server context
+
+                return { 
+                  success: true, 
+                  result, 
+                  subscribe: (callback: Function) => subscriber = callback
+                }
+
+              // Disconnect
+              } else {
+                const result = await resolved[methodName](...args); // Use server context
+                return { success: true, result };
+              }
+            }
+
+            else {
+              const result = await resolved[methodName].call(this, ...args); // NOTE: No refs from the start method for now
+              return { success: true, result };
+            }
+
           } catch (error) {
             return { success: false, error: error.message };
           }
       },
-      get: async () => resolvedPluginInfo
+      get: async (url) => {
+        if (!url.startsWith(NEUROSYS_SUBROUTE)) return { code: 404, success: false, error: 'Not Found' }
+        return { success: true, result: resolvedPluginInfo }
+      }
 
     })
 

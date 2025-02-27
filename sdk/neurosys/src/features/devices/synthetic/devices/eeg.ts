@@ -13,7 +13,10 @@ export default new Device({
         generate: "Generate",
         load: { label: "Load File", enabled: false }
     },
-    connect: ({ data }) => {
+    disconnect() {
+        clearInterval(this.__interval)
+    },
+    connect({ protocol }, notify) {
 
         const componentOne = { freq: 10, amp: 10 }
         const componentTwo = { freq: 20, amp: 10 }
@@ -35,18 +38,17 @@ export default new Device({
 
             const durationToGenerate = (updateDuration / 1000) * updateFrequency
             const generated = generatedData(channelNames, components, sfreq, durationToGenerate)
+            const nSamples = generated[0].length
 
-            for (const [ i, samples ] of generated.entries()) {
-                const chName = channelNames[i]
-                const signal = data[chName] || ( data[chName] = [])
-                signal.push(...samples)
-            }
+            const organized = generated.reduce((acc, samples, i) => ({ ...acc, [channelNames[i]]: samples }), {})
+
+            const now = performance.now()
+            notify({ data: organized, timestamps: Array.from({ length: nSamples }, (_, i) => now) })
 
         }, updateFrequency);
 
-        return {
-            sfreq,
-            disconnect: () => clearInterval(interval)
-        }
+        this.__interval = interval
+
+        return { sfreq }
     }
 })

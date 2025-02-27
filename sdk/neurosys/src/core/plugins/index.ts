@@ -14,39 +14,24 @@ export * from './output'
 export * from './devices'
 
 const PREFIX = 'neurosys:'
+export const SERVICE_PREFIX = `${PREFIX}services:`
 
 // Plugin Managemement Features
-export const NAMESPACES = {
-    features: 'feature',
-    devices: 'devices',
-    outputs: 'outputs',
-    scores: 'score'
-}
-
-export const getTypeFromNamespace = (namespace: string) => {
-    switch (namespace) {
-        case NAMESPACES.features: return 'feature'
-        case NAMESPACES.devices: return 'devices'
-        case NAMESPACES.outputs: return 'output'
-        case NAMESPACES.scores: return 'score'
-        default: return null
-    }
-}
 
 export const getTransformedKey = (
-    namespace: string, 
+    type: string, 
     key: string,
-    isService: boolean = false // Not browser AND not in the commoners configuration
+    serviceId?: string // Not browser AND not in the commoners configuration
 ) => {
-    if (isService) return `${PREFIX}${namespace}:service:${key}`
-    return `${PREFIX}${namespace}:${key}`
+    if (serviceId) return `${SERVICE_PREFIX}${serviceId}:${type}:${key}`
+    return `${PREFIX}${type}:${key}`
 }
 
-export const getNamespace = (key: string) => {
+export const getEncodedType = (key: string) => {
     
     if (key.startsWith(PREFIX)) {
         const split = key.split(':')
-        return split[1]
+        return split[split.length - 2]
     }
 
     return null
@@ -65,21 +50,22 @@ export const getOriginalKey = (key: string) => {
 export const getPluginType = (encoded: string, plugin: Plugin): PluginType | null => {
 
     // Handle plugins that have been properly registered
-    const namespace = getNamespace(encoded)
-    if (namespace) return getTypeFromNamespace(namespace)
+    const encodedType = getEncodedType(encoded)
+    if (encodedType) return encodedType as PluginType
 
     // Handle plugins that have been directly passed based on classes
     if (plugin instanceof Output)  return 'output'
     if (plugin instanceof Score)   return 'score'
     if (plugin instanceof Feature) return 'feature'
-    if (plugin instanceof Devices)  return 'device'
+    if (plugin instanceof Devices) return 'devices'
+
     return null
 }
 
 
-const registerPlugins = (plugins: Plugins, namespace: string) => Object.entries(plugins).reduce((acc, [ key, plugin ]) => ({...acc, [getTransformedKey(namespace, key)]: plugin}), {})
+const registerPlugins = (plugins: Plugins, type: string) => Object.entries(plugins).reduce((acc, [ key, plugin ]) => ({...acc, [getTransformedKey(type, key)]: plugin}), {})
 
-export const registerFeaturePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.features)
-export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.devices)
-export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.outputs)
-export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, NAMESPACES.scores)
+export const registerFeaturePlugins = (plugins: Plugins) => registerPlugins(plugins, 'feature')
+export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, 'devices')
+export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, 'output')
+export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, 'score')

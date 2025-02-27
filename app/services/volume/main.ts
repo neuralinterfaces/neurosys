@@ -1,5 +1,6 @@
-import { getMuted, setVolume } from '../../../sdk/neurosys/src/services/volume';
-import { createService, Output, registerOutputPlugins } from '../../../sdk/neurosys/src/services';
+import { setVolume } from '../../../sdk/neurosys/src/services/volume';
+import { createService } from '../../../sdk/neurosys/src/services';
+import { Output } from '../../../sdk/neurosys/src/core/plugins';
 
 // import { createService } from 'neurosys/services';
 // import { setVolume } from 'neurosys/services/volume';
@@ -8,7 +9,7 @@ import { createService, Output, registerOutputPlugins } from '../../../sdk/neuro
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT
 
-const volumeOutputPlugin = new Output({
+const volume = new Output({
     label: "Volume",
     settings: {
         range: [ 0.1, 0.75 ],
@@ -24,9 +25,7 @@ const volumeOutputPlugin = new Output({
 });
 
 const server = createService({
-    ...registerOutputPlugins({
-        volume: volumeOutputPlugin,
-    })
+    volumeOutput: volume
 });
 
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));

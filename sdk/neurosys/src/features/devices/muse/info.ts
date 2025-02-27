@@ -10,7 +10,12 @@ export default new Device({
         ble: { label: 'Bluetooth' },
     },
 
-    async connect({ data }) {
+    async disconnect() {
+        if (!this.__client) return
+        await this.__client.disconnect()
+    },
+
+    async connect({ protocol }, notify) {
 
         const { DESKTOP, READY } = commoners
 
@@ -28,14 +33,11 @@ export default new Device({
         await client.start();
 
         client.eegReadings.subscribe(({ electrode, samples }) => {
-            const chName = channelNames[electrode]
-            const signal = data[chName] || ( data[chName] = [])
-            signal.push(...samples)
+            notify({ data: { [channelNames[electrode]]: samples }, timestamps: [ performance.now() ] })
         });
 
-        return {
-            disconnect: () => client.disconnect(),  
-            sfreq: EEG_FREQUENCY
-        }
+        this.__client = client
+
+        return { sfreq: EEG_FREQUENCY }
     }
 })

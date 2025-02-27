@@ -11,19 +11,20 @@ type Settings = {
 
 export default new Feature({
     id: 'bands',
+    duration: 3, // Max duration for windowing
     calculate(
         { data, sfreq },
         settings: Settings
     ) {
 
-        const { bands = {}, windowDuration = 1 } = settings
+        const { bands = {}, windowDuration } = settings
 
-        const window = [ -sfreq * windowDuration ]
+        const window = typeof windowDuration === 'number' ? [ -sfreq * windowDuration ] : undefined
         
         try {
             return Object.entries(data).reduce((acc, [ch, chData]) => {
 
-                const sliced = chData.slice(...window)
+                const sliced = window ? chData.slice(...window) : chData
                 const powers = calculateBandPower(
                     sliced,
                     sfreq,
