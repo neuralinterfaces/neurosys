@@ -70,33 +70,36 @@ pnpm start
 Score and output plugins are automatically detected and loaded into the system tray.
 
 #### Devices 
-Each **devices** plugin has a `devices` array, where each item has a `name`, a dictionary of `protocols`, and a `connect` function that starts the data stream and provides metadata about the device.
+Each **devices** plugin has:
+1. A `devices` array, where each item has a `name`
+2. A dictionary of `protocols`
+3. A `connect` function that starts the data stream, uses the provided `notify` function to update the application with new data, and returns metadata about the structure of returned data
+4. A `disconnect` function that stops the data stream.
 
 ```javascript
 import { Devices, Device } from 'neurosys/plugins'
 
 export const devices = new Devices([
-    new Device({
+       new Device({
         name: 'Random Data',
         protocols: { start: "Start" },
-        connect: ({ data, protocol }) => {
+        disconnect() {
+            clearInterval(this.__interval)
+        },
+        connect( { protocol }, notify ) {
 
+            const montage = [ 'Fp1', 'Fp2' ]
             const sfreq = 512
-            const channels = [ 'Fp1', 'Fp2' ]
+
+            // Genereate data every 1/sfreq seconds
             const interval = setInterval(() => {
-
-                channels.forEach((ch) => {
-                    const arr = data[ch] || (data[ch] = [])
-                    arr.push(Math.random() * 100)
-                })
-
+                const data = montage.reduce((acc, ch) => ({ ...acc, [ch]: [ Math.random() * 100 ] }), {})
+                notify({ data, timestamps: [ performance.now() ] })
             }, 1000 / sfreq)
 
-            return {
-                disconnect: () => clearInterval(interval),
-                sfreq,
-            }
+            this.__interval = interval  // Set the interval reference in the device context
 
+            return { sfreq }
         }
     })
 ])
@@ -187,8 +190,6 @@ printInMainProcess.desktop = {
 
 #### Server-Side Plugins
 You can declare server-side plugins (SSPs) and expose them using a standardized REST API.
-
-> **Note:** Currently, Devices SSPs are **not** supported.
 
 ##### Neurosys SDK
 The Neurosys SDK provides a set of utilities for creating server-side plugins, which can be used as follows:
