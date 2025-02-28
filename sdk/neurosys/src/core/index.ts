@@ -8,7 +8,7 @@ export { loadSettings } from "./settings"
 
 // Calculation Utilities
 export { Norm } from "./norms"
-export { calculate } from "./calculate"
+export { Protocol } from "./protocol"
 
 // Plugin Management
 import * as outputs from './outputs'

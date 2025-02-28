@@ -1,16 +1,23 @@
 import { resolvePlugins } from "./commoners"
-import type { RegisterFunction } from "./plugins"
+import type { RegisterFunction, Score } from "./plugins"
 
 export const onToggle = async (fn: Function) => {
   const { menu: { onScoreToggle } } = await resolvePlugins()
   onScoreToggle(fn)
 }
 
-const scoreOptions: Record<string, any> = {}
+type ScoreInfo = {
+  enabled: boolean,
+  get: Score['get'],
+  features: Score['features'],
+  __ctx: Record<string, any>
+}
+
+const scoreOptions: Record<string, ScoreInfo> = {}
 
 export const registerPlugin = async (
   identifier: string, 
-  plugin: any, 
+  plugin: Score, 
   register?: RegisterFunction
 ) => {
     
@@ -44,7 +51,7 @@ export const togglePlugin = (key: string, state?: boolean) => {
 }
 
 export const getActivePlugin = async () => {
-    return Object.values(scoreOptions).find(({ enabled }) => enabled)
+    return Object.values(scoreOptions).find(({ enabled }) => enabled) 
 }
   
 export const calculate = async (plugin: any, calculatedFeatures: any) => {

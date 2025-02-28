@@ -1,10 +1,9 @@
-import feature from "../../../../app/examples/plugins/feature"
 import { Feature, getOriginalKey } from "./plugins"
 import { Client } from "./plugins/types"
 
 type FeatureSettings = any
 type SettingsForFeatures = Record<string, FeatureSettings> 
-type FeatureCollection = Record<string, FeatureSettings>
+export type FeatureCollection = Record<string, Feature>
 
 const featureOptions: Record<string, Feature> = {}
 
@@ -47,4 +46,5 @@ export const calculate = (
     return plugin.calculate({ data, sfreq: collection.sfreq }, settings) // NOTE: Support multiple requesters in the future
 }
 
+export const getAllPlugins = () => ({ ...featureOptions })
 export const getPlugins = (features: SettingsForFeatures = {}) => Object.keys(features).reduce((acc, id) => featureOptions[id] ? { ...acc, [id]: featureOptions[id] } : acc, {}) as FeatureCollection

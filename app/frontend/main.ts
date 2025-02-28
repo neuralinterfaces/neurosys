@@ -1,9 +1,14 @@
 import './style.css'
 
-import { calculate, score, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
+import { Protocol, score, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
 
-const runCalculation = () => calculate(getClient())
+let protocol: Protocol
+const runCalculation = async () => {
+  if (!protocol) return
+  const client = getClient()
+  return score.getActivePlugin().then(plugin => plugin &&  protocol.calculate(client, plugin))
+}
 
 const { SERVICES, READY } = commoners
 
@@ -29,6 +34,10 @@ READY.then(async (PLUGINS) => {
   }
 
   console.log(`Service plugins loaded in ${performance.now() - loadStart}ms`)
+
+  const featurePlugins = features.getAllPlugins()
+  protocol = new Protocol(featurePlugins) // Initialize the protocol with the feature plugins
+
 
   // Load settings after all services are available
   loadSettings()
