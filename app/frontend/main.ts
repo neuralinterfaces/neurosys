@@ -1,9 +1,9 @@
 import './style.css'
 
-import { score, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings } from 'neurosys'
+import { calculate, score, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
-import { calculate } from './calculate'
 
+const runCalculation = () => calculate(getClient())
 
 const { SERVICES, READY } = commoners
 
@@ -35,14 +35,14 @@ READY.then(async (PLUGINS) => {
 
 
   // Start calculating
-  setInterval(calculate, UPDATE_INVERVAL)
+  setInterval(runCalculation, UPDATE_INVERVAL)
 
 })
 
 score.onToggle(async (key, enabled) => {
   const state = score.togglePlugin(key, enabled)
   await setValueInSettings(`score.${key}.enabled`, state)
-  calculate() // Set the plugin score immediately when toggled
+  runCalculation() // Set the plugin score immediately when toggled
 })
 
 outputs.onToggle(async (key, enabled) => {

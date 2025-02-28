@@ -6,6 +6,10 @@ import { deviceOptions, onDeviceDisconnect, onShowDevices, registerDevices, togg
 export { setIgnoreMouseEvents } from './interactions'
 export { loadSettings } from "./settings"
 
+// Calculation Utilities
+export { Norm } from "./norms"
+export { calculate } from "./calculate"
+
 // Plugin Management
 import * as outputs from './outputs'
 import * as score from './score'

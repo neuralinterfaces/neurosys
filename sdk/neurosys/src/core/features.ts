@@ -1,17 +1,16 @@
 import feature from "../../../../app/examples/plugins/feature"
-import { getOriginalKey } from "./plugins"
+import { Feature, getOriginalKey } from "./plugins"
 import { Client } from "./plugins/types"
 
 type FeatureSettings = any
-type UserFeatures = Record<string, FeatureSettings>
+type SettingsForFeatures = Record<string, FeatureSettings> 
+type FeatureCollection = Record<string, FeatureSettings>
 
-// type FeaturesByChannel<T> = Record<string, T>
-
-const featureOptions: Record<string, any> = {}
+const featureOptions: Record<string, Feature> = {}
 
 export const registerPlugin = (
   identifier: string, 
-  plugin: any
+  plugin: Feature
 ) => {
     const { id = getOriginalKey(identifier) } = plugin
     if (featureOptions[id]) return console.error('Feature plugin is already registered', id, plugin)
@@ -20,7 +19,7 @@ export const registerPlugin = (
 
 
 export const calculate = (
-  plugin: any,
+  plugin: Feature,
   settings: FeatureSettings,
   client: Client
 ): any | Promise<any> => {
@@ -48,4 +47,4 @@ export const calculate = (
     return plugin.calculate({ data, sfreq: collection.sfreq }, settings) // NOTE: Support multiple requesters in the future
 }
 
-export const getPlugins = (features: UserFeatures) => Object.keys(features).reduce((acc, id) => featureOptions[id] ? { ...acc, [id]: featureOptions[id] } : acc, {})
+export const getPlugins = (features: SettingsForFeatures = {}) => Object.keys(features).reduce((acc, id) => featureOptions[id] ? { ...acc, [id]: featureOptions[id] } : acc, {}) as FeatureCollection
