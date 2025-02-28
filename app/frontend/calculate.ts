@@ -28,15 +28,19 @@ export const calculate = async (
   }
 
   // Calculate a score from the provided features
-  const calculatedScore = await score.calculate(calculatedFeatures)
+  const rawScore = await score.calculate(scorePlugin, calculatedFeatures)
 
-
+  const { min: ogMin, max: ogMax } = scoreNormalization
+  
   // Normalize the score between 0 and 1
-  if (calculatedScore < scoreNormalization.min) scoreNormalization.min = calculatedScore
-  if (calculatedScore > scoreNormalization.max) scoreNormalization.max = calculatedScore
+  const lessThanMin = ogMin === undefined ? true : rawScore < ogMin 
+  const greaterThanMax = ogMax === undefined ? true : rawScore > ogMax
+  scoreNormalization.min = lessThanMin ? rawScore : scoreNormalization.min
+  scoreNormalization.max = greaterThanMax ? rawScore : scoreNormalization.max
 
   const { min, max } = scoreNormalization
-  const normalizedScore = Math.max(0, Math.min(1, (calculatedScore - min) / (max - min)))
+
+  const normalizedScore = Math.max(0, Math.min(1, (rawScore - min) / (max - min)))
 
   // Set the feedback from the calculated score and features
   outputs.set(normalizedScore, calculatedFeatures)

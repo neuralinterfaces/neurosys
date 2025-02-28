@@ -50,13 +50,11 @@ export const togglePlugin = (key: string, state?: boolean) => {
 }
 
 export const set = async (score: number, features: any) => {
-
-    if (score === null && features === null) return // No active score plugin
   
     for (const [ key, plugin ] of Object.entries(outputOptions)) {
-
-      const resolvedFeatures = plugin.__latest = { score, ...features ?? {} }
-
+      const resolvedFeatures = { score, ...features ?? {} }
       if (plugin.enabled) plugin.set(resolvedFeatures, plugin.__info)
+      plugin.__latest = resolvedFeatures
     }
+
 }

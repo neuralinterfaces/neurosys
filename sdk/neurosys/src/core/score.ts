@@ -47,9 +47,7 @@ export const getActivePlugin = async () => {
     return Object.values(scoreOptions).find(({ enabled }) => enabled)
 }
   
-export const calculate = async (calculatedFeatures: any) => {
-    const plugin = await getActivePlugin()
-    if (!plugin) return { features: null, score: null }
+export const calculate = async (plugin: any, calculatedFeatures: any) => {
     const { get, __ctx } = plugin
     return get.call(__ctx, calculatedFeatures)
   }
