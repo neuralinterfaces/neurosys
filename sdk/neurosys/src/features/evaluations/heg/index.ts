@@ -1,6 +1,6 @@
-import { Score } from "../../../core/plugins"
+import { Evaluate } from "../../../core/plugins"
 
-export default new Score({
+export default new Evaluate({
     label: 'HEG Score',
     features: { heg: true },
     get: ({ heg }) => heg['red'] / heg['ir']

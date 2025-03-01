@@ -11,8 +11,8 @@ To connect your device, click on the brain icon in the system tray and select th
 
 After completing the device connection workflow, you'll be able to configure other settings.
 
-## Changing the Score
-The first score option will be chosen automatically. To change the score, click on the brain icon in the system tray and select an alternative Score option from the list.
+## Changing the Score Evaluation
+The first evaluation option will be chosen automatically. To change the selection, click on the brain icon in the system tray and select an alternative Score option from the list.
 
 > **Note**: Currently, there's only one EEG-related score (Alpha Score) and one HEG-related score (HEG Score). More scores will be added in the future.
 

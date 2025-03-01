@@ -21,4 +21,4 @@ const mapPluginsForCommoners = (plugins: Plugins) => Object.entries(plugins).red
 export const registerFeaturePlugins = (plugins: Plugins) => pluginUtils.registerFeaturePlugins(mapPluginsForCommoners(plugins))
 export const registerDevicePlugins = (plugins: Plugins) => pluginUtils.registerDevicePlugins(mapPluginsForCommoners(plugins))
 export const registerOutputPlugins = (plugins: Plugins) => pluginUtils.registerOutputPlugins(mapPluginsForCommoners(plugins))
-export const registerScorePlugins = (plugins: Plugins) => pluginUtils.registerScorePlugins(mapPluginsForCommoners(plugins))
+export const registerEvaluationPlugins = (plugins: Plugins) => pluginUtils.registerEvaluationPlugins(mapPluginsForCommoners(plugins))

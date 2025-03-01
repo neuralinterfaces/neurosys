@@ -1,6 +1,6 @@
-import { Score } from "neurosys/plugins"
+import { Evaluate } from "neurosys/plugins"
 
-export default new Score({
+export default new Evaluate({
     label: 'Average Voltage',
     features: { window: true },
     get({ window: windowedData }) {

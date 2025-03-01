@@ -1,13 +1,13 @@
 import './style.css'
 
-import { Protocol, score, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
+import { Protocol, evaluation, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
 
 let protocol: Protocol
 const runCalculation = async () => {
   if (!protocol) return
   const client = getClient()
-  return score.getActivePlugin().then(plugin => plugin &&  protocol.calculate(client, plugin))
+  return evaluation.getActivePlugin().then(plugin => plugin &&  protocol.calculate(client, plugin))
 }
 
 const { SERVICES, READY } = commoners
@@ -48,10 +48,10 @@ READY.then(async (PLUGINS) => {
 
 })
 
-score.onToggle(async (key, enabled) => {
-  const state = score.togglePlugin(key, enabled)
-  await setValueInSettings(`score.${key}.enabled`, state)
-  runCalculation() // Set the plugin score immediately when toggled
+evaluation.onToggle(async (key, enabled) => {
+  const state = evaluation.togglePlugin(key, enabled)
+  await setValueInSettings(`evaluation.${key}.enabled`, state)
+  runCalculation() // Run the protocol immediately after toggling
 })
 
 outputs.onToggle(async (key, enabled) => {
@@ -76,7 +76,7 @@ outputs.onToggle(async (key, enabled) => {
   if (hasNotChanged) return
   if (!state) return
 
-  ref.set(__latest, info) // Set the plugin score immediately when toggled
+  ref.set(__latest, info) // Re-set the latest features to the output
 })
 
 

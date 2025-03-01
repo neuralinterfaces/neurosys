@@ -1,5 +1,5 @@
-import { devices, features, scores, outputs, system } from 'neurosys/features'
-import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerScorePlugins } from 'neurosys/commoners'
+import { devices, features, evaluations, outputs, system } from 'neurosys/features'
+import { registerDevicePlugins, registerFeaturePlugins, registerOutputPlugins, registerEvaluationPlugins } from 'neurosys/commoners'
 
 import * as customPlugins from "./app/plugins"
 
@@ -11,11 +11,11 @@ const examples = {
     features: {},
     devices: {},
     outputs: {},
-    scores: {}
+    evaluations: {}
 }
 
-const DEBUG = false
-// const DEBUG = true
+// const DEBUG = false
+const DEBUG = true
 
 const config = {
     name: "Neurosys",
@@ -27,14 +27,14 @@ const config = {
     // },
 
     services: {
-        // exampleSSPs: './app/examples/examples-in-service.ts',  // Example SSPs
+        exampleSSPs: './app/examples/examples-in-service.ts',  // Example SSPs
         volume: "./app/services/volume/main.ts" // Volume Control SSP
     },
 
     plugins: {
 
 
-        // --------------------------------- Required Plugins --------------------------------- //
+        // // --------------------------------- Required Plugins --------------------------------- //
         overlay: system.overlay({ debug: DEBUG }),
         menu: system.menu({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
         settings: system.settings, // Allow for managing and saving the active protocol
@@ -59,9 +59,9 @@ const config = {
             ...customPlugins.outputs    // Custom Outputs
         }),
 
-        ...registerScorePlugins({
-            ...examples.scores,         // Example Scores
-            ...scores                   // SDK Scores
+        ...registerEvaluationPlugins({
+            ...examples.evaluations,         // Example Evaluations
+            ...evaluations                   // SDK Evaluations
         }),
     }
 }

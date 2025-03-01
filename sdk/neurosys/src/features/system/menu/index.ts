@@ -14,9 +14,9 @@ export default (icons: Icon) => {
                 registerOutput: (key, plugin) => this.sendSync("outputs.register", { key, plugin }),
                 onOutputToggle: (callback) => this.on(`outputs.toggle`, (_, key, enabled) => callback(key, enabled)),
 
-                // Score Mechanisms
-                registerScore: (key, plugin) => this.sendSync("score.register", { key, plugin }),
-                onScoreToggle: (callback) => this.on(`score.toggle`, (_, key, enabled) => callback(key, enabled)),
+                // Evaluation Mechanisms
+                registerEvaluation: (key, plugin) => this.sendSync("evaluation.register", { key, plugin }),
+                onEvaluationToggle: (callback) => this.on(`evaluation.toggle`, (_, key, enabled) => callback(key, enabled)),
 
                 // Connection
                 toggleDeviceConnection: (on = true) => this.send("connection.toggle", on),
@@ -39,7 +39,7 @@ export default (icons: Icon) => {
                 const tray = new Tray(icon);
 
                 const SUBMENU_IDS = {
-                    score: "score",
+                    evaluation: "evaluation",
                     outputs: "outputs"
                 }
 
@@ -47,7 +47,7 @@ export default (icons: Icon) => {
                 const template = [
                     { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
                     { type: 'separator' },
-                    { id: SUBMENU_IDS.score, label: "Score", submenu: [] },
+                    { id: SUBMENU_IDS.evaluation, label: "Score", submenu: [] },
                     { id: SUBMENU_IDS.outputs, label: "Outputs", submenu: [] },
                     { type: 'separator' },
                     { label: 'Quit', role: 'quit' }
@@ -110,7 +110,7 @@ export default (icons: Icon) => {
                     updateContextMenu()
                 })
 
-                const REGISTERED = { outputs: {}, score: {} }
+                const REGISTERED = { outputs: {}, evaluation: {} }
                 const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.toggle`, key, enabled)
                 const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
                 const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
@@ -152,9 +152,9 @@ export default (icons: Icon) => {
                     ev.returnValue = success
                 })
 
-                this.on("score.register", (ev, { key, plugin }) => {
+                this.on("evaluation.register", (ev, { key, plugin }) => {
                     const { enabled = false, ...options } = plugin
-                    const success = registerNewItem(SUBMENU_IDS.score, key, { type: 'radio', checked: enabled, ...options }, true)
+                    const success = registerNewItem(SUBMENU_IDS.evaluation, key, { type: 'radio', checked: enabled, ...options }, true)
                     ev.returnValue = success
                 })
 

@@ -1,4 +1,4 @@
-import { Norm } from "../norms"
+import { Score } from "../score"
 import { MenuLabel } from "./types"
 
 
@@ -10,9 +10,9 @@ type Features = {
 
     // Default values provided by Neurosys
     score: number,
-    __score: Norm,
+    __score: Score,
 
-    // Score-requested features
+    // Evaluation-requested features
     [key: string]: any
 }
 

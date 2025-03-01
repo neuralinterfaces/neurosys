@@ -1,5 +1,5 @@
 import { resolvePlugins } from "./commoners"
-import { Norm } from "./norms"
+import { Score } from "./score"
 
 import type { RegisterFunction } from "./plugins"
 
@@ -50,7 +50,7 @@ export const togglePlugin = (key: string, state?: boolean) => {
   return plugin.enabled = typeof state === 'boolean' ? state : !plugin.enabled
 }
 
-export const set = async (__score: Norm, features: any) => {
+export const set = async (__score: Score, features: any) => {
     const score = __score.get()
   
     for (const [ key, plugin ] of Object.entries(outputOptions)) {

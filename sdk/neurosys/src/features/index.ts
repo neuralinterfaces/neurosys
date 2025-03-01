@@ -1,4 +1,4 @@
-export * as scores from './scores'
+export * as evaluations from './evaluations'
 export * as features from './features'
 export * as devices from './devices'
 export * as outputs from './outputs'

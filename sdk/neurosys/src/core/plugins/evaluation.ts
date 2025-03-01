@@ -2,19 +2,19 @@ import { FeatureId, MenuLabel, ResolvedFeature, Settings } from "./types"
 
 
 
-type ScoreProps = {
+type EvaluationProps = {
     label: MenuLabel,
     features?: Record<FeatureId, Settings>,
     get: (resolvedFeatures: Record<FeatureId, ResolvedFeature>) => any
 }
 
-export class Score {
+export class Evaluate {
 
-    label: ScoreProps['label']
-    features: ScoreProps['features']
-    get: ScoreProps['get']
+    label: EvaluationProps['label']
+    features: EvaluationProps['features']
+    get: EvaluationProps['get']
 
-    constructor(props: ScoreProps) {
+    constructor(props: EvaluationProps) {
         this.label = props.label
         this.features = props.features || {}
         this.get = props.get

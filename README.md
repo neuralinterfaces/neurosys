@@ -47,7 +47,7 @@ pnpm start
 ```
 
 ## Customizing the Plugins
-Neurosys declares plugins in the `commoners.config.ts` file. From this, score and output plugins are automatically detected and loaded into the system tray.
+Neurosys declares plugins in the `commoners.config.ts` file. From this, evaluation and output plugins are automatically detected and loaded into the system tray.
 
 ### Devices 
 Each **devices** plugin has:
@@ -88,7 +88,7 @@ export const devices = new Devices([
 ### Features
 Each **feature** plugin has an `id` field to allow references from other plugins, a `duration` (optional) in seconds that controls the amount of data received, and a `calculate` function that returns the relevant feature data.
 
-The `calculate` function receives an `info` object that includes all data organized by channel name, which has been windowed by the `duration` value. A `settings` value is also provided, which is provided by the requesting **score** plugin.
+The `calculate` function receives an `info` object that includes all data organized by channel name, which has been windowed by the `duration` value. A `settings` value is also provided, which is provided by the requesting **evaluation** plugin.
 
 ```javascript
 import { Feature } from 'neurosys/plugins'
@@ -100,15 +100,15 @@ export const windowData = new Feature({
 })
 ```
 
-See the [Scores](#score) section for an example of how to request this feature.
+See the [Evaluation](#evaluation) section for an example of how to request this feature.
 
-### Score
-Each **score** plugin has a `label` field for the tray option names, `features` for feature requirements with related settings, and a `get` function that calculates a score value based on the resolved features.
+### Evaluation
+Each **evaluation** plugin has a `label` field for the tray option names, `features` for feature requirements with related settings, and a `get` function that resolves a meaningful metric based on the resolved features.
 
 ```javascript
-import { Score } from 'neurosys/plugins'
+import { Evaluate } from 'neurosys/plugins'
 
-export const averageVoltage = Score({
+export const averageVoltage = Evaluate({
     label: 'Average Voltage',
     features: { window: true },
     get({ window: windowedData }) {
@@ -120,10 +120,10 @@ export const averageVoltage = Score({
 })
 ```
 
-Once calculated, scores are auto-normalized using baseline data and min/max values detected during the session.
+Evaluated metrics are auto-normalized into a **score** using baseline data and min/max values detected during the session.
 
 ### Outputs
-Each **output** plugin has a `label` field for the tray option name and a `set` function that consumes a score value.
+Each **output** plugin has a `label` field for the tray option name and a `set` function that consumes calculated features that are pre-populated with a `score` value and a `__score` metadata object.
 
 Use the `start` and `stop` fields to specify reactions to being enabled / disabled, including the management of visualization.
 
@@ -191,7 +191,7 @@ const print = new Output({
 const server = createService({ 
     device: examples.devices, // NOTE: Not yet supported
     feature: examples.windowData,
-    score: examples.averageVoltage,
+    evaluation: examples.averageVoltage,
     output: examples.printOutput
  });
 

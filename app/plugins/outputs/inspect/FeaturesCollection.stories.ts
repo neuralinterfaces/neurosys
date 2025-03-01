@@ -5,8 +5,8 @@ import type { FeaturesCollectionProps } from './FeaturesCollection';
 import { FeaturesCollection } from './FeaturesCollection';
 
 import { Bandpowers } from './Bandpowers';
-import { Score } from './Score';
-import { Norm } from '../../../../sdk/neurosys/src/core';
+import { ScoreComponent } from './Score';
+import { Score } from '../../../../sdk/neurosys/src/core';
 
 // Score stuff
 const randomValues = Array.from({ length: 10 }, () => Math.random());
@@ -23,7 +23,7 @@ const meta = {
   tags: [ 'plugin', 'output', 'inspect' ],
   render: ({ bands, score }) => {
     const bandsComponent = new Bandpowers({ data: bands });
-    const scoreComponent = new Score(score);
+    const scoreComponent = new ScoreComponent(score);
     
     // Animate the score
     if (score) setInterval(() => {
@@ -46,7 +46,7 @@ type Story = StoryObj<FeaturesCollectionProps>;
 export const ScoreDisplay: Story = {
     args: {
         score: {
-            info: new Norm({ raw: other, min, max })
+            info: new Score({ raw: other, min, max })
         }
     },
 };
@@ -54,7 +54,7 @@ export const ScoreDisplay: Story = {
 export const ScoreDisplayWithTarget: Story = {
     args: {
         score: {
-            info: new Norm({ raw: other, min, max }),
+            info: new Score({ raw: other, min, max }),
             target: [ min + range * 0.7, min + range * 0.9 ]
         }
     },

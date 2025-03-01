@@ -5,9 +5,9 @@
 //     beta: [13, 30],
 //     gamma: [31, 50]
 
-import { Score } from "../../../core/plugins"
+import { Evaluate } from "../../../core/plugins"
 
-export default new Score({
+export default new Evaluate({
     label: 'Alpha Score',
     features: {
         bands: { 

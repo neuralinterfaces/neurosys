@@ -7,12 +7,12 @@ export { setIgnoreMouseEvents } from './interactions'
 export { loadSettings } from "./settings"
 
 // Calculation Utilities
-export { Norm } from "./norms"
+export { Score } from "./score"
 export { Protocol } from "./protocol"
 
 // Plugin Management
 import * as outputs from './outputs'
-import * as score from './score'
+import * as evaluation from './evaluation'
 import * as features from './features'
 // import * as devices from './devices/'
 
@@ -29,7 +29,7 @@ export {
 
     // Grouped Methods
     outputs,
-    score,
+    evaluation,
     features,
 }
 
@@ -43,7 +43,7 @@ export const getClient = () => client
 const reset = () => client = null
 
 export const registerPlugins = async (plugins: any) => {
-  const { menu: { registerOutput, registerScore } } = await resolvePlugins() // Get registration functions
+  const { menu: { registerOutput, registerEvaluation } } = await resolvePlugins() // Get registration functions
 
   for (const key in plugins) {
     const plugin = plugins[key]
@@ -51,7 +51,7 @@ export const registerPlugins = async (plugins: any) => {
     if (type === 'output') await outputs.registerPlugin(key, plugin, registerOutput)
     else if (type === 'feature') features.registerPlugin(key, plugin)
     else if (type === 'devices') registerDevices(plugin)
-    else if (type === 'score') await score.registerPlugin(key, plugin, registerScore)
+    else if (type === 'evaluation') evaluation.registerPlugin(key, plugin, registerEvaluation)
     else if (type) console.warn(`Plugin ${key} not registered because of type ${type}`)
   }
 

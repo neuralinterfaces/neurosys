@@ -1,15 +1,15 @@
 import { Devices } from './devices'
 import { Feature } from './feature'
 import { Output } from './output'
-import { Score } from './score'
+import { Evaluate } from './evaluation'
 
 export type RegisterFunction = (key: string, info: any) => void
-export type Plugin = Output | Score | Feature | Devices
+export type Plugin = Output | Evaluate | Feature | Devices
 export type Plugins = Record<string, Plugin>
-export type PluginType = 'feature' | 'devices' | 'output' | 'score'
+export type PluginType = 'feature' | 'devices' | 'output' | 'evaluation'
 
 export * from './feature'
-export * from './score'
+export * from './evaluation'
 export * from './output'
 export * from './devices'
 
@@ -55,7 +55,7 @@ export const getPluginType = (encoded: string, plugin: Plugin): PluginType | nul
 
     // Handle plugins that have been directly passed based on classes
     if (plugin instanceof Output)  return 'output'
-    if (plugin instanceof Score)   return 'score'
+    if (plugin instanceof Evaluate)   return 'evaluation'
     if (plugin instanceof Feature) return 'feature'
     if (plugin instanceof Devices) return 'devices'
 
@@ -68,4 +68,4 @@ const registerPlugins = (plugins: Plugins, type: string) => Object.entries(plugi
 export const registerFeaturePlugins = (plugins: Plugins) => registerPlugins(plugins, 'feature')
 export const registerDevicePlugins = (plugins: Plugins) => registerPlugins(plugins, 'devices')
 export const registerOutputPlugins = (plugins: Plugins) => registerPlugins(plugins, 'output')
-export const registerScorePlugins = (plugins: Plugins) => registerPlugins(plugins, 'score')
+export const registerEvaluationPlugins = (plugins: Plugins) => registerPlugins(plugins, 'evaluation')

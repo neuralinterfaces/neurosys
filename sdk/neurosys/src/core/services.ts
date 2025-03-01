@@ -53,7 +53,7 @@ export async function sendToServicePlugin (
 
 const methodsForType = {
   output: ['start', 'set', 'stop'],
-  score: ['get'],
+  evaluation: ['get'],
   feature: ['calculate'],
   devices: [ 'connect', 'disconnect' ]
 }

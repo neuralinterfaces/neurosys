@@ -1,4 +1,4 @@
-import { Output, Feature, Devices, Score } from 'neurosys/plugins';
+import { Output, Feature, Devices, Device, Evaluate } from 'neurosys/plugins';
 import { createService } from 'neurosys/services';
 
 import examplePlugins from './plugins/index'
@@ -9,7 +9,7 @@ const port = process.env.PORT
 const CLASSES = {
     outputs: Output,
     features: Feature,
-    scores: Score,
+    evaluations: Evaluate,
     devices: Devices
 }
 
@@ -25,7 +25,7 @@ const server = createService({
     ...examples.devices,
     ...examples.features,
     ...examples.outputs,
-    ...examples.scores,
+    ...examples.evaluations,
 });
 
 server.listen(port, host, () => console.log(`Server running at http://${host}:${port}/`));

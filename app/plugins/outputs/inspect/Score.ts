@@ -1,12 +1,12 @@
 import { LitElement, html, css } from 'lit';
-import { Norm } from '../../../../sdk/neurosys/src/core';
+import { Score } from '../../../../sdk/neurosys/src/core';
 
 export type ScoreProps = {
-    info?: Norm
+    info?: Score
     target?: [number, number]
 }
 
-export class Score extends LitElement {
+export class ScoreComponent extends LitElement {
   static styles = css`
 
     :host > div {

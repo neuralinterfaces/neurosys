@@ -1,62 +1,37 @@
-import { resolvePlugins } from "./commoners"
-import type { RegisterFunction, Score } from "./plugins"
-
-export const onToggle = async (fn: Function) => {
-  const { menu: { onScoreToggle } } = await resolvePlugins()
-  onScoreToggle(fn)
+type ScoreProps = {
+    min?: number
+    max?: number
+    raw?: number
 }
 
-type ScoreInfo = {
-  enabled: boolean,
-  get: Score['get'],
-  features: Score['features'],
-  __ctx: Record<string, any>
-}
+export class Score {
 
-const scoreOptions: Record<string, ScoreInfo> = {}
+    min: number
+    max: number
+    raw: number
 
-export const registerPlugin = async (
-  identifier: string, 
-  plugin: Score, 
-  register?: RegisterFunction
-) => {
-    
-  if (scoreOptions[identifier]) return console.error('Score plugin is already registered', identifier, plugin)
-
-    if (!register) {
-      const PLUGINS = await resolvePlugins()
-      const { menu: { registerScore } } = PLUGINS
-      register = registerScore
+    constructor({ min = NaN, max = NaN, raw = NaN }: ScoreProps = {}) {
+        this.min = min
+        this.max = max
+        this.raw = raw
     }
 
-    const resolvedRegisterFn = register as RegisterFunction
+    reset() {
+        this.min = NaN
+        this.max = NaN
+        this.raw = NaN
+    }
 
-    const { 
-      label,    // Menu Information
-      enabled,  // Menu state
-      get,      // Score getter
-      features  // Features requested
-    } = plugin
+    update(value: number) {
+        this.min = isNaN(this.min) ? value : (value < this.min ? value : this.min);
+        this.max = isNaN(this.max) ? value : (value > this.max ? value : this.max);
+        return this.normalize(value)
+    }
 
-    scoreOptions[identifier] = { enabled, get, features, __ctx: {} }
-    resolvedRegisterFn(identifier, { label, enabled })
+    get() { return this.normalize(this.raw) }
 
+    normalize(value: number) {        
+        this.raw = value
+        return Math.max(0, Math.min(1, (value - this.min) / (this.max - this.min)))
+    }
 }
-
-export const getPlugin = (key: string) => scoreOptions[key]
-
-export const togglePlugin = (key: string, state?: boolean) => {
-  const plugin = getPlugin(key)
-  return plugin.enabled = typeof state === 'boolean' ? state : !plugin.enabled
-}
-
-export const getActivePlugin = async () => {
-    return Object.values(scoreOptions).find(({ enabled }) => enabled) 
-}
-  
-export const calculate = async (plugin: any, calculatedFeatures: any) => {
-    const { get, __ctx } = plugin
-    return get.call(__ctx, calculatedFeatures)
-  }
-  
-  

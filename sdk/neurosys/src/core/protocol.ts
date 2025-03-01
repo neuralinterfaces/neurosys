@@ -1,11 +1,11 @@
 
 // Neurosys Classes
-import { Norm } from './norms'
-import { Score } from './plugins'
+import { Score } from './score'
+import { Evaluate } from './plugins'
 
 // Utilities
 import * as outputs from './outputs'
-import * as score from './score'
+import { calculate as evaluate } from './evaluation'
 import * as features from './features'
 
 // Types
@@ -15,7 +15,7 @@ import type { Client } from './plugins/types'
 
 export class Protocol {
 
-    #norm = new Norm()
+    #score = new Score()
 
     features: FeatureCollection = {}
 
@@ -25,28 +25,27 @@ export class Protocol {
 
     async calculate( 
         client?: Client, 
-        scorePlugin?: Score 
+        evaluation?: Evaluate 
     ) {
 
-        if (!client || !scorePlugin) return // Invalid inputs
+        if (!client || !evaluation) return // Invalid inputs
     
-        const featureSettings = scorePlugin.features || {}
+        const featureSettings = evaluation.features || {}
     
-        // Use score plugin to define the features to calculate
+        // Use evaluation plugin to define the features to calculate
         const calculatedFeatures: Record<string, any> = {}
         for (const id in featureSettings) {
-        const plugin = this.features[id]
-        const settings = featureSettings[id]
-        calculatedFeatures[id] = await features.calculate(plugin, settings, client)
+            const plugin = this.features[id]
+            const settings = featureSettings[id]
+            calculatedFeatures[id] = await features.calculate(plugin, settings, client)
         }
     
         // Calculate a score from the provided features
-        const rawScore = await score.calculate(scorePlugin, calculatedFeatures)
-    
-        const normalizedScore = this.#norm.update(rawScore)
+        const evaluatedMetric = await evaluate(evaluation, calculatedFeatures)
+        const normalizedScore = this.#score.update(evaluatedMetric)
     
         // Set the feedback from the calculated score and features
-        outputs.set(this.#norm, calculatedFeatures)
+        outputs.set(this.#score, calculatedFeatures)
     
         return { score: normalizedScore, features: calculatedFeatures }
     }
