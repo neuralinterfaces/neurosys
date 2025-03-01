@@ -1,3 +1,4 @@
+import { Norm } from "../norms"
 import { MenuLabel } from "./types"
 
 
@@ -6,7 +7,12 @@ type StopRefs = any
 
 type Settings = Record<string, any>
 type Features = {
+
+    // Default values provided by Neurosys
     score: number,
+    __score: Norm,
+
+    // Score-requested features
     [key: string]: any
 }
 

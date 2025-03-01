@@ -11,40 +11,52 @@ export class Bandpowers extends LitElement {
       font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
-    #channels-container {
-        display: flex;
-        flex-direction: column;
+    table {
+        margin: 0;
         color: white;
         background: #111;
-        width: min-content;
         border-radius: 5px;
+        width: 100%;
+        padding: 5px;
+        font-size: 14px;
+        border-collapse: separate; /* Needed for border-spacing to work */
+        border-spacing: 10px; /* Sets gap between cells */
+    }
+        
+
+    th {
+        white-space: nowrap;
+        width: min-content;
+        font-weight: bold;
+        text-align: right;
     }
 
-    #channels-container .channel {
-        display: flex;
-        justify-content: end;
+    th:first-child {
+        white-space: nowrap;
+    }
+
+    th:last-child {
+        padding-left: 10px;
+        width: 100%;
+    }
+
+    table tr {
         align-items: center;
         gap: 20px;
-        padding: 10px 20px;
-
     }
 
-    #channels-container .channel:not(:first-child) {
-        padding-top: 0px
-    }
 
-    #channels-container .channel strong {
+    tr strong {
         font-size: 90%;
     }
 
-    #channels-container .bands {
+    tr .bands {
         display: flex;
-        width: 150px;
+        flex-grow: 1;
         height: 10px;
         border-radius: 5px;
         overflow: hidden;
         background: #444;
-        
     }
 
     .band {
@@ -85,19 +97,25 @@ export class Bandpowers extends LitElement {
   }
 
   render() {
-    return html`<div id="channels-container">
+
+    if (!Object.keys(this.data).length) return
+
+
+    return html`<table>
         ${Object.entries(this.data).map(([ch, bands]) => html`
-            <div class="channel">
-                <strong>${ch}</strong>
-                <div class="bands">
-                ${Object.entries(bands).map(([band, value]) => html`<div
-                    class="band ${band}"
-                    style="width: ${value * 100}%"
-                ></div>`)}
-                </div>
-            </div>
+            <tr>
+                <th>${ch}</th>
+                <th>
+                    <div class="bands">
+                        ${Object.entries(bands).map(([band, value]) => html`<div
+                            class="band ${band}"
+                            style="width: ${value * 100}%"
+                        ></div>`)}
+                    </div>
+                </th>
+            </tr>
         `)}
-    </div>`;
+    </table>`;
   }
 }
 

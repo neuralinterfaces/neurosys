@@ -1,35 +1,47 @@
 import { Output } from 'neurosys/plugins'
 
+
 export default new Output({
     label: 'Inspect Features',
 
     async start() {
 
+        const { FeaturesCollection } = await import('./FeaturesCollection')
+
+
+        const Score = (await import('./Score')).Score
+
         // Dynamic import to avoid conflict with Commoners
         const Bandpowers = (await import('./Bandpowers')).Bandpowers
 
-        const featuresDiv = document.createElement("div")
-        featuresDiv.style.position = "absolute"
-        featuresDiv.style.top = "50px";
-        featuresDiv.style.left = "10px";
-        featuresDiv.style.display = "flex";
-        featuresDiv.style.flexDirection = "column";
-        featuresDiv.style.gap = "10px";
+        const anchorDiv = document.createElement("div")
+        anchorDiv.style.position = "absolute"
+        anchorDiv.style.top = "50px";
+        anchorDiv.style.left = "10px";
 
-        const bandpowersDisplay = new Bandpowers()
-        featuresDiv.append(bandpowersDisplay)
-        document.body.append(featuresDiv)
+        const features = {
+            score: new Score(),
+            bands: new Bandpowers(),
+        }
+
+        const featuresCollection = new FeaturesCollection(Object.values(features))
+        anchorDiv.append(featuresCollection)
+        document.body.append(anchorDiv)
+
 
         return { 
-            container: featuresDiv,
-            bandpowers: bandpowersDisplay
+            anchor: anchorDiv,
+            features
         }
     },
-    stop({ container }) {
-        container.remove()
+    stop({ anchor }) {
+        anchor.remove()
     },
-    set({ bands }, info) {
-        const { bandpowers: bandEl } = info
-        if (bands) bandEl.data = bands
+    set({ bands, __score }, { features }) {
+        if (bands) features.bands.data = bands
+        if (__score) {
+            features.score.info = __score // No way to pass target yet...
+            features.score.requestUpdate() // Ensure re-render
+        }
     }
 })

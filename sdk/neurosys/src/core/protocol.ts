@@ -43,12 +43,10 @@ export class Protocol {
         // Calculate a score from the provided features
         const rawScore = await score.calculate(scorePlugin, calculatedFeatures)
     
-        this.#norm.update(rawScore)
-
-        const normalizedScore = this.#norm.normalize(rawScore)
+        const normalizedScore = this.#norm.update(rawScore)
     
         // Set the feedback from the calculated score and features
-        outputs.set(normalizedScore, calculatedFeatures)
+        outputs.set(this.#norm, calculatedFeatures)
     
         return { score: normalizedScore, features: calculatedFeatures }
     }
