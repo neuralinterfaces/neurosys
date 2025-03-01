@@ -125,4 +125,4 @@ export class ScoreComponent extends LitElement {
   }
 }
 
-customElements.define('score-component', Score);
+customElements.define('score-component', ScoreComponent);

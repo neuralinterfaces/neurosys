@@ -14,8 +14,8 @@ const examples = {
     evaluations: {}
 }
 
-// const DEBUG = false
-const DEBUG = true
+const DEBUG = false
+// const DEBUG = true
 
 const config = {
     name: "Neurosys",
@@ -27,12 +27,11 @@ const config = {
     // },
 
     services: {
-        exampleSSPs: './app/examples/examples-in-service.ts',  // Example SSPs
+        // exampleSSPs: './app/examples/examples-in-service.ts',  // Example SSPs
         volume: "./app/services/volume/main.ts" // Volume Control SSP
     },
 
     plugins: {
-
 
         // // --------------------------------- Required Plugins --------------------------------- //
         overlay: system.overlay({ debug: DEBUG }),

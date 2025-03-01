@@ -10,8 +10,7 @@ import * as features from './features'
 
 // Types
 import type { FeatureCollection } from './features'
-import type { Client } from './plugins/types'
-
+import { Client } from './client'
 
 export class Protocol {
 

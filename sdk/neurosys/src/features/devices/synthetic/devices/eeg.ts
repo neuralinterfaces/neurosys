@@ -8,7 +8,6 @@ const updateFrequency = 10
 
 export default new Device({
     name: "Synthetic EEG",
-    type: "EEG",
     protocols: {
         generate: "Generate",
         load: { label: "Load File", enabled: false }
@@ -43,12 +42,12 @@ export default new Device({
             const organized = generated.reduce((acc, samples, i) => ({ ...acc, [channelNames[i]]: samples }), {})
 
             const now = performance.now()
-            notify({ data: organized, timestamps: Array.from({ length: nSamples }, (_, i) => now) })
+            notify({ data: organized, timestamps: Array.from({ length: nSamples }, (_, i) => now) }, 'eeg')
 
         }, updateFrequency);
 
         this.__interval = interval
 
-        return { sfreq }
+        return { eeg: { sfreq } } 
     }
 })

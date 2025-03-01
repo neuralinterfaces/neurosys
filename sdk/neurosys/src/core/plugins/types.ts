@@ -4,22 +4,20 @@ export type Timestamps = number[]
 
 type DataUpdate = { data: Data, timestamps: Timestamps }
 
-export type NotifyCallback = (update: DataUpdate, collection?: string | symbol) => void // Use group to keep timestamps distinct
+export type NotifyCallback = (update: DataUpdate, collection: string) => void // Use group to keep timestamps distinct
 
-type DataCollectionProps = { sfreq: number }
+type DataStreamProps = { sfreq: number }
 
-type CollectionKey = string | symbol
-type ClientData = Record<CollectionKey, DataCollection> // Client data is stored as data collections
+type CollectionKey = string
+export type ClientDataStructure = Record<CollectionKey, DataStreamProps> |  DataStreamProps
 
-export type ClientDataStructure = Record<CollectionKey, DataCollectionProps> |  DataCollectionProps
-
-export class DataCollection {
+export class DataStream {
 
     data: Data = {}
     timestamps: Timestamps = []
-    sfreq: DataCollectionProps["sfreq"] = 0
+    sfreq: DataStreamProps["sfreq"] = 0
 
-    constructor({ sfreq }: DataCollectionProps) {
+    constructor({ sfreq }: DataStreamProps) {
         this.data = {}
         this.timestamps = []
         this.sfreq = sfreq
@@ -34,12 +32,7 @@ export class DataCollection {
         this.timestamps.push(...timestampsUpdate)
     }
 }
- 
 
-export type Client = {
-    data: ClientData
-    disconnect: () => void
-}
 
 export type FeatureId = string
 export type DeviceFilter = string[]

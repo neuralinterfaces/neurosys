@@ -74,12 +74,12 @@ export const devices = new Devices([
             // Genereate data every 1/sfreq seconds
             const interval = setInterval(() => {
                 const data = montage.reduce((acc, ch) => ({ ...acc, [ch]: [ Math.random() * 100 ] }), {})
-                notify({ data, timestamps: [ performance.now() ] })
+                notify({ data, timestamps: [ performance.now() ] }, 'eeg') // Route to the correct data collection
             }, 1000 / sfreq)
 
             this.__interval = interval  // Set the interval reference in the device context
 
-            return { sfreq }
+            return { eeg: { sfreq } } // Annotate with data collection
         }
     })
 ])

@@ -5,7 +5,6 @@ import { HEGClient } from "./client"
 
 export default new Device({
     name: "HEGduino",
-    type: "HEG",
     protocols: {
         ble: { label: 'Bluetooth' },
         serial: { label: 'USB' }
@@ -22,11 +21,11 @@ export default new Device({
         await client.connect({ protocol });
         await client.start();
         client.subscribe(({ red, ir, time }) => {
-            notify({ data: { red: [ red ], ir: [ ir ] }, timestamps: [ time ] }) // Same time for all updates
+            notify({ data: { red: [ red ], ir: [ ir ] }, timestamps: [ time ] }, 'heg') // Same time for all updates
         })
 
         this.__client = client
 
-        return { sfreq: client.sfreq }
+        return { heg : { sfreq: client.sfreq } }
     }
 })

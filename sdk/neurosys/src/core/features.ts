@@ -1,5 +1,5 @@
+import { Client } from "./client"
 import { Feature, getOriginalKey } from "./plugins"
-import { Client } from "./plugins/types"
 
 type FeatureSettings = any
 type SettingsForFeatures = Record<string, FeatureSettings> 
@@ -25,17 +25,17 @@ export const calculate = (
   
   const { duration } = plugin
 
-  const collections = client.data
-  // for (const cId in collections) {
-    // const collection = collections[cId]
-    const collection = collections['default'] // Only calculate for default collection
+  // for (const cId in client.streams) {
+    // const collection = client.streams[cId]
+
+    const stream = Object.values(client.streams)[0] // Only calculate for the first collection
 
     // Pre-window the data if necessary
-    let data = collection.data
+    let data = stream.data
     if (Object.keys(data).length === 0) return {} // No data = No features
 
     if (duration != undefined) {
-        const { sfreq } = collection
+        const { sfreq } = stream
         const window = [ -sfreq * duration ]
         data = Object.entries(data).reduce((acc, [ch, chData]) => {
           acc[ch] = chData.slice(...window)
@@ -43,7 +43,7 @@ export const calculate = (
         }, {})
     }
 
-    return plugin.calculate({ data, sfreq: collection.sfreq }, settings) // NOTE: Support multiple requesters in the future
+    return plugin.calculate({ data, sfreq: stream.sfreq }, settings) // NOTE: Support multiple requesters in the future
 }
 
 export const getAllPlugins = () => ({ ...featureOptions })

@@ -9,7 +9,7 @@ export default new Output({
         const { FeaturesCollection } = await import('./FeaturesCollection')
 
 
-        const Score = (await import('./Score')).Score
+        const ScoreComponent = (await import('./Score')).ScoreComponent
 
         // Dynamic import to avoid conflict with Commoners
         const Bandpowers = (await import('./Bandpowers')).Bandpowers
@@ -20,7 +20,7 @@ export default new Output({
         anchorDiv.style.left = "10px";
 
         const features = {
-            score: new Score(),
+            score: new ScoreComponent(),
             bands: new Bandpowers(),
         }
 

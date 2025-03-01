@@ -18,9 +18,9 @@ import * as features from './features'
 
 // SSPs
 export { getAllServerSidePlugins } from "./services"
-import { DataCollection, getPluginType } from "./plugins"
+import { getPluginType } from "./plugins"
 import { resolvePlugins } from "./commoners"
-import { Client, NotifyCallback } from "./plugins/types"
+import { System } from "./system"
 
 export {
 
@@ -37,10 +37,8 @@ export {
 export * from './plugins'
 export * from './settings'
 
-let client: null | Client = null
 
-export const getClient = () => client
-const reset = () => client = null
+export const neurosys = new System()
 
 export const registerPlugins = async (plugins: any) => {
   const { menu: { registerOutput, registerEvaluation } } = await resolvePlugins() // Get registration functions
@@ -60,10 +58,8 @@ export const registerPlugins = async (plugins: any) => {
 // ------------ Default Device Handling Behaviors ------------
 
 onDeviceDisconnect(async () => {
-  if (client) await client.disconnect()
-  reset()
+  await neurosys.reset()
   toggleDeviceConnection(true)
-  client = null
 })
 
 
@@ -78,27 +74,10 @@ onShowDevices(async () => {
   if (!deviceRequestHandler) return console.error('No device request handler set')
     
   const { device, protocol } = await deviceRequestHandler(deviceOptions)
+  
+  neurosys.connect(device, protocol)
 
-  reset()
 
-
-  const collections: Record<string | symbol, DataCollection> = {}
-
-  const notify: NotifyCallback = (update, collection = 'default') => {
-      const selected = collections[collection]
-      if (!selected) return console.warn('Data collection not found', collection)
-      selected.update(update) 
-  }
-
-  const structure = await device.connect({ protocol }, notify)
-
-  if (structure.sfreq) collections['default'] = new DataCollection(structure)
-  else for (const collection in structure) collections[collection] = new DataCollection(structure[collection])
-
-  client = { 
-    data: collections,
-    disconnect: () => device.disconnect()
-  }
 
   toggleDeviceConnection(false) // Success
 })

@@ -1,13 +1,12 @@
 import './style.css'
 
-import { Protocol, evaluation, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, getClient } from 'neurosys'
+import { Protocol, evaluation, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, neurosys } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
 
 let protocol: Protocol
 const runCalculation = async () => {
   if (!protocol) return
-  const client = getClient()
-  return evaluation.getActivePlugin().then(plugin => plugin &&  protocol.calculate(client, plugin))
+  return evaluation.getActivePlugin().then(plugin => plugin &&  protocol.calculate(neurosys.client, plugin))
 }
 
 const { SERVICES, READY } = commoners
@@ -16,7 +15,36 @@ const UPDATE_INVERVAL = 250
 
 const loadStart = performance.now()
 
+
 READY.then(async (PLUGINS) => {
+
+  const { menu } = PLUGINS
+
+  const menuStates = {
+    recording: {
+      save: {
+        label: 'Save Data',
+        enabled: false,
+        onClick: () => neurosys.client && neurosys.client.save()
+      },
+      start: {
+        label: 'Start Recording',
+        enabled: false,
+        onClick: () => {
+          if (!neurosys.client) return console.error('No client available')
+          menu.update('recording', menuStates.recording.stop)
+        }
+      },
+      stop: {
+        label: 'Stop Recording',
+        onClick: () => {
+          menuStates.recording.save.onClick() // Save the data before stopping
+          menu.update('recording', menuStates.recording.start)
+        }
+      }
+    }
+  }
+
 
   console.log(`Commoners loaded in ${performance.now() - loadStart}ms`)
 
@@ -42,10 +70,13 @@ READY.then(async (PLUGINS) => {
   // Load settings after all services are available
   loadSettings()
 
-
   // Start calculating
   setInterval(runCalculation, UPDATE_INVERVAL)
 
+  // menu.add('recording', menuStates.recording.start)
+  menu.add('recording', menuStates.recording.save)
+  neurosys.onDeviceConnected = () => menu.update('recording', { ...menuStates.recording.save, enabled: true })
+  neurosys.onDeviceDisconnected = () => menu.update('recording', menuStates.recording.save) // Reset
 })
 
 evaluation.onToggle(async (key, enabled) => {

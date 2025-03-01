@@ -1,6 +1,4 @@
-import { ClientDataStructure, Montage, NotifyCallback } from "./types"
-
-export { DataCollection } from './types'
+import type { ClientDataStructure, Montage, NotifyCallback } from "./types"
 
 type ProtocolId = string
 
@@ -12,11 +10,10 @@ type ProtocolInformation = string | { label: string, enabled?: false }
 
 type DeviceInformation = {
     name: string
-    type?: string
     protocols: Record<ProtocolId, ProtocolInformation>
     // montage: Montage // Montage getter
-    connect: (this: Device, request: ConnectionRequest, notify: NotifyCallback) => ClientDataStructure | Promise<ClientDataStructure>
-    disconnect: (this: Device) => void
+    connect?: (this: Device, request: ConnectionRequest, notify: NotifyCallback) => ClientDataStructure | Promise<ClientDataStructure>
+    disconnect?: (this: Device) => void
 }
 
 type DeviceProps = {
@@ -35,7 +32,6 @@ export class Devices {
 export class Device {
     
     name: DeviceInformation['name']
-    type: DeviceInformation['type']
     protocols: DeviceInformation['protocols']
     // montage: DeviceInformation['montage']
     connect: DeviceInformation['connect']
@@ -43,7 +39,6 @@ export class Device {
 
     constructor(props: DeviceInformation) {
         this.name = props.name
-        this.type = props.type
         this.protocols = props.protocols
         // this.montage = props.montage
         this.connect = props.connect

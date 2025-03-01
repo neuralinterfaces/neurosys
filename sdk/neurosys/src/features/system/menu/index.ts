@@ -7,6 +7,15 @@ export default (icons: Icon) => {
     return {
         assets: icons,
         load() {
+
+
+            const managedItems = {}
+
+            this.on("menu.click", (_, id) => {  
+                const onClick = managedItems[id]
+                if (onClick) onClick()
+            })
+
             return {
                 showDeviceSelector: (callback) => this.on("devices.show", () => callback()),
 
@@ -25,7 +34,26 @@ export default (icons: Icon) => {
                 // Settings
                 onSaveSettings: (callback) => this.on("settings.save", () => callback()),
                 loadSettings: (settings) => this.send("settings.load", settings),
-                enableSettings: (enabled) => this.send("settings.enabled", enabled)
+                enableSettings: (enabled) => this.send("settings.enabled", enabled),
+
+                // Menu Item Management
+                add: (id, options) => {
+                    const { onClick, ...rest } = options
+                    const result = this.sendSync("menu.add", { id, options: rest })
+                    if (result) managedItems[id] = onClick
+                    return result
+                },
+                update: (id, options) => {
+                    const { onClick, ...rest } = options
+                    const result = this.sendSync("menu.update", { id, options: rest })
+                    if (result) managedItems[id] = onClick
+                    return result
+                },
+                remove: (id) => {
+                    const result = this.sendSync("menu.remove", id)
+                    if (result) delete managedItems[id]
+                    return result
+                }
             }
         },
 
@@ -45,10 +73,10 @@ export default (icons: Icon) => {
 
 
                 const template = [
-                    { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
                     { type: 'separator' },
                     { id: SUBMENU_IDS.evaluation, label: "Score", submenu: [] },
                     { id: SUBMENU_IDS.outputs, label: "Outputs", submenu: [] },
+                    { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
                     { type: 'separator' },
                     { label: 'Quit', role: 'quit' }
                 ]
@@ -115,11 +143,10 @@ export default (icons: Icon) => {
                 const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
                 const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
 
-                const registerNewItem = (
+                const registerNewSubItem = (
                     id,
-                    key,
-                    options,
-                    updateAll = false
+                    key = id,
+                    options
                 ) => {
 
                     const registered = REGISTERED[id] ?? (REGISTERED[id] = {})
@@ -133,7 +160,7 @@ export default (icons: Icon) => {
                     const item = new MenuItem({
                         id: key,
                         ...options,
-                        click: () => updateAll ? updateAllStates(id) : sendState(id, key, item.checked)
+                        click: () => options.onClick && options.onClick(item)
                     })
 
                     submenu.push(item)
@@ -142,19 +169,60 @@ export default (icons: Icon) => {
                     registered[key] = true
 
                     return true
+                }
 
+                const registerNewItem = (id, options) => {
+                    const foundItem = template.find(item => item.id === id)
+                    if (foundItem) return false
+
+                    const indexOfFirstSeparator = template.findIndex(item => item.type === 'separator')
+                    const insertIdx = indexOfFirstSeparator > -1 ? indexOfFirstSeparator : template.length - 1
+
+                    const item = new MenuItem({
+                        id,
+                        ...options,
+                        click: () => options.onClick && options.onClick(item)
+                    })
+
+                    template.splice(insertIdx, 0, item)
+                    
+                    updateContextMenu()
+
+                    return true
+                }
+
+                const updateMenuItem = (id, options) => {
+                    const foundItem = template.find(item => item.id === id)
+                    if (!foundItem) return false
+                    Object.assign(foundItem, options)
+                    updateContextMenu()
+                    return true
                 }
 
                 // ------------------------- Define Setting Options ------------------------- \\
                 this.on("outputs.register", (ev, { key, plugin }) => {
                     const { enabled = false, ...options } = plugin
-                    const success = registerNewItem(SUBMENU_IDS.outputs, key, { type: 'checkbox', checked: enabled, ...options })
+
+                    const success = registerNewSubItem(SUBMENU_IDS.outputs, key, { 
+                        type: 'checkbox', 
+                        checked: enabled, 
+                        onClick: (item) => sendState(SUBMENU_IDS.outputs, key, item.checked),
+                        ...options 
+                    })
+
                     ev.returnValue = success
                 })
 
                 this.on("evaluation.register", (ev, { key, plugin }) => {
                     const { enabled = false, ...options } = plugin
-                    const success = registerNewItem(SUBMENU_IDS.evaluation, key, { type: 'radio', checked: enabled, ...options }, true)
+
+                    const success = registerNewSubItem(SUBMENU_IDS.evaluation, key, { 
+                        type: 'radio', 
+                        checked: enabled, 
+                        onClick: () =>  updateAllStates(SUBMENU_IDS.evaluation),
+                        ...options 
+                    })
+
                     ev.returnValue = success
                 })
 
@@ -184,6 +252,28 @@ export default (icons: Icon) => {
                     }
 
                     updateContextMenu()
+                })
+
+                this.on("menu.add", (ev, { id, options }) => {
+                    const success = registerNewItem(id, { ...options, onClick: () => this.send("menu.click", id) })
+                    ev.returnValue = success
+                })
+
+                this.on("menu.update", (ev, { id, options }) => {
+                    const success = updateMenuItem(id, { ...options })
+                    ev.returnValue = success
+                })
+
+                this.on("menu.remove", (ev, id) => {
+                    const foundItem = template.find(item => item.id === id)
+                    if (!foundItem) return ev.returnValue = false
+
+                    const submenu = foundItem.submenu as any[]
+                    const idx = submenu.findIndex(item => item.id === id)
+                    if (idx > -1) submenu.splice(idx, 1)
+
+                    updateContextMenu()
+                    ev.returnValue = true
                 })
 
             }

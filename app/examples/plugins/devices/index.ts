@@ -1,7 +1,7 @@
 import { Device, Devices } from "neurosys/plugins";
 
 const collectionInfo = {
-    default: {
+    eeg: {
         montage: [ 'Fp1', 'Fp2' ],
         sfreq: 512
     },
@@ -28,12 +28,12 @@ export default new Devices([
             // Genereate data every 1/sfreq seconds
             const interval = setInterval(() => {
                 const data = montage.reduce((acc, ch) => ({ ...acc, [ch]: [ Math.random() * 100 ] }), {})
-                notify({ data, timestamps: [ performance.now() ] })
+                notify({ data, timestamps: [ performance.now() ] }, 'eeg')
             }, 1000 / sfreq)
 
             this.__interval = interval  // Set the interval reference in the device context
 
-            return { sfreq }
+            return { eeg: { sfreq } }
         }
     }),
 
