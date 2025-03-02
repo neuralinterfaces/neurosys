@@ -1,7 +1,10 @@
 import './style.css'
 
-import { evaluation, outputs, setDeviceRequestHandler, setDeviceDiscoveryHandler, getAllServerSidePlugins, neurosys } from 'neurosys'
+import { evaluation, outputs, setDeviceDiscoveryHandler, getAllServerSidePlugins, System } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
+
+
+const neurosys = new System()
 
 // // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
 // const searchParams = new URLSearchParams(window.location.search)
@@ -90,8 +93,18 @@ READY.then(async (PLUGINS) => {
 
   // menu.add('recording', MENU_STATES.recording.start)
   menu.add('recording', MENU_STATES.recording.save)
+  
   neurosys.onDeviceConnected = () => menu.update('recording', { ...MENU_STATES.recording.save, enabled: true })
-  neurosys.onDeviceDisconnected = () => menu.update('recording', MENU_STATES.recording.save) // Reset
+
+  const { menu: { onDeviceDisconnect } } = await READY
+
+  onDeviceDisconnect(async () => {
+    neurosys.reset() // Reset the system
+    menu.update('recording', MENU_STATES.recording.save) // Reset the recording button
+    const { menu: { toggleDeviceConnection } } = await READY
+    toggleDeviceConnection(true) // Reset the device connection button
+  })
+  
 })
 
 evaluation.onToggle(async (key, enabled) => {
@@ -138,58 +151,66 @@ outputs.onToggle(async (key, enabled) => {
 })
 
 
-setDeviceRequestHandler(async (devices) => {
 
-  return new Promise((resolve, reject) => {
+// Allow Device Type Selection with a User Action (to bypass security restrictions)
+READY.then((PLUGINS) => {
 
-    const list = new DeviceList({
-      devices,
+  const { menu } = PLUGINS
 
-      // Success
-      onSelect: async (device, protocol) => {
-        resolve({ device, protocol })
-        modal.close()
-      }
+  menu.showDeviceSelector(async () => {
+
+    const { device, protocol } = await new Promise((resolve, reject) => {
+      const list = new DeviceList({
+        devices: neurosys.plugins.devices,
+
+        // Success
+        onSelect: async (device, protocol) => {
+          resolve({ device, protocol })
+          modal.close()
+        }
+      })
+
+      const modal = createModal({ title: 'Neurofeedback Devices', content: list })
+
+      modal.addEventListener('close', () => {
+        modal.remove()
+        reject('No device selected')
+      })
+
+      document.body.append(modal)
+      modal.showModal()
     })
 
-    const modal = createModal({ title: 'Neurofeedback Devices', content: list })
-
-    modal.addEventListener('close', () => {
-      modal.remove()
-      reject('No device selected')
-    })
-
-    document.body.append(modal)
-    modal.showModal()
+    neurosys.connect(device, protocol)
+    menu.toggleDeviceConnection(false) // Success
   })
-
 })
 
 
-setDeviceDiscoveryHandler(async (onSelect) => {
+  setDeviceDiscoveryHandler(async (onSelect) => {
 
-    let device = '';
+      let device = '';
 
-    const onModalClosed = () => {
-      onSelect(device)
-      modal.remove()
-    }
+      const onModalClosed = () => {
+        onSelect(device)
+        modal.remove()
+      }
 
-    const list = new DeviceDiscoveryList({ 
-      emptyMessage: 'Searching...',
-      onSelect: (deviceId) => {
-        device = deviceId
-        modal.close()
-      } 
-    })
-  
-    const modal = createModal({ title: 'Discovered USB Devices',  content: list })
-    document.body.append(modal)
-    modal.showModal()
-
-    modal.addEventListener('close', onModalClosed)
-  
+      const list = new DeviceDiscoveryList({ 
+        emptyMessage: 'Searching...',
+        onSelect: (deviceId) => {
+          device = deviceId
+          modal.close()
+        } 
+      })
     
-    return (devices) => list.devices = devices
+      const modal = createModal({ title: 'Discovered USB Devices',  content: list })
+      document.body.append(modal)
+      modal.showModal()
 
-})
+      modal.addEventListener('close', onModalClosed)
+    
+      
+      return (devices) => list.devices = devices
+
+  })
