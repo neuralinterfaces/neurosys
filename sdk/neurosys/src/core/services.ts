@@ -46,9 +46,10 @@ export async function sendToServicePlugin (
     const resolvedUrl = getURL(url, pathname)
 
     const ctx = this ?? {}
-    const result = await fetch(resolvedUrl, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
-    if (!result.success) throw new Error(result.error)
-    return result.result
+    const { success, result, ctx: returnedContext, error } = await fetch(resolvedUrl, { method: 'POST',  body: JSON.stringify({ args, ctx }) }).then(res => res.json())
+    if (!success) throw new Error(error)
+    if (returnedContext) Object.assign(this, returnedContext) // Update the context if it was returned
+    return result
 }
 
 const methodsForType = {

@@ -40,7 +40,7 @@ export const createServer = (handlers: Handlers) => {
           req.on('end', async () => {
             const { args, ctx } = JSON.parse(body);
             const result = await handlers.post.call(ctx, resolvedURL, ...args);
-            resolve(result);
+            resolve({ ...result , ctx }); // Send back the context
           });
         })
       }

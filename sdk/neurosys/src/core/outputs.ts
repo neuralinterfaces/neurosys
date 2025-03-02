@@ -1,10 +1,10 @@
-import { Output } from "./plugins"
+import { Output, Context } from "./plugins"
+
 
 export type EnhancedOutputPlugin = Output & {
   enabled: boolean,
-  __commoners?: any,
-  __latest: Record<string, any>,
-  __info: Record<string, any>
+  __latest?: Record<string, any>,
+  __ctx: Context
 }
 
 export const registerPlugin = (
@@ -12,8 +12,6 @@ export const registerPlugin = (
 ) => {
     const { __commoners } = plugin
     const copy = new Output(plugin) as EnhancedOutputPlugin
-    copy.__commoners = __commoners
-    copy.__latest = {}
-    copy.__info = {}
+    copy.__ctx = { commoners: __commoners } // NOTE: Resolving settings later
     return copy
 }

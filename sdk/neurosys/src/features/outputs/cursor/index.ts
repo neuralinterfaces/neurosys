@@ -52,16 +52,16 @@ export default new Output({
 
         document.body.append(cursor)
 
+        this.states = outputs
 
-        return outputs
     },
 
-    set({ score }, info) {
-        info.score = score
+    set({ score }) {
+        this.states.score = score
     },
 
-    stop(outputs) {
-        outputs.cursor.remove()
-        outputs.animate = false
+    stop() {
+        this.states.cursor.remove()
+        this.states.animate = false
     }
 })

@@ -29,15 +29,16 @@ export default new Output({
         document.body.append(anchorDiv)
 
 
-        return { 
+        this.states = { 
             anchor: anchorDiv,
             features
         }
     },
-    stop({ anchor }) {
-        anchor.remove()
+    stop() {
+        this.states.anchor.remove()
     },
-    set({ bands, __score }, { features }) {
+    set({ bands, __score }) {
+        const { features } = this.states
         if (bands) features.bands.data = bands
         if (__score) {
             features.score.info = __score // No way to pass target yet...

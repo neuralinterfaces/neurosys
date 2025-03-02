@@ -1,11 +1,14 @@
 import { Score } from "../score"
 import { MenuLabel } from "./types"
 
+type SettingsSchema = Record<string, any>
+type ResolvedSettings = Record<string, any>
 
-type StartRefs = any
-type StopRefs = any
+export type Context = {
+    settings: ResolvedSettings,
+    commoners?: Record<string, any>, // Commoners utilities
+  }
 
-type Settings = Record<string, any>
 type Features = {
 
     // Default values provided by Neurosys
@@ -18,25 +21,29 @@ type Features = {
 
 type OutputProps = {
     label: MenuLabel,
-    settings?:Settings,
-    start?: (refs: StopRefs) => StartRefs,
-    set: (features: Features, refs: StartRefs) => void,
-    stop?: (refs: StartRefs) => StopRefs
+    settings?: SettingsSchema,
+    start?: (this: Context) => void,
+    set: ( this: Context, features: Features, resolvedSettings: ResolvedSettings ) => void,
+    stop?: (this: Context) => void
 }
 
 export class Output {
 
     label: OutputProps['label']
-    settings: Settings
+    settings: SettingsSchema
+
     start: OutputProps['start']
     stop: OutputProps['stop']
+
     set: OutputProps['set']
 
     constructor(props: OutputProps) {
+
         this.label = props.label
-        this.settings = props.settings || {}
+
         this.start = props.start
         this.stop = props.stop
         this.set = props.set
+        this.settings = props.settings ?? {}
     }
 }

@@ -11,6 +11,7 @@ import type { EnhancedOutputPlugin } from "./outputs"
 // Utilities
 import { calculate as evaluate } from './evaluation'
 import { Score } from "./score"
+import { getTemplate, resolveSchema } from "./plugins/utils"
 
 type OutputSettings = Record<string, EnhancedOutputPlugin>
 type EvaluationSettings = Record<string, EnhancedEvaluatePlugin>
@@ -34,7 +35,6 @@ export class Protocol {
     constructor(settings: ProtocolSettings, system: System) {
         Object.assign(this, settings)
         this.#system = system
-        console.log('Protocol loaded', JSON.parse(JSON.stringify(this)))
         this.reset()
     }
 
@@ -42,16 +42,23 @@ export class Protocol {
         this.#score = new Score()
     }
 
-    update(type: keyof ProtocolSettings, plugin: string, settings = {}) {
+    update(
+        type: keyof ProtocolSettings, 
+        plugin: string, 
+        settings = {}
+    ) {
+
         const collection = this[type]
-        const oldValue = collection[plugin]
+        const oldSettings = structuredClone(collection[plugin])
 
         Object.assign(collection[plugin] ?? (collection[plugin] = {}), settings)
 
-        const isOnlyDisabled = typeof settings === 'object' && Object.keys(settings).length <= 1 && !settings.enabled
+        // Delete from the collection if the plugin is only disabled
+        const isOnlyDisabled = typeof collection[plugin] === 'object' && Object.keys(collection[plugin]).length <= 1 && !collection[plugin].enabled
         if (isOnlyDisabled) delete collection[plugin]     
         
-        const hasChanged = JSON.stringify(oldValue) !== JSON.stringify(collection[plugin])
+        const newSettings = collection[plugin]
+        const hasChanged = JSON.stringify(oldSettings) !== JSON.stringify(newSettings)
 
         if (type === 'evaluations' && hasChanged) this.reset() // Reset the score if the evaluation has changed
 
@@ -90,20 +97,30 @@ export class Protocol {
         const normalizedScore = this.#score.update(evaluatedMetric)
 
         // Get active outputs
-        const activeOutputs = Object.entries(this.outputs).filter(([ _, value ]) => value.enabled).map(([key]) => key)
-        const outputs = activeOutputs.reduce((acc, key) => [ ...acc, allPlugins.output[key] ], []) // Use protocol settings to get active output plugins
+        const activeOutputEntries = Object.entries(this.outputs).filter(([ _, value ]) => value.enabled)
+
+        // Use protocol settings to get active output plugins with settings
+        // NOTE: Move this to only calculate once when the settings are updated
+        const outputInfo = activeOutputEntries.reduce((acc, [ key, { settings = {} } ]) => {
+            const plugin = allPlugins.output[key]
+            const schema = resolveSchema(plugin.settings, settings) || {}
+            const data = getTemplate(schema, settings)
+            return { ...acc, [key]: { plugin, settings: data } }
+        }, {})
 
         // Set the feedback from the calculated score and features
         const inputs = { score: normalizedScore, __score: this.#score, ...calculatedFeatures }
 
-        outputs.map(async (plugin) => {
+        Object.values(outputInfo).map(async ({ plugin, settings }) => {
 
-            await plugin.set(
+            plugin.__ctx.settings = settings // Set the settings in the context
+
+            await plugin.set.call(
+                plugin.__ctx, // Context
                 inputs, // Features
-                plugin.__info // Context
             )
 
-            plugin.__latest = inputs
+            plugin.__latest = inputs // Allow recalculation
         })
 
         return inputs

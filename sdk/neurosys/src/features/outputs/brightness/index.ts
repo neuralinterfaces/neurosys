@@ -3,7 +3,16 @@ import { Output } from "../../../core/plugins/output"
 export default new Output({
     label: 'Brightness',
     settings: {
-        range: [ 0.3, 1 ],
+        properties: {
+            range: {
+                type: "array",
+                items: { type: "number" },
+                minItems: 2,
+                maxItems: 2,
+                default: [0.3, 1]
+            }
+        },
+        required: ["range"]
     },
     stop () {
         document.body.style.backgroundColor = "" // Reset

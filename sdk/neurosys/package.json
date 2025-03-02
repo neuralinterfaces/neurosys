@@ -1,52 +1,53 @@
 {
-    "name": "neurosys",
-    "version": "0.0.2",
-    "description": "An SDK for system-level neurofeedback",
-    "type": "module",
-    "exports": {
-      ".": {
-        "import": "./dist/main.mjs",
-        "require": "./dist/main.cjs"
-      },
-      "./commoners": {
-        "import": "./dist/commoners.mjs",
-        "require": "./dist/commoners.cjs"
-      },
-      "./plugins": {
-        "import": "./dist/plugins.mjs",
-        "require": "./dist/plugins.cjs"
-      },
-      "./features": {
-        "import": "./dist/features.mjs",
-        "require": "./dist/features.cjs"
-      },
-      "./services": {
-        "import": "./dist/services.mjs",
-        "require": "./dist/services.cjs"
-      },
-      "./services/volume": {
-        "import": "./dist/services/volume.mjs",
-        "require": "./dist/services/volume.cjs"
-      }
+  "name": "neurosys",
+  "version": "0.0.2",
+  "description": "An SDK for system-level neurofeedback",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/main.mjs",
+      "require": "./dist/main.cjs"
     },
-    "engine": {
-      "node": ">=20.0.0"
+    "./commoners": {
+      "import": "./dist/commoners.mjs",
+      "require": "./dist/commoners.cjs"
     },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/garrettmflynn/neurosys.git"
+    "./plugins": {
+      "import": "./dist/plugins.mjs",
+      "require": "./dist/plugins.cjs"
     },
-    "author": {
-      "name": "Garrett Flynn",
-      "email": "garrettmflynn@gmail.com"
+    "./features": {
+      "import": "./dist/features.mjs",
+      "require": "./dist/features.cjs"
     },
-    "scripts": {
-      "build": "vite build"
+    "./services": {
+      "import": "./dist/services.mjs",
+      "require": "./dist/services.cjs"
     },
-    "dependencies": {
-      "loudness": "^0.4.2"
-    },
-    "devDependencies": {
-      "vite": "^6.1.0"
+    "./services/volume": {
+      "import": "./dist/services/volume.mjs",
+      "require": "./dist/services/volume.cjs"
     }
+  },
+  "engine": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garrettmflynn/neurosys.git"
+  },
+  "author": {
+    "name": "Garrett Flynn",
+    "email": "garrettmflynn@gmail.com"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "json-schema-library": "10.0.0-rc7",
+    "loudness": "^0.4.2"
+  },
+  "devDependencies": {
+    "vite": "^6.1.0"
   }
+}

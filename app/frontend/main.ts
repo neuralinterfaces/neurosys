@@ -12,8 +12,7 @@ const calculate = async () => {
   const client = neurosys.__client // Get the client
   if (!client) return
 
-  const results = await neurosys.calculate(client) // Calculate the protocol
-  console.log('Results:', results)
+  await neurosys.calculate(client) // Calculate for all protocols
 
   // const protocol = neurosys.get() // Get the protocol
   // if (!protocol) return
@@ -172,14 +171,14 @@ READY.then(async (PLUGINS) => {
 
     if (!ref) return
 
-    const { __info, __latest } = ref
+    const { __ctx, __latest } = ref
 
     const toggledFromPrevState = enabled == !ref.enabled
 
     const hasNotChanged = !enabled && !toggledFromPrevState
 
     const callback = enabled ? 'start' : 'stop'
-    const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
+    if (ref[callback] && !hasNotChanged) await ref[callback].call(__ctx)
 
     // Ensure the appropriate callback is called before the state is toggled
     ref.enabled = enabled
@@ -189,8 +188,9 @@ READY.then(async (PLUGINS) => {
 
     if (!changed) return
     if (!enabled) return
+    if (!__latest) return
 
-    ref.set(__latest, info) // Re-set the latest features to the output
+    ref.set.call(__ctx, __latest) // Re-set the latest features to the output
   })
 
 

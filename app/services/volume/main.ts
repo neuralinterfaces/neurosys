@@ -8,7 +8,16 @@ const port = process.env.PORT
 const volume = new Output({
     label: "Volume",
     settings: {
-        range: [ 0.1, 0.75 ],
+        properties: {
+            range: {
+                type: "array",
+                items: { type: "number" },
+                minItems: 2,
+                maxItems: 2,
+                default: [0.1, 0.75]
+            }
+        },
+        required: ["range"]
     },
     start: () => console.log('Volume plugin started'),
     stop: () => console.log('Volume plugin stopped'),
