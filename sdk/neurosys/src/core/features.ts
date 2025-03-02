@@ -1,21 +1,8 @@
 import { Client } from "./client"
-import { Feature, getOriginalKey } from "./plugins"
+import { Feature } from "./plugins"
 
 type FeatureSettings = any
-type SettingsForFeatures = Record<string, FeatureSettings> 
 export type FeatureCollection = Record<string, Feature>
-
-const featureOptions: Record<string, Feature> = {}
-
-export const registerPlugin = (
-  identifier: string, 
-  plugin: Feature
-) => {
-    const { id = getOriginalKey(identifier) } = plugin
-    if (featureOptions[id]) return console.error('Feature plugin is already registered', id, plugin)
-    featureOptions[id] = plugin
-}
-
 
 export const calculate = (
   plugin: Feature,
@@ -45,6 +32,3 @@ export const calculate = (
 
     return plugin.calculate({ data, sfreq: stream.sfreq }, settings) // NOTE: Support multiple requesters in the future
 }
-
-export const getAllPlugins = () => ({ ...featureOptions })
-export const getPlugins = (features: SettingsForFeatures = {}) => Object.keys(features).reduce((acc, id) => featureOptions[id] ? { ...acc, [id]: featureOptions[id] } : acc, {}) as FeatureCollection

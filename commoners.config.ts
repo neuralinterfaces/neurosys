@@ -14,8 +14,8 @@ const examples = {
     evaluations: {}
 }
 
-const DEBUG = false
-// const DEBUG = true
+// const DEBUG = false
+const DEBUG = true
 
 const config = {
     name: "Neurosys",

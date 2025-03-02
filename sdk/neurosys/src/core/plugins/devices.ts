@@ -8,7 +8,7 @@ type ConnectionRequest = {
 
 type ProtocolInformation = string | { label: string, enabled?: false }
 
-type DeviceInformation = {
+export type DeviceInformation = {
     name: string
     protocols: Record<ProtocolId, ProtocolInformation>
     // montage: Montage // Montage getter

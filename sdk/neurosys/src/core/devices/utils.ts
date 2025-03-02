@@ -1,12 +1,5 @@
 import { resolvePlugins } from "../commoners"
 
-export const deviceOptions: any[] = []
-
-export const registerDevices = (plugin) => {
-  const { devices } = plugin
-  deviceOptions.push(...devices)
-}
-
 export const onShowDevices = async (fn: Function) => {
     const { menu: { showDeviceSelector } } = await resolvePlugins()
     showDeviceSelector(fn)

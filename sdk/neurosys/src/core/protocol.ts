@@ -1,51 +1,32 @@
-
-// Neurosys Classes
-import { Score } from './score'
-import { Evaluate } from './plugins'
-
-// Utilities
-import * as outputs from './outputs'
-import { calculate as evaluate } from './evaluation'
-import * as features from './features'
-
-// Types
-import type { FeatureCollection } from './features'
-import { Client } from './client'
+export type ProtocolSettings = {
+    outputs: Record<string, any>
+    evaluations: Record<string, any>
+}
 
 export class Protocol {
 
-    #score = new Score()
+    outputs: ProtocolSettings['outputs'] = {}
+    evaluations: ProtocolSettings['evaluations'] = {}
 
-    features: FeatureCollection = {}
-
-    constructor(featurePlugins: FeatureCollection) {
-        this.features = featurePlugins
+    constructor(settings: ProtocolSettings) {
+        Object.assign(this, settings)
+        console.log('Protocol loaded', this)
     }
 
-    async calculate( 
-        client?: Client, 
-        evaluation?: Evaluate 
-    ) {
+    update(type: keyof ProtocolSettings, plugin: string, settings = {}) {
+        const collection = this[type]
+        const oldValue = collection[plugin]
 
-        if (!client || !evaluation) return // Invalid inputs
-    
-        const featureSettings = evaluation.features || {}
-    
-        // Use evaluation plugin to define the features to calculate
-        const calculatedFeatures: Record<string, any> = {}
-        for (const id in featureSettings) {
-            const plugin = this.features[id]
-            const settings = featureSettings[id]
-            calculatedFeatures[id] = await features.calculate(plugin, settings, client)
+        Object.assign(collection[plugin] ?? (collection[plugin] = {}), settings)
+
+        const isOnlyDisabled = typeof settings === 'object' && Object.keys(settings).length <= 1 && !settings.enabled
+        if (isOnlyDisabled) delete collection[plugin]     
+        
+        const hasChanged = JSON.stringify(oldValue) !== JSON.stringify(collection[plugin])
+
+        return {
+            changed: hasChanged,
+            value: collection[plugin]
         }
-    
-        // Calculate a score from the provided features
-        const evaluatedMetric = await evaluate(evaluation, calculatedFeatures)
-        const normalizedScore = this.#score.update(evaluatedMetric)
-    
-        // Set the feedback from the calculated score and features
-        outputs.set(this.#score, calculatedFeatures)
-    
-        return { score: normalizedScore, features: calculatedFeatures }
     }
 }

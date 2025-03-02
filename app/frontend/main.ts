@@ -1,13 +1,20 @@
 import './style.css'
 
-import { Protocol, evaluation, features, outputs, setValueInSettings, setDeviceRequestHandler, setDeviceDiscoveryHandler, registerPlugins, getAllServerSidePlugins, loadSettings, neurosys } from 'neurosys'
+import { evaluation, outputs, setDeviceRequestHandler, setDeviceDiscoveryHandler, getAllServerSidePlugins, neurosys } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
 
-let protocol: Protocol
-const runCalculation = async () => {
-  if (!protocol) return
-  return evaluation.getActivePlugin().then(plugin => plugin &&  protocol.calculate(neurosys.client, plugin))
-}
+// // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
+// const searchParams = new URLSearchParams(window.location.search)
+
+// const urlSettings = {
+//     outputs: searchParams.getAll('output').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
+//     score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
+// }
+
+// const hasUrlSettings = Object.values(urlSettings).some((o) => Object.keys(o).length > 0)
+
+
+const SETTINGS_FILE_PREFIX = 'settings'
 
 const { SERVICES, READY } = commoners
 
@@ -16,39 +23,50 @@ const UPDATE_INVERVAL = 250
 const loadStart = performance.now()
 
 
-READY.then(async (PLUGINS) => {
+READY.then(async ({ menu, settings }) => {
+  menu.onSaveSettings(async () => {
+      settings.set(SETTINGS_FILE_PREFIX,  neurosys.get()) // Only a single settings file is stored
+      menu.enableSettings(false)
+  })
+})
 
-  const { menu } = PLUGINS
 
-  const menuStates = {
-    recording: {
-      save: {
-        label: 'Save Data',
-        enabled: false,
-        onClick: () => neurosys.client && neurosys.client.save()
-      },
-      start: {
-        label: 'Start Recording',
-        enabled: false,
-        onClick: () => {
-          if (!neurosys.client) return console.error('No client available')
-          menu.update('recording', menuStates.recording.stop)
-        }
-      },
-      stop: {
-        label: 'Stop Recording',
-        onClick: () => {
-          menuStates.recording.save.onClick() // Save the data before stopping
-          menu.update('recording', menuStates.recording.start)
-        }
+const MENU_STATES = {
+  recording: {
+    save: {
+      label: 'Save Data',
+      enabled: false,
+      onClick: () => neurosys.client && neurosys.client.save()
+    },
+    start: {
+      label: 'Start Recording',
+      enabled: false,
+      onClick: async () => {
+        const { menu } = await READY
+        if (!neurosys.client) return console.error('No client available')
+        menu.update('recording', MENU_STATES.recording.stop)
+      }
+    },
+    stop: {
+      label: 'Stop Recording',
+      onClick: async () => {
+        const { menu } = await READY
+        MENU_STATES.recording.save.onClick() // Save the data before stopping
+        menu.update('recording', MENU_STATES.recording.start)
       }
     }
   }
+}
 
+
+
+READY.then(async (PLUGINS) => {
+
+  const { menu, settings } = PLUGINS
 
   console.log(`Commoners loaded in ${performance.now() - loadStart}ms`)
 
-  await registerPlugins(PLUGINS)
+  await neurosys.register(PLUGINS)
 
   console.log(`Main plugins loaded in ${performance.now() - loadStart}ms`)
 
@@ -58,36 +76,43 @@ READY.then(async (PLUGINS) => {
   const servicePlugins = await getAllServerSidePlugins(urlsByService)
   for (const serviceName in servicePlugins) {
     const plugins = servicePlugins[serviceName]
-    await registerPlugins(plugins)
+    await neurosys.register(plugins)
   }
 
   console.log(`Service plugins loaded in ${performance.now() - loadStart}ms`)
 
-  const featurePlugins = features.getAllPlugins()
-  protocol = new Protocol(featurePlugins) // Initialize the protocol with the feature plugins
-
-
-  // Load settings after all services are available
-  loadSettings()
+  const currentSettings = settings.get(SETTINGS_FILE_PREFIX) // Load settings from the file
+  await neurosys.load(currentSettings) // Load settings into the system
+  menu.loadSettings(currentSettings) // Update menu with the current settings
 
   // Start calculating
-  setInterval(runCalculation, UPDATE_INVERVAL)
+  setInterval(() => neurosys.calculate(), UPDATE_INVERVAL)
 
-  // menu.add('recording', menuStates.recording.start)
-  menu.add('recording', menuStates.recording.save)
-  neurosys.onDeviceConnected = () => menu.update('recording', { ...menuStates.recording.save, enabled: true })
-  neurosys.onDeviceDisconnected = () => menu.update('recording', menuStates.recording.save) // Reset
+  // menu.add('recording', MENU_STATES.recording.start)
+  menu.add('recording', MENU_STATES.recording.save)
+  neurosys.onDeviceConnected = () => menu.update('recording', { ...MENU_STATES.recording.save, enabled: true })
+  neurosys.onDeviceDisconnected = () => menu.update('recording', MENU_STATES.recording.save) // Reset
 })
 
 evaluation.onToggle(async (key, enabled) => {
-  const state = evaluation.togglePlugin(key, enabled)
-  await setValueInSettings(`evaluation.${key}.enabled`, state)
-  runCalculation() // Run the protocol immediately after toggling
+
+  const { menu } = await READY
+
+  const plugin = neurosys.plugins.evaluation[key]
+  plugin.enabled = enabled
+
+  const protocol = neurosys.get()
+  const { changed } = protocol.update('evaluations', key, { enabled })
+  if (changed) menu.enableSettings(true) // Enable settings save button because of changes
+
+  neurosys.calculate() // Run the protocol immediately after toggling
 })
 
 outputs.onToggle(async (key, enabled) => {
 
-  const ref = outputs.getPlugin(key)
+  const { menu } = await READY
+
+  const ref = neurosys.plugins.output[key]
 
   if (!ref) return
 
@@ -101,11 +126,13 @@ outputs.onToggle(async (key, enabled) => {
   const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
 
   // Ensure the appropriate callback is called before the state is toggled
-  const state = outputs.togglePlugin(key, enabled)
-  await setValueInSettings(`outputs.${key}.enabled`, state)
+  ref.enabled = enabled
+  const protocol = neurosys.get()
+  const { changed } = protocol.update('outputs', key, { enabled })
+  if (changed) menu.enableSettings(true) // Enable settings save button because of changes
 
-  if (hasNotChanged) return
-  if (!state) return
+  if (!changed) return
+  if (!enabled) return
 
   ref.set(__latest, info) // Re-set the latest features to the output
 })
