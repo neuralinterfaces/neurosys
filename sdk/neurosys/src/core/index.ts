@@ -4,6 +4,7 @@ export { enableBluetooth, enableSerial } from "./devices"
 export { Score } from "./score"
 export { Protocol } from "./protocol"
 export { Client } from "./client"
+export { Recording } from "./recording"
 
 // Plugin Management
 export * as outputs from './outputs'

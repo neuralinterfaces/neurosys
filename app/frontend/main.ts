@@ -1,18 +1,17 @@
 import './style.css'
 
-import { getAllServerSidePlugins, System, devices } from 'neurosys'
+import { getAllServerSidePlugins, System, devices, Recording, Client } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
-import { Client } from '../../sdk/neurosys/src/core'
 
 
 const neurosys = new System()
 
 const calculate = async () => {
 
-  const client = neurosys.__client // Get the client
-  if (!client) return
+  const { __client } = neurosys
+  if (!__client) return
 
-  await neurosys.calculate(client) // Calculate for all protocols
+  await neurosys.calculate(__client) // Calculate for all protocols
 
   // const protocol = neurosys.get() // Get the protocol
   // if (!protocol) return
@@ -52,17 +51,16 @@ READY.then(async ({ menu, settings }) => {
 
 const MENU_STATES = {
   recording: {
-    save: {
-      label: 'Save Data',
-      enabled: false,
-      onClick: () => neurosys.client && neurosys.client.save()
-    },
     start: {
       label: 'Start Recording',
       enabled: false,
       onClick: async () => {
         const { menu } = await READY
-        if (!neurosys.client) return console.error('No client available')
+        if (!neurosys.__client) return console.error('No client available')
+
+        neurosys.__recording = new Recording(neurosys.__client)
+        neurosys.__recording.start()
+        
         menu.update('recording', MENU_STATES.recording.stop)
       }
     },
@@ -70,8 +68,14 @@ const MENU_STATES = {
       label: 'Stop Recording',
       onClick: async () => {
         const { menu } = await READY
-        MENU_STATES.recording.save.onClick() // Save the data before stopping
-        menu.update('recording', MENU_STATES.recording.start)
+
+        const { __recording } = neurosys
+        if (!__recording) return
+        __recording.save()
+        __recording.stop()
+        delete neurosys.__recording
+
+        menu.update('recording', { ...MENU_STATES.recording.start, enabled: true })
       }
     }
   }
@@ -123,8 +127,7 @@ READY.then(async (PLUGINS) => {
   // Start calculating
   setInterval(calculate, UPDATE_INVERVAL)
 
-  // menu.add('recording', MENU_STATES.recording.start)
-  menu.add('recording', MENU_STATES.recording.save)
+  menu.add('recording', MENU_STATES.recording.start)
 
   const { menu: { onDeviceDisconnect } } = await READY
 
@@ -134,7 +137,7 @@ READY.then(async (PLUGINS) => {
     delete neurosys.__client
     await client.disconnect()
     neurosys.reset() // Reset the system
-    menu.update('recording', MENU_STATES.recording.save) // Reset the recording button
+    menu.update('recording', MENU_STATES.recording.start) // Reset the recording button
 
     const { menu: { toggleDeviceConnection } } = await READY
     toggleDeviceConnection(true) // Reset the device connection button
@@ -225,7 +228,7 @@ READY.then(async (PLUGINS) => {
     neurosys.__client = client
 
     // On Connection Behavior
-    menu.update('recording', { ...MENU_STATES.recording.save, enabled: true })
+    menu.update('recording', { ...MENU_STATES.recording.start, enabled: true })
 
     menu.toggleDeviceConnection(false) // Success
   })
