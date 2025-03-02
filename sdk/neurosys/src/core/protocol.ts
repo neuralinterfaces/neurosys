@@ -40,6 +40,7 @@ export class Protocol {
 
     reset() {
         this.#score = new Score()
+        this.#updateSettings()
     }
 
     update(
@@ -61,11 +62,26 @@ export class Protocol {
         const hasChanged = JSON.stringify(oldSettings) !== JSON.stringify(newSettings)
 
         if (type === 'evaluations' && hasChanged) this.reset() // Reset the score if the evaluation has changed
+        else if (hasChanged) this.#updateSettings() // Update the settings for the output plugins
 
         return {
             changed: hasChanged,
             value: collection[plugin]
         }
+    }
+
+    #outputSettings: Record<string, Record<string, any>> = {}
+
+    #updateSettings = () => {
+        this.#outputSettings = Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
+            const plugin = this.#system.plugins.output[key]
+            if (!plugin) return acc
+
+            const schema = resolveSchema(plugin.settings, settings) || {}
+            const data = getTemplate(schema, settings)
+            return { ...acc, [key]: data }
+        }, {})
+
     }
 
     async calculate(client: Client): Promise<CalculationOutput | null> {
@@ -75,7 +91,11 @@ export class Protocol {
         const allPlugins = this.#system.plugins
 
         const activeEvaluations = Object.entries(this.evaluations).filter(([ _, value ]) => value.enabled).map(([key]) => key)
-        const plugins = activeEvaluations.reduce((acc, key) => [ ...acc, allPlugins.evaluation[key] ], []) // Use protocol settings to get active evaluation plugins
+        const plugins = activeEvaluations.reduce((acc, key) => {
+            const plugin = allPlugins.evaluation[key]
+            if (plugin) acc.push(plugin)
+            return acc
+        }, []) // Use protocol settings to get active evaluation plugins
         
         if (!plugins.length) return null // No evaluation plugin active
         if (plugins.length > 1) console.warn('Only one evaluation plugin is supported for now')
@@ -97,21 +117,17 @@ export class Protocol {
         const normalizedScore = this.#score.update(evaluatedMetric)
 
         // Get active outputs
-        const activeOutputEntries = Object.entries(this.outputs).filter(([ _, value ]) => value.enabled)
-
-        // Use protocol settings to get active output plugins with settings
-        // NOTE: Move this to only calculate once when the settings are updated
-        const outputInfo = activeOutputEntries.reduce((acc, [ key, { settings = {} } ]) => {
-            const plugin = allPlugins.output[key]
-            const schema = resolveSchema(plugin.settings, settings) || {}
-            const data = getTemplate(schema, settings)
-            return { ...acc, [key]: { plugin, settings: data } }
-        }, {})
+        const activeOutputPluginKeys = Object.entries(this.outputs).filter(([ _, value ]) => value.enabled).map(([key]) => key)
 
         // Set the feedback from the calculated score and features
         const inputs = { score: normalizedScore, __score: this.#score, ...calculatedFeatures }
 
-        Object.values(outputInfo).map(async ({ plugin, settings }) => {
+        activeOutputPluginKeys.map(async (key) => {
+
+            const plugin = allPlugins.output[key]
+            if (!plugin) return
+
+            const settings = this.#outputSettings[key]
 
             plugin.__ctx.settings = settings // Set the settings in the context
 
