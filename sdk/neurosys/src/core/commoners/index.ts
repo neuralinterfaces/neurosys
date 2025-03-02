@@ -1,8 +1,6 @@
 import type { Plugin, Plugins } from "../plugins";
 import * as pluginUtils from '../plugins'
 
-export const resolvePlugins = async (): Promise<Record<string, any>> => await globalThis.commoners?.READY ?? {}
-
 const getCommonersPlugin = (plugin: Plugin) => {
 
     const { desktop } = plugin

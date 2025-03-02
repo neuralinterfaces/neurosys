@@ -81,7 +81,6 @@ export function load() {
 
   if (!DESKTOP) return
 
-
   const { __id } = DESKTOP
 
   const onOpen = (callback) => this.on(`${__id}:open`, () => callback())

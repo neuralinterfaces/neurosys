@@ -1,4 +1,5 @@
-export default {
+export default (defaultSettingsContent = {}) => ({
+    
     load() {
         return {
             get: (name) => this.sendSync('get', name),
@@ -26,7 +27,7 @@ export default {
 
             this.on('get', (event, name) => {
                 const filePath = getProtocolsPath(name)
-                if (!fs.existsSync(filePath)) return event.returnValue = {}
+                if (!fs.existsSync(filePath)) return event.returnValue = defaultSettingsContent
                 const data = fs.readFileSync(filePath)
                 const parsed = JSON.parse(data)
                 return event.returnValue = parsed
@@ -34,4 +35,4 @@ export default {
 
         }
     }
-}
+})

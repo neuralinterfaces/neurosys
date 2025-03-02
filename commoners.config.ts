@@ -36,7 +36,13 @@ const config = {
         // // --------------------------------- Required Plugins --------------------------------- //
         overlay: system.overlay({ debug: DEBUG }),
         menu: system.menu({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
-        settings: system.settings, // Allow for managing and saving the active protocol
+        
+        // Allow for managing and saving the active protocol
+        settings: system.settings({
+            evaluations: { alpha: { enabled: true } },
+            outputs: { inspect: { enabled: true } }
+        }),
+        
         bluetooth: system.bluetooth, // For Desktop Support
         serial: system.serial, // For Desktop Support
         

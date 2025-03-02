@@ -1,15 +1,9 @@
-import { resolvePlugins } from "../commoners";
-
-
-
 type DeviceDiscoveryHandler = (devices: any) => any | Promise<any> // Device
 let deviceDiscoveryHandler: null | DeviceDiscoveryHandler = null
 export const setDeviceDiscoveryHandler = async (callback: DeviceDiscoveryHandler) => deviceDiscoveryHandler = callback
 
-export const enableSerial = async () => {
+export const enableSerial = (serial: any) => {
 
-    const { serial } = await resolvePlugins()
-    if (!serial) return
     const { onRequest, select, onDeviceAdded, onDeviceRemoved } = serial
   
     const transformDevices = (devices: any[]) => devices.map(o => ({
@@ -33,10 +27,8 @@ export const enableSerial = async () => {
     onDeviceRemoved((device) => deviceUpdateHandler && deviceUpdateHandler(allDevices.filter(({ id }) => id !== device.portId)))
   }
   
-export const enableBluetooth = async () => {
-  
-    const { bluetooth } = await resolvePlugins()
-    if (!bluetooth) return
+export const enableBluetooth = (bluetooth ) => {
+
     const { onOpen, onUpdate, select } = bluetooth
 
      

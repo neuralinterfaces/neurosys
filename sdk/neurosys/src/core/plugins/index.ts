@@ -42,7 +42,7 @@ export const getOriginalKey = (key: string) => {
     const split = key.split(':')
 
     if (key.startsWith(SERVICE_PREFIX)) return `${split[2]}:${split[split.length - 1]}` // Return the original key with the serviceId
-    if (key.startsWith(PREFIX)) split[split.length - 1]
+    if (key.startsWith(PREFIX)) return split[split.length - 1] // Encoded names for flat list of plugins (e.g. commoners)
 
     return key
 }

@@ -20,17 +20,15 @@ export default new Device({
 
     async connect({ protocol }, notify) {
 
-        const { DESKTOP, READY } = commoners
-
         const client = new MuseClient();
         client.enablePpg = true;
         client.enableAux = true;
         
-        const previousDevice = null
-        if (DESKTOP && previousDevice) {
-            const { bluetooth } = await READY
-            if (bluetooth) bluetooth.match(previousDevice, 5000) // Set device to match on desktop
-        }
+        // const previousDevice = null
+        // if (commoners.DESKTOP && previousDevice) {
+        //     const { bluetooth } = await commoners.READY
+        //     if (bluetooth) bluetooth.match(previousDevice, 5000) // Set device to match on desktop
+        // }
 
         // options.device = previousDevice
 

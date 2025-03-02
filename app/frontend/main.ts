@@ -1,10 +1,25 @@
 import './style.css'
 
-import { evaluation, outputs, setDeviceDiscoveryHandler, getAllServerSidePlugins, System } from 'neurosys'
+import { getAllServerSidePlugins, System, devices } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
+import { Client } from '../../sdk/neurosys/src/core'
 
 
 const neurosys = new System()
+
+const calculate = async () => {
+
+  const client = neurosys.__client // Get the client
+  if (!client) return
+
+  const results = await neurosys.calculate(client) // Calculate the protocol
+  console.log('Results:', results)
+
+  // const protocol = neurosys.get() // Get the protocol
+  // if (!protocol) return
+  // await protocol.calculate(client) // Calculate the protocol
+
+}
 
 // // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
 // const searchParams = new URLSearchParams(window.location.search)
@@ -28,8 +43,10 @@ const loadStart = performance.now()
 
 READY.then(async ({ menu, settings }) => {
   menu.onSaveSettings(async () => {
-      settings.set(SETTINGS_FILE_PREFIX,  neurosys.get()) // Only a single settings file is stored
-      menu.enableSettings(false)
+    const protocol = neurosys.get()
+    const copied = JSON.parse(JSON.stringify(protocol))
+    settings.set(SETTINGS_FILE_PREFIX, copied) // Only a single settings file is stored
+    menu.enableSettings(false)
   })
 })
 
@@ -62,6 +79,20 @@ const MENU_STATES = {
 }
 
 
+const registerInMenu = async (collectedPlugins: Record<string, any>) => {
+
+  const { menu: { registerOutput, registerEvaluation } } = await commoners.READY // Get registration functions
+  const { output = {}, evaluation = {} } = collectedPlugins
+  for (const identifier in output) {
+    const { label, enabled } = output[identifier]
+    registerOutput(identifier, { label, enabled })
+  }
+
+  for (const identifier in evaluation) {
+    const { label, enabled } = evaluation[identifier]
+    registerEvaluation(identifier, { label, enabled })
+  }
+}
 
 READY.then(async (PLUGINS) => {
 
@@ -69,7 +100,8 @@ READY.then(async (PLUGINS) => {
 
   console.log(`Commoners loaded in ${performance.now() - loadStart}ms`)
 
-  await neurosys.register(PLUGINS)
+  const collected = neurosys.register(PLUGINS)
+  await registerInMenu(collected)
 
   console.log(`Main plugins loaded in ${performance.now() - loadStart}ms`)
 
@@ -79,7 +111,8 @@ READY.then(async (PLUGINS) => {
   const servicePlugins = await getAllServerSidePlugins(urlsByService)
   for (const serviceName in servicePlugins) {
     const plugins = servicePlugins[serviceName]
-    await neurosys.register(plugins)
+    const collected = neurosys.register(plugins)
+    await registerInMenu(collected)
   }
 
   console.log(`Service plugins loaded in ${performance.now() - loadStart}ms`)
@@ -89,73 +122,79 @@ READY.then(async (PLUGINS) => {
   menu.loadSettings(currentSettings) // Update menu with the current settings
 
   // Start calculating
-  setInterval(() => neurosys.calculate(), UPDATE_INVERVAL)
+  setInterval(calculate, UPDATE_INVERVAL)
 
   // menu.add('recording', MENU_STATES.recording.start)
   menu.add('recording', MENU_STATES.recording.save)
-  
-  neurosys.onDeviceConnected = () => menu.update('recording', { ...MENU_STATES.recording.save, enabled: true })
 
   const { menu: { onDeviceDisconnect } } = await READY
 
   onDeviceDisconnect(async () => {
+
+    const client = neurosys.__client
+    delete neurosys.__client
+    await client.disconnect()
     neurosys.reset() // Reset the system
     menu.update('recording', MENU_STATES.recording.save) // Reset the recording button
+
     const { menu: { toggleDeviceConnection } } = await READY
     toggleDeviceConnection(true) // Reset the device connection button
   })
-  
+
 })
 
-evaluation.onToggle(async (key, enabled) => {
+// -------------------- Electron Menu Callbacks --------------------
+READY.then(async (PLUGINS) => {
 
-  const { menu } = await READY
-
-  const plugin = neurosys.plugins.evaluation[key]
-  plugin.enabled = enabled
-
-  const protocol = neurosys.get()
-  const { changed } = protocol.update('evaluations', key, { enabled })
-  if (changed) menu.enableSettings(true) // Enable settings save button because of changes
-
-  neurosys.calculate() // Run the protocol immediately after toggling
-})
-
-outputs.onToggle(async (key, enabled) => {
-
-  const { menu } = await READY
-
-  const ref = neurosys.plugins.output[key]
-
-  if (!ref) return
-
-  const { __info, __latest } = ref
-
-  const toggledFromPrevState = enabled == !ref.enabled
-
-  const hasNotChanged = !enabled && !toggledFromPrevState
-
-  const callback = enabled ? 'start' : 'stop'
-  const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
-
-  // Ensure the appropriate callback is called before the state is toggled
-  ref.enabled = enabled
-  const protocol = neurosys.get()
-  const { changed } = protocol.update('outputs', key, { enabled })
-  if (changed) menu.enableSettings(true) // Enable settings save button because of changes
-
-  if (!changed) return
-  if (!enabled) return
-
-  ref.set(__latest, info) // Re-set the latest features to the output
-})
+  const { menu, bluetooth, serial } = PLUGINS
 
 
+  if (bluetooth) devices.enableBluetooth(bluetooth)
+  if (serial) devices.enableSerial(serial)
 
-// Allow Device Type Selection with a User Action (to bypass security restrictions)
-READY.then((PLUGINS) => {
+  menu.onEvaluationToggle(async (key, enabled) => {
 
-  const { menu } = PLUGINS
+    const plugin = neurosys.plugins.evaluation[key]
+    plugin.enabled = enabled
+
+    const protocol = neurosys.get()
+    const { changed } = protocol.update('evaluations', key, { enabled })
+    if (changed) menu.enableSettings(true) // Enable settings save button because of changes
+
+    calculate() // Run the protocol immediately after toggling
+  })
+
+  menu.onOutputToggle(async (key, enabled) => {
+
+    const { menu } = await READY
+
+    const ref = neurosys.plugins.output[key]
+
+    if (!ref) return
+
+    const { __info, __latest } = ref
+
+    const toggledFromPrevState = enabled == !ref.enabled
+
+    const hasNotChanged = !enabled && !toggledFromPrevState
+
+    const callback = enabled ? 'start' : 'stop'
+    const info = (ref[callback] && !hasNotChanged) ? (ref.__info = (await ref[callback](__info)) ?? {}) : __info
+
+    // Ensure the appropriate callback is called before the state is toggled
+    ref.enabled = enabled
+    const protocol = neurosys.get()
+    const { changed } = protocol.update('outputs', key, { enabled })
+    if (changed) menu.enableSettings(true) // Enable settings save button because of changes
+
+    if (!changed) return
+    if (!enabled) return
+
+    ref.set(__latest, info) // Re-set the latest features to the output
+  })
+
+
+  // Allow Device Type Selection with a User Action (to bypass security restrictions)
 
   menu.showDeviceSelector(async () => {
 
@@ -181,36 +220,41 @@ READY.then((PLUGINS) => {
       modal.showModal()
     })
 
-    neurosys.connect(device, protocol)
+    const client = new Client(device)
+    await client.connect(protocol)
+    neurosys.__client = client
+
+    // On Connection Behavior
+    menu.update('recording', { ...MENU_STATES.recording.save, enabled: true })
+
     menu.toggleDeviceConnection(false) // Success
   })
 })
 
+devices.setDeviceDiscoveryHandler(async (onSelect) => {
 
-  setDeviceDiscoveryHandler(async (onSelect) => {
+  let device = '';
 
-      let device = '';
+  const onModalClosed = () => {
+    onSelect(device)
+    modal.remove()
+  }
 
-      const onModalClosed = () => {
-        onSelect(device)
-        modal.remove()
-      }
-
-      const list = new DeviceDiscoveryList({ 
-        emptyMessage: 'Searching...',
-        onSelect: (deviceId) => {
-          device = deviceId
-          modal.close()
-        } 
-      })
-    
-      const modal = createModal({ title: 'Discovered USB Devices',  content: list })
-      document.body.append(modal)
-      modal.showModal()
-
-      modal.addEventListener('close', onModalClosed)
-    
-      
-      return (devices) => list.devices = devices
-
+  const list = new DeviceDiscoveryList({
+    emptyMessage: 'Searching...',
+    onSelect: (deviceId) => {
+      device = deviceId
+      modal.close()
+    }
   })
+
+  const modal = createModal({ title: 'Discovered USB Devices', content: list })
+  document.body.append(modal)
+  modal.showModal()
+
+  modal.addEventListener('close', onModalClosed)
+
+
+  return (devices) => list.devices = devices
+
+})

@@ -1,24 +1,15 @@
-import { Client } from "./client"
-import { resolvePlugins } from "./commoners"
-import { DeviceInformation, Devices, Feature, getOriginalKey, getPluginType } from "./plugins"
+import { DeviceInformation, Devices, Feature, getOriginalKey, getPluginType, Plugin } from "./plugins"
 
 // Plugin Management
 import * as outputs from './outputs'
 import * as evaluation from './evaluation'
-import * as features from './features'
 import { Protocol, ProtocolSettings } from "./protocol"
-
-// Utilities
-import { calculate as evaluate } from './evaluation'
-import { Score } from "./score"
 
 const defaulKey = Symbol('default')
 
 type ProtocolIdentifier = string | symbol
 
 export class System {
-
-  client: null | Client = null
 
   #protocols: Record<ProtocolIdentifier, Protocol> = {}
 
@@ -33,142 +24,82 @@ export class System {
     devices: [],
     evaluation: {}
   }
-
-  connect = async (
-    device: any,
-    protocol: string,
-  ) => {
-    
-    if (this.client) return console.error('Client already connected')
-    this.client = new Client(device)
-    const result = await this.client.connect(protocol)
-    this.onDeviceConnected()
-    return result
-  }
   
   reset = async () => {
-
-    if (this.client) {
-      await this.client.disconnect()
-      this.onDeviceDisconnected()
-    }
-
-    this.client = null
+    for (const protocol of Object.values(this.#protocols)) protocol.reset() // Reset all protocols
   }
-
   
-  register = async (plugins: any) => {
+  register = (
+    plugins: Record<string, Plugin>
+  ) => {
 
-    const { menu: { registerOutput, registerEvaluation } } = await resolvePlugins() // Get registration functions
-  
-    for (const key in plugins) {
-      const plugin = plugins[key]
-
+    const registered = Object.entries(plugins).reduce((acc, [key, plugin]) => {
+      
       const type = getPluginType(key, plugin)
 
-      if (!type) continue // Ignore plugins without a type
+      if (!type) return acc // Ignore plugins without a type
+
+      key = getOriginalKey(key) // Normalize the key
         
       const collection = this.plugins[type]
-      if (!collection){
-          console.error(`Plugin ${key} not registered because of missing collection`)
-          continue
+      if (!collection) {
+        console.error(`Plugin ${key} not registered because of missing collection`)
+        return acc
       }
       
       if (collection[key]) {
-         console.error(`Plugin ${key} already registered`)
-          continue
+        console.error(`Plugin ${key} already registered`)
+        return acc
       }
-      
-      const identifier = getOriginalKey(key)
 
+      const accCollection = acc[type] ?? (acc[type] = type === 'devices' ? [] : {})
+      
       // Register an output plugin
-      if (type === 'output') {
-        const collection = this.plugins.output
-        const { label, enabled } = collection[identifier] = outputs.registerPlugin(plugin)
-        registerOutput(identifier, { label, enabled })
-      }
+      if (type === 'output') accCollection[key] = this.plugins.output[key] = outputs.registerPlugin(plugin)
 
       // Register a feature plugin
       else if (type === 'feature') {
-        const collection = this.plugins.feature
-          const { id = identifier } = plugin
-          collection[id] = plugin
+          // const { id = getOriginalKey(key) } = plugin
+          const { id = key } = plugin
+          accCollection[id] = this.plugins.feature[id] = plugin
       }
 
       else if (type === 'devices') {
         const devicePlugin = plugin as Devices
-        const collection = this.plugins.devices
         const { devices } = devicePlugin
-        collection.push(...devices)
+        this.plugins.devices.push(...devices)
+        accCollection.push(...devices)
       }
 
       // Register an evaluation plugin
-      else if (type === 'evaluation') {
-        const collection = this.plugins.evaluation
-        const { label, enabled } = collection[identifier] = evaluation.registerPlugin(plugin)
-        registerEvaluation(identifier, { label, enabled })
-      }
+      else if (type === 'evaluation') accCollection[key] = this.plugins.evaluation[key] = evaluation.registerPlugin(plugin)
 
       else if (type) console.warn(`Plugin ${key} not registered because of type ${type}`)
-    }
-  }
 
-  #score = new Score() // The score normalizer
+      return acc
+      
+    }, {})
+
+    return registered
+
+  }
 
   get = (key: ProtocolIdentifier = defaulKey) => this.#protocols[key]
-  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) => {
-    const isSupported = this.#isSupported(settings)
-    this.#protocols[id] = new Protocol(isSupported ? settings : {}) // Load the protocol only if supported
-  }
+  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) =>this.#protocols[id] = new Protocol(settings, this)
 
-  #isSupported = (settings: ProtocolSettings) => {
-    const { outputs, evaluations } = settings
-    const missing = []
-    for (const key in outputs) {
-      const plugin = this.plugins.output[key]
-      if (!plugin) missing.push(key)
-    }
-    for (const key in evaluations) {
-      const plugin = this.plugins.evaluation[key]
-      if (!plugin) missing.push(key)
+  async calculate(client: any) {
+
+    const result: Record<string | symbol, any> = {}
+
+    const allKeysAndSymbols = [ ...Object.getOwnPropertySymbols(this.#protocols), ...Object.keys(this.#protocols) ]
+
+    for (const id of allKeysAndSymbols) {
+      const protocol = this.#protocols[id]
+      const output = await protocol.calculate(client)
+      if (output) result[id] = output
     }
 
-    const isSupported = !missing.length
-    if (!isSupported) console.warn(`Missing plugins: ${missing.join(', ')}`)
-
-    return isSupported
+    return result
   }
-
-  calculate = async (id: ProtocolIdentifier = defaulKey) => {
-
-    if (!this.#protocols[id]) return null
-    if (!this.client) return null // No client connected
-
-    const plugin = await evaluation.getActivePlugin(this.plugins.evaluation)
-    if (!plugin) return null // No evaluation plugin active
-
-    const featureSettings = plugin.features || {}
-      
-    // Use evaluation plugin to define the features to calculate
-    const calculatedFeatures: Record<string, any> = {}
-    for (const id in featureSettings) {
-        const plugin = this.plugins.feature[id]
-        const settings = featureSettings[id]
-        calculatedFeatures[id] = await features.calculate(plugin, settings, this.client)
-    }
-
-    // Calculate a score from the provided features
-    const evaluatedMetric = await evaluate(plugin, calculatedFeatures)
-    const normalizedScore = this.#score.update(evaluatedMetric)
-
-    // Set the feedback from the calculated score and features
-    outputs.set(this.#score, calculatedFeatures, this.plugins.output)
-
-    return { score: normalizedScore, features: calculatedFeatures }
-  }
-
-
-  onDeviceConnected = async () => {}
-  onDeviceDisconnected = async () => {}
 
 }

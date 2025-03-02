@@ -1,7 +1,20 @@
-import { setIgnoreMouseEvents } from 'neurosys'
 
 export * from './DeviceDiscoveryList'
 export * from './DeviceList'
+
+const setIgnoreMouseEvents = async (ignore: boolean) => {
+  const { commoners = {} } = globalThis
+  const { overlay } = await commoners.READY
+  if (!overlay) return
+  const { setIgnoreMouseEvents } = overlay
+  setIgnoreMouseEvents(ignore)
+}
+
+// export const registerAsInteractive = async (element: HTMLElement) => {
+//   element.onmouseover = () => setIgnoreMouseEvents(false)
+//   element.onmouseout = () => setIgnoreMouseEvents(true)
+// }
+
 
 export const createModal = ({ title, content }: { 
   title: string,
@@ -30,7 +43,7 @@ export const createModal = ({ title, content }: {
   });
 
   // Ensure that no interactions can happen when a modal is open
-  modal.addEventListener('close', () => setIgnoreMouseEvents(true))
+  modal.addEventListener('close', async () => setIgnoreMouseEvents(true))
 
   const ogShowModal = modal.showModal.bind(modal)
   modal.showModal = async () => {
