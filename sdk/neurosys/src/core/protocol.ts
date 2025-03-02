@@ -1,16 +1,21 @@
+
+
+type OutputSettings = Record<string, any>
+type EvaluationSettings = Record<string, any>
+
 export type ProtocolSettings = {
-    outputs: Record<string, any>
-    evaluations: Record<string, any>
+    outputs?: OutputSettings
+    evaluations?: EvaluationSettings
 }
 
 export class Protocol {
 
-    outputs: ProtocolSettings['outputs'] = {}
-    evaluations: ProtocolSettings['evaluations'] = {}
+    outputs: OutputSettings = {}
+    evaluations: EvaluationSettings = {}
 
     constructor(settings: ProtocolSettings) {
         Object.assign(this, settings)
-        console.log('Protocol loaded', this)
+        console.log('Protocol loaded', JSON.parse(JSON.stringify(this)))
     }
 
     update(type: keyof ProtocolSettings, plugin: string, settings = {}) {

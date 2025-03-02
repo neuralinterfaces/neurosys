@@ -39,10 +39,10 @@ export const getEncodedType = (key: string) => {
 
 export const getOriginalKey = (key: string) => {
 
-    if (key.startsWith(PREFIX)) {
-        const split = key.split(':')
-        return split[split.length - 1]
-    }
+    const split = key.split(':')
+
+    if (key.startsWith(SERVICE_PREFIX)) return `${split[2]}:${split[split.length - 1]}` // Return the original key with the serviceId
+    if (key.startsWith(PREFIX)) split[split.length - 1]
 
     return key
 }

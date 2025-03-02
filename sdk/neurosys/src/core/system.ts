@@ -78,18 +78,20 @@ export class System {
          console.error(`Plugin ${key} already registered`)
           continue
       }
+      
+      const identifier = getOriginalKey(key)
 
       // Register an output plugin
       if (type === 'output') {
         const collection = this.plugins.output
-        const { label, enabled } = collection[key] = outputs.registerPlugin(plugin)
-        registerOutput(key, { label, enabled })
+        const { label, enabled } = collection[identifier] = outputs.registerPlugin(plugin)
+        registerOutput(identifier, { label, enabled })
       }
 
       // Register a feature plugin
       else if (type === 'feature') {
         const collection = this.plugins.feature
-          const { id = getOriginalKey(key) } = plugin
+          const { id = identifier } = plugin
           collection[id] = plugin
       }
 
@@ -103,8 +105,8 @@ export class System {
       // Register an evaluation plugin
       else if (type === 'evaluation') {
         const collection = this.plugins.evaluation
-        const { label, enabled } = collection[key] = evaluation.registerPlugin(plugin)
-        registerEvaluation(key, { label, enabled })
+        const { label, enabled } = collection[identifier] = evaluation.registerPlugin(plugin)
+        registerEvaluation(identifier, { label, enabled })
       }
 
       else if (type) console.warn(`Plugin ${key} not registered because of type ${type}`)
@@ -114,7 +116,28 @@ export class System {
   #score = new Score() // The score normalizer
 
   get = (key: ProtocolIdentifier = defaulKey) => this.#protocols[key]
-  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) => this.#protocols[id] = new Protocol(settings)
+  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) => {
+    const isSupported = this.#isSupported(settings)
+    this.#protocols[id] = new Protocol(isSupported ? settings : {}) // Load the protocol only if supported
+  }
+
+  #isSupported = (settings: ProtocolSettings) => {
+    const { outputs, evaluations } = settings
+    const missing = []
+    for (const key in outputs) {
+      const plugin = this.plugins.output[key]
+      if (!plugin) missing.push(key)
+    }
+    for (const key in evaluations) {
+      const plugin = this.plugins.evaluation[key]
+      if (!plugin) missing.push(key)
+    }
+
+    const isSupported = !missing.length
+    if (!isSupported) console.warn(`Missing plugins: ${missing.join(', ')}`)
+
+    return isSupported
+  }
 
   calculate = async (id: ProtocolIdentifier = defaulKey) => {
 
