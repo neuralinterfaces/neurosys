@@ -28,6 +28,8 @@ export class Protocol {
     outputs: OutputSettings = {}
     evaluations: EvaluationSettings = {}
 
+    settings: Record<string, Record<string, any>> = {}
+
     #system: System
     #score = new Score() // The score normalizer
     
@@ -40,7 +42,7 @@ export class Protocol {
 
     reset() {
         this.#score = new Score()
-        this.#updateSettings()
+        this.#refreshSettings()
     }
 
     update(
@@ -62,7 +64,7 @@ export class Protocol {
         const hasChanged = JSON.stringify(oldSettings) !== JSON.stringify(newSettings)
 
         if (type === 'evaluations' && hasChanged) this.reset() // Reset the score if the evaluation has changed
-        else if (hasChanged) this.#updateSettings() // Update the settings for the output plugins
+        else if (hasChanged) this.#refreshSettings() // Update the settings for the output plugins
 
         return {
             changed: hasChanged,
@@ -70,17 +72,17 @@ export class Protocol {
         }
     }
 
-    #outputSettings: Record<string, Record<string, any>> = {}
-
-    #updateSettings = () => {
-        this.#outputSettings = Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
-            const plugin = this.#system.plugins.output[key]
-            if (!plugin) return acc
-
-            const schema = resolveSchema(plugin.settings, settings) || {}
-            const data = getTemplate(schema, settings)
-            return { ...acc, [key]: data }
-        }, {})
+    #refreshSettings = () => {
+        this.settings = {
+            oututs: Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
+                const plugin = this.#system.plugins.output[key]
+                if (!plugin) return acc
+    
+                const schema = resolveSchema(plugin.settings, settings) || {}
+                const data = getTemplate(schema, settings)
+                return { ...acc, [key]: data }
+            }, {})
+        }
 
     }
 
@@ -127,7 +129,7 @@ export class Protocol {
             const plugin = allPlugins.output[key]
             if (!plugin) return
 
-            const settings = this.#outputSettings[key]
+            const settings = this.settings.output[key]
 
             plugin.__ctx.settings = settings // Set the settings in the context
 

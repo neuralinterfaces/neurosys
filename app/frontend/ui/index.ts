@@ -18,8 +18,7 @@ const setIgnoreMouseEvents = async (ignore: boolean) => {
 
 export const createModal = ({ title, content }: { 
   title: string,
-  content?: HTMLElement,
-  emptyMessage?: string
+  content?: HTMLElement
 }) => {
 
   const modal = document.createElement('dialog') 

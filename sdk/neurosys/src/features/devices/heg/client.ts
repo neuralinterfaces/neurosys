@@ -62,7 +62,6 @@ export class HEGClient{
         const arr = line.replace(/[\n\r]+/g, '').split(DATA_DELIMITER);
         const [ microseconds, red, ir, __, ambient, ___, ____ ] = arr
         const data = { red: parseFloat(red), ir: parseFloat(ir), ambient: parseFloat(ambient), time: parseInt(microseconds) }
-        console.log("HEG Data", data)
         this.#evTarget.dispatchEvent(new CustomEvent('parsed-data', { detail: data }))
     }
 

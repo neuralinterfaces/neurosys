@@ -4,23 +4,26 @@ export default new Output({
     label: 'Brightness',
     settings: {
         properties: {
-            range: {
-                type: "array",
-                items: { type: "number" },
-                minItems: 2,
-                maxItems: 2,
-                default: [0.3, 1]
+            minBrightness: {
+                title: "Minimum Brightness",
+                type: "number",
+                default: 0.3
+            },
+            maxBrightness: {
+                title: "Maximum Brightness",
+                type: "number",
+                max: 1,
+                default: 1,
             }
         },
-        required: ["range"]
+        required: [ "minVolume", "maxVolume" ]
     },
     stop () {
         document.body.style.backgroundColor = "" // Reset
     },
     set ({ score }) {
-        const { range } = this.settings
-        const [ min = 0, max = 1 ] = range
-        const normalized = min + ((max - min) * score)
+        const { minBrightness = 0, maxBrightness = 1 } = this.settings
+        const normalized = minBrightness + ((maxBrightness - minBrightness) * score)
         document.body.style.backgroundColor = `rgba(0, 0, 0, ${ (1 - normalized)})`
     }
 })

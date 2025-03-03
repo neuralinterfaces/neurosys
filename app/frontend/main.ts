@@ -2,6 +2,19 @@ import './style.css'
 
 import { getAllServerSidePlugins, System, devices, Recording, Client } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
+// import { JSONSchemaForm } from './ui/JSONSchemaForm'
+
+
+// // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
+// const searchParams = new URLSearchParams(window.location.search)
+
+// const urlSettings = {
+//     outputs: searchParams.getAll('output').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
+//     score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
+// }
+
+// const hasUrlSettings = Object.values(urlSettings).some((o) => Object.keys(o).length > 0)
+
 
 
 const neurosys = new System()
@@ -18,17 +31,6 @@ const calculate = async () => {
   // await protocol.calculate(client) // Calculate the protocol
 
 }
-
-// // Example Search Params: ?output=textFeedback&output=inspectFeedback&score=alphaScore
-// const searchParams = new URLSearchParams(window.location.search)
-
-// const urlSettings = {
-//     outputs: searchParams.getAll('output').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {}),
-//     score: searchParams.getAll('score').reduce((acc, key) => ({ ...acc, [key]: { enabled: true } }), {})
-// }
-
-// const hasUrlSettings = Object.values(urlSettings).some((o) => Object.keys(o).length > 0)
-
 
 const SETTINGS_FILE_PREFIX = 'settings'
 
@@ -50,6 +52,58 @@ READY.then(async ({ menu, settings }) => {
 
 
 const MENU_STATES = {
+  device: {
+    connect: {
+      label: 'Connect Device',
+
+      // Allow Device Type Selection with a User Action (to bypass security restrictions)
+      onClick: async () => {
+        const { menu } = await READY
+        const { device, protocol } = await new Promise((resolve, reject) => {
+          const list = new DeviceList({
+            devices: neurosys.plugins.devices,
+
+            // Success
+            onSelect: async (device, protocol) => {
+              resolve({ device, protocol })
+              modal.close()
+            }
+          })
+
+          const modal = createModal({ title: 'Neurofeedback Devices', content: list })
+
+          modal.addEventListener('close', () => {
+            modal.remove()
+            reject('No device selected')
+          })
+
+          document.body.append(modal)
+          modal.showModal()
+        })
+
+        const client = new Client(device)
+        await client.connect(protocol)
+        neurosys.__client = client
+
+        menu.update('recording', { ...MENU_STATES.recording.start, enabled: true })
+        menu.update('device', MENU_STATES.device.disconnect)
+      }
+    },
+    disconnect: {
+      label: 'Disconnect Device',
+      onClick: async () => {
+        const { menu } = await READY
+        const { __client } = neurosys
+        if (!__client) return
+        await __client.disconnect()
+        delete neurosys.__client
+        neurosys.reset()
+        menu.update('recording', MENU_STATES.recording.start)
+        menu.update('device', MENU_STATES.device.connect)
+      }
+    }
+  },
+
   recording: {
     start: {
       label: 'Start Recording',
@@ -76,6 +130,82 @@ const MENU_STATES = {
         delete neurosys.__recording
 
         menu.update('recording', { ...MENU_STATES.recording.start, enabled: true })
+      }
+    }
+  },
+
+  pluginSettings: {
+    save: {
+      label: 'Edit Plugin Settings',
+
+      onClick: async () => {
+
+           const allOutputPlugins = neurosys.plugins.output
+           const elements = Object.entries(allOutputPlugins).map(([ key, plugin ]) => {
+
+              const { label } = plugin
+
+              const formContainer = document.createElement('div')
+              formContainer.style.display = 'flex'
+              formContainer.style.flexDirection = 'column'
+              formContainer.style.gap = '10px'
+              formContainer.style.padding = '10px'
+
+              const header = document.createElement('h3')
+              header.textContent = label
+              formContainer.append(header)
+
+              const { settings: schema = {} } = plugin
+              const hasProperties = Object.keys(schema.properties || {}).length > 0
+
+              if (hasProperties) {
+                // const form = new JSONSchemaForm({ data: {}, schema })
+                const form = document.createElement('form')
+                form.textContent = 'Cannot generate form yet...'
+                formContainer.append(form)
+              }
+
+              else {
+                const message = document.createElement('small')
+                message.textContent = 'No settings available'
+                formContainer.append(message)
+              }
+
+
+              return formContainer
+           })
+
+           // Sort by has form
+           .sort((a, b) => {  
+              const hasFormA = a.querySelector('form')
+              const hasFormB = b.querySelector('form')
+              return hasFormA && !hasFormB ? -1 : 1
+           })
+
+
+          //  const allProtocols = neurosys.getAll()
+          //  allProtocols.forEach((protocol) => {
+          //   const outputPlugins = protocol.outputs
+          //   const evaluationPlugins = protocol.evaluations
+          //   console.log(outputPlugins, evaluationPlugins)
+          // })
+
+          const container = document.createElement('div')
+          container.style.display = 'flex'
+          container.style.flexDirection = 'column'
+          container.style.gap = '10px'
+          container.append(...elements)
+        
+          const modal = createModal({ 
+            title: 'Plugin Settings', 
+            content: container
+          })
+
+          document.body.append(modal)
+          modal.showModal()
+
+          modal.addEventListener('close', () => modal.remove())
+
       }
     }
   }
@@ -127,21 +257,7 @@ READY.then(async (PLUGINS) => {
   // Start calculating
   setInterval(calculate, UPDATE_INVERVAL)
 
-  menu.add('recording', MENU_STATES.recording.start)
-
-  const { menu: { onDeviceDisconnect } } = await READY
-
-  onDeviceDisconnect(async () => {
-
-    const client = neurosys.__client
-    delete neurosys.__client
-    await client.disconnect()
-    neurosys.reset() // Reset the system
-    menu.update('recording', MENU_STATES.recording.start) // Reset the recording button
-
-    const { menu: { toggleDeviceConnection } } = await READY
-    toggleDeviceConnection(true) // Reset the device connection button
-  })
+  for (const [ key, states ] of Object.entries(MENU_STATES))menu.add(key, Object.values(states)[0]) // Add the first state of each menu option
 
 })
 
@@ -194,43 +310,6 @@ READY.then(async (PLUGINS) => {
     if (!__latest) return
 
     ref.set.call(__ctx, __latest) // Re-set the latest features to the output
-  })
-
-
-  // Allow Device Type Selection with a User Action (to bypass security restrictions)
-
-  menu.showDeviceSelector(async () => {
-
-    const { device, protocol } = await new Promise((resolve, reject) => {
-      const list = new DeviceList({
-        devices: neurosys.plugins.devices,
-
-        // Success
-        onSelect: async (device, protocol) => {
-          resolve({ device, protocol })
-          modal.close()
-        }
-      })
-
-      const modal = createModal({ title: 'Neurofeedback Devices', content: list })
-
-      modal.addEventListener('close', () => {
-        modal.remove()
-        reject('No device selected')
-      })
-
-      document.body.append(modal)
-      modal.showModal()
-    })
-
-    const client = new Client(device)
-    await client.connect(protocol)
-    neurosys.__client = client
-
-    // On Connection Behavior
-    menu.update('recording', { ...MENU_STATES.recording.start, enabled: true })
-
-    menu.toggleDeviceConnection(false) // Success
   })
 })
 

@@ -1,0 +1,8 @@
+{
+  "name": "neurosys-app",
+  "type": "module",
+  "devDependencies": {
+    "@jsfe/form": "^0.4.0",
+    "lit": "^3.2.1"
+  }
+}

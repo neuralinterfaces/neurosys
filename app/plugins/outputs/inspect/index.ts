@@ -37,12 +37,14 @@ export default new Output({
     stop() {
         this.states.anchor.remove()
     },
-    set({ bands, __score }) {
+    set({ bands = {}, __score }) {
         const { features } = this.states
-        if (bands) features.bands.data = bands
-        if (__score) {
-            features.score.info = __score // No way to pass target yet...
-            features.score.requestUpdate() // Ensure re-render
-        }
+
+        // Bandpowers
+        features.bands.data = bands
+    
+        // Score
+        features.score.info = __score
+        features.score.requestUpdate() // Ensure re-render
     }
 })

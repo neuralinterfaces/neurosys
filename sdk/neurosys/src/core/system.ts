@@ -85,15 +85,17 @@ export class System {
   }
 
   get = (key: ProtocolIdentifier = defaulKey) => this.#protocols[key]
+
+  #getAllProtocolIds = () => [ ...Object.getOwnPropertySymbols(this.#protocols), ...Object.keys(this.#protocols) ]
+  getAll = () => this.#getAllProtocolIds().map(id => this.#protocols[id])
+
   load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) =>this.#protocols[id] = new Protocol(settings, this)
 
   async calculate(client: any) {
 
     const result: Record<string | symbol, any> = {}
 
-    const allKeysAndSymbols = [ ...Object.getOwnPropertySymbols(this.#protocols), ...Object.keys(this.#protocols) ]
-
-    for (const id of allKeysAndSymbols) {
+    for (const id of this.#getAllProtocolIds()) {
       const protocol = this.#protocols[id]
       const output = await protocol.calculate(client)
       if (output) result[id] = output

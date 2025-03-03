@@ -17,19 +17,14 @@ export default (icons: Icon) => {
             })
 
             return {
-                showDeviceSelector: (callback) => this.on("devices.show", () => callback()),
 
                 // Output Mechanisms
                 registerOutput: (key, plugin) => this.sendSync("outputs.register", { key, plugin }),
                 onOutputToggle: (callback) => this.on(`outputs.toggle`, (_, key, enabled) => callback(key, enabled)),
 
                 // Evaluation Mechanisms
-                registerEvaluation: (key, plugin) => this.sendSync("evaluation.register", { key, plugin }),
-                onEvaluationToggle: (callback) => this.on(`evaluation.toggle`, (_, key, enabled) => callback(key, enabled)),
-
-                // Connection
-                toggleDeviceConnection: (on = true) => this.send("connection.toggle", on),
-                onDeviceDisconnect: (callback) => this.on("device.disconnect", () => callback()),
+                registerEvaluation: (key, plugin) => this.sendSync("evaluations.register", { key, plugin }),
+                onEvaluationToggle: (callback) => this.on(`evaluations.toggle`, (_, key, enabled) => callback(key, enabled)),
 
                 // Settings
                 onSaveSettings: (callback) => this.on("settings.save", () => callback()),
@@ -67,14 +62,14 @@ export default (icons: Icon) => {
                 const tray = new Tray(icon);
 
                 const SUBMENU_IDS = {
-                    evaluation: "evaluation",
+                    evaluations: "evaluations",
                     outputs: "outputs"
                 }
 
 
                 const template = [
                     { type: 'separator' },
-                    { id: SUBMENU_IDS.evaluation, label: "Score", submenu: [] },
+                    { id: SUBMENU_IDS.evaluations, label: "Score", submenu: [] },
                     { id: SUBMENU_IDS.outputs, label: "Outputs", submenu: [] },
                     { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
                     { type: 'separator' },
@@ -107,25 +102,8 @@ export default (icons: Icon) => {
                     // Build the menu
                     return Menu.buildFromTemplate(noDuplicateSeparators)
                 }
+
                 const updateContextMenu = () => tray.setContextMenu(rebuildMenu())
-
-                const toggleConnection = (on = true) => {
-                    const idx = template.findIndex(item => item.id === "connect")
-
-                    const newItem = new MenuItem({
-                        id: "connect",
-                        label: on ? "Connect to Device" : "Disconnect Device",
-                        click: () => on ? this.send("devices.show") : this.send("device.disconnect")
-                    })
-
-                    if (idx > -1) template[idx] = newItem
-                    else template.unshift(newItem)
-
-                    updateContextMenu()
-                }
-
-                toggleConnection(true)
-                updateContextMenu()
 
                 tray.setToolTip('neurosys');
                 tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
@@ -138,7 +116,7 @@ export default (icons: Icon) => {
                     updateContextMenu()
                 })
 
-                const REGISTERED = { outputs: {}, evaluation: {} }
+                const REGISTERED = { outputs: {}, evaluations: {} }
                 const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.toggle`, key, enabled)
                 const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
                 const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
@@ -172,8 +150,8 @@ export default (icons: Icon) => {
                 }
 
                 const registerNewItem = (id, options) => {
-                    const foundItem = template.find(item => item.id === id)
-                    if (foundItem) return false
+                    const foundItemIdx = template.findIndex(item => item.id === id)
+                    if (foundItemIdx > -1) template.splice(foundItemIdx, 1) // Remove the item if it already exists
 
                     const indexOfFirstSeparator = template.findIndex(item => item.type === 'separator')
                     const insertIdx = indexOfFirstSeparator > -1 ? indexOfFirstSeparator : template.length - 1
@@ -213,13 +191,13 @@ export default (icons: Icon) => {
                     ev.returnValue = success
                 })
 
-                this.on("evaluation.register", (ev, { key, plugin }) => {
+                this.on("evaluations.register", (ev, { key, plugin }) => {
                     const { enabled = false, ...options } = plugin
 
-                    const success = registerNewSubItem(SUBMENU_IDS.evaluation, key, { 
+                    const success = registerNewSubItem(SUBMENU_IDS.evaluations, key, { 
                         type: 'radio', 
                         checked: enabled, 
-                        onClick: () =>  updateAllStates(SUBMENU_IDS.evaluation),
+                        onClick: () =>  updateAllStates(SUBMENU_IDS.evaluations),
                         ...options 
                     })
 
