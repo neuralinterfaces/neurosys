@@ -1,4 +1,5 @@
 import { bandpower as calculateBandPower } from "../../../../../timefreak/src"
+
 import { Feature } from "../../../core/plugins"
 
 type BandSpecification = Record<string, [ number, number ]>

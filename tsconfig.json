@@ -20,5 +20,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["app", "sdk"]
+  "include": [ "packages/**/*" ]
 }

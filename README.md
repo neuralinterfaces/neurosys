@@ -1,24 +1,23 @@
 # Neurosys SDK
-
-The Neurosys software suite provides real-time neurofeedback for multiple EEG + fNIRS devices using a system overlay.
-
-This repository contains the `neurosys` SDK and a fully-functional template application for system-level neurofeedback.
+`neurosys` is a software development kit for creating neurofeedback applications that support multiple devices (EEG, fNIRS, HEG, etc.) and provide system-level neurofeedback.
 
 ### Why It Matters
-Neurosys intends to meet people where they’re at. Most neurofeedback systems ask you to interrupt your routine for a dedicated session. We allow you to leverage your daily activities for neurofeedback, making it easier to integrate into your life.
+Most neurofeedback systems ask you to interrupt your routine for a dedicated session—but **the Neurosys SDK seeks to meet people where they’re at**. 
+
+Applications built on `neurosys` allow you to leverage your daily activities for neurofeedback, making it easier to integrate into your life.
 
 ### Key Features
-1. System-level neurofeedback outputs like Brightness, Volume, and Cursor Animation.
-2. Support for multiple EEG devices, including the Muse 2 and the HEGduino.
-3. System tray integration for a seamless user experience.
-4. Modular architecture for easy extension and customization.
+1. **System-level Neurofeedback Outputs:** Brightness, Volume, and Cursor Animation.
+2. **Multi-Device Support:** Compatible with most biofeedback devices, with initial support for the Muse 2 and the HEGduino.
+3. **System Tray Integration:** Easily connect and disconnect devices, change evaluation metrics, and select outputs without leaving your current task.
+4. **Modular Architecture:** Easily extend and customize the system with new devices, features, evaluations, and outputs.
 
 ### Applications
-- **[Neurosys](./app/README.md)**: A template application for providing system-level neurofeedback.
+- **[Neurosys Starter Kit](https://github.com/neuralinterfaces/neurosys-starter-kit)**: A template application for providing system-level neurofeedback.
 - **[HEGBeta](https://github.com/garrettmflynn/HEGBeta)**: An HEGduino-focused release for training your HEG ratio.
 
 ## Getting Started
-Neurosys has a modular architecture that allows for easy extension and customization.
+The Neurosys SDK has a modular architecture that allows for easy extension and customization.
 
 ![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
@@ -40,14 +39,7 @@ Finally, build the SDK by running:
 pnpm build:sdk
 ```
 
-## Running the Template Application
-To run the Neurosys application, use the following command:
-```bash
-pnpm start
-```
-
-## Customizing the Plugins
-Neurosys declares plugins in the `commoners.config.ts` file. From this, evaluation and output plugins are automatically detected and loaded into the system tray.
+## Plugin Design
 
 ### Devices 
 Each **devices** plugin has:
@@ -240,12 +232,3 @@ All `GET` requests to the `.neurosys` sub-route return a collection of available
 ```json
 { "success": false, "error": "Error message" }
 ```
-
-## Common Issues
-### Native Node Modules
-It's likely that `robot.js` (if included) will give you trouble when being used through Electron. To solve this, you can try the following:
-```
-npm rebuild.js
-```
-
-This will rebuild the necessary modules for your current operating system.

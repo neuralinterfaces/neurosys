@@ -2,6 +2,7 @@
   "name": "neurosys",
   "version": "0.0.2",
   "description": "An SDK for system-level neurofeedback",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
