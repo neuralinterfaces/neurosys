@@ -29,7 +29,8 @@ function assertValidData(data: any, schema: any) {
 export type FormProps = {
     data?: any
     schema: JSONSchema7,
-	ui?: UiSchema
+	ui?: UiSchema,
+	submitButton?: boolean
 }
 
 export class JSONSchemaForm extends LitElement {
@@ -46,20 +47,28 @@ export class JSONSchemaForm extends LitElement {
     declare data: any
     declare schema: FormProps['schema']
 	declare ui: FormProps['ui']
+	declare submitButton: boolean
 
     static get properties() {
         return {
             data: { type: Object },
             schema: { type: Object },
-			ui: { type: Object }
+			ui: { type: Object },
+			submitButton: { type: Boolean }
         }
     }
 
-    constructor({ data = {}, schema, ui }: FormProps) {
+    constructor({ 
+		data = {}, 
+		schema, 
+		ui,
+		submitButton = true
+	}: FormProps) {
         super()
         this.schema = schema
         this.data = data
 		this.ui = ui || {}
+		this.submitButton = submitButton
     }
 
 
@@ -73,10 +82,12 @@ export class JSONSchemaForm extends LitElement {
 				.schema=${schema}
 				.data=${data}
 				.uiSchema=${this.ui}
+				.submitButton=${this.submitButton}
 				.dataChangeCallback=${(newData: unknown) => {
 					const validation = assertValidData(newData, schema)
 					if (validation.valid) this.data = newData
 					else console.error('Invalid data:', validation.errors, structuredClone(newData))
+					this.dispatchEvent(new CustomEvent('change', { detail: validation.valid }))
 				}}
 				.submitCallback=${(newData: unknown, valid: boolean) => {
 					if (!valid) return 

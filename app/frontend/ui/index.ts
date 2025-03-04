@@ -16,15 +16,19 @@ const setIgnoreMouseEvents = async (ignore: boolean) => {
 // }
 
 
-export const createModal = ({ title, content }: { 
-  title: string,
+export const createModal = ({ header, content }: { 
+  header: string | HTMLElement,
   content?: HTMLElement
 }) => {
 
   const modal = document.createElement('dialog') 
 
-  const header = document.createElement('header')
-  header.innerText = title
+  if (typeof header === 'string') {
+    const headerElement = document.createElement('header')
+    headerElement.innerText = header
+    header = headerElement
+  }
+
   modal.appendChild(header)
 
   const main = document.createElement('main')

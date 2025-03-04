@@ -71,7 +71,7 @@ const MENU_STATES = {
             }
           })
 
-          const modal = createModal({ title: 'Neurofeedback Devices', content: list })
+          const modal = createModal({ header: 'Neurofeedback Devices', content: list })
 
           modal.addEventListener('close', () => {
             modal.remove()
@@ -198,39 +198,68 @@ const MENU_STATES = {
            const form = new JSONSchemaForm({ 
               data: aggregatedInfo.data, 
               schema: { type: "object", properties: aggregatedInfo.properties },
-              ui: aggregatedInfo.uiSchema 
+              ui: aggregatedInfo.uiSchema,
+              submitButton: false
             })
 
-           form.addEventListener("submit", async () => {
 
-              let hasSaveableChange = false
-              for (const pluginName in form.data) {
+          const updateProtocolsWithNewFormData = (formData: any) => {
+            let hasSaveableChange = false
+            for (const pluginName in formData) {
 
-                const plugin = neurosys.plugins.output[pluginName]
-                if (!plugin) continue
+              const plugin = neurosys.plugins.output[pluginName]
+              if (!plugin) continue
 
-                for (const protocolIdx in form.data[pluginName]) {
-                  const data = form.data[pluginName][protocolIdx]
+              for (const protocolIdx in formData[pluginName]) {
+                const data = formData[pluginName][protocolIdx]
 
-                  const protocol = allProtocols[protocolIdx]
-                  if (!protocol) continue
+                const protocol = allProtocols[protocolIdx]
+                if (!protocol) continue
 
-                  const { changed } = protocol.update('outputs', pluginName, { settings: data })
-                  if (changed) hasSaveableChange = true
-                }
+                const { changed } = protocol.update('outputs', pluginName, { settings: data })
+                if (changed) hasSaveableChange = true
               }
+            }
 
-              if (hasSaveableChange) {
+            return hasSaveableChange
+          }
+            
+
+          form.addEventListener("change", async (ev) => {
+            const { detail: valid } = ev
+            if (valid) {
+
+              const saveable = updateProtocolsWithNewFormData(form.data)
+
+              if (saveable) {
                 const { menu } = await READY
                 menu.enableSettings(true)
               }
+            }
+          })
 
-              modal.close()
+          if (form.submitButton) form.addEventListener("submit", async () => {
+            const saveable = updateProtocolsWithNewFormData(form.data)
 
-            })
+            if (saveable) {
+              const { menu } = await READY
+              menu.enableSettings(true)
+            }
+            
+            modal.close()
+          })
+
+          const header = document.createElement('header')
+          Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center' })
+          const headerText = document.createElement('span')
+          headerText.innerText = 'Plugin Settings'
+          const closeButton = document.createElement('button')
+          closeButton.innerText = 'Close'
+          closeButton.onclick = () => modal.close()
+          header.append(headerText, closeButton)
 
           const modal = createModal({ 
-            title: 'Plugin Settings', 
+            header, 
             content: form
           })
 
@@ -368,7 +397,7 @@ devices.setDeviceDiscoveryHandler(async (onSelect) => {
     }
   })
 
-  const modal = createModal({ title: 'Discovered USB Devices', content: list })
+  const modal = createModal({ header: 'Discovered USB Devices', content: list })
   document.body.append(modal)
   modal.showModal()
 
