@@ -15,7 +15,7 @@ const exampleDeviceList = [
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
   title: 'App/Devices',
-  tags: ['autodocs'],
+  // tags: ['autodocs'],
   render: (args) => new DeviceList(args),
   argTypes: {
     // backgroundColor: { control: 'color' },

@@ -54,6 +54,20 @@ export class DeviceList extends LitElement {
             ul li:not(:first-child) {
                 border-top: 1px solid #333;
             }
+
+            button {
+                padding: 10px 20px;
+                background-color: #333;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+
+            button[disabled] {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
         `
     }
 
@@ -74,8 +88,8 @@ export class DeviceList extends LitElement {
 
                 // Resolve protocols
                 const resolvedProtocols = Object.entries(info.protocols ?? {}).map(([ id, protocol ]) => {
-                    const overrides = typeof protocol === 'string' ? { label: protocol } : {}
-                    return { ...protocol, ...overrides, id }
+                    const overrides = typeof protocol === 'string' ? { label: protocol } : { }
+                    return { enabled: true, ...protocol, ...overrides, id }
                 })
             
                 return { ...info, protocols: resolvedProtocols}

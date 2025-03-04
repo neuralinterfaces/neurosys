@@ -19,7 +19,7 @@ const range = max - min;
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
-  title: 'Plugins/Outputs/Inspect',
+  title: 'Plugins/Inspect',
   tags: [ 'plugin', 'output', 'inspect' ],
   render: ({ bands, score }) => {
     const bandsComponent = new Bandpowers({ data: bands });

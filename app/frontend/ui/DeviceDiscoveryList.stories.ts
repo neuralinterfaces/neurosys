@@ -14,7 +14,7 @@ const exampleDeviceList = [
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
   title: 'App/DeviceDiscovery',
-  tags: ['autodocs'],
+  // tags: ['autodocs'],
   render: (args) => new DeviceDiscoveryList(args),
   argTypes: {
     emptyMessage: { control: 'text' }
