@@ -6,52 +6,42 @@ type Icons = {
 type MenuInfo = {
     name: string
     icons: Icons,
+    template?: any[]
 }
 
-export default ({ name, icons }: MenuInfo) => {
+export default ({ name, icons, template: inputTemplate = [] }: MenuInfo) => {
     return {
         assets: icons,
         load() {
 
 
-            const managedItems = {}
+            const managedItems: Record<string, any> = {}
 
-            this.on("menu.click", (_, id) => {  
+            this.on("menu.click", (_, id, info = {}) => {  
                 const item = managedItems[id]
-                if (item.onClick) item.onClick() // Maintain context
+                if (item.onClick) item.onClick(info) // Maintain context
             })
 
             return {
 
-                // Output Mechanisms
-                registerOutput: (key, plugin) => this.sendSync("outputs.register", { key, plugin }),
-                onOutputToggle: (callback) => this.on(`outputs.toggle`, (_, key, enabled) => callback(key, enabled)),
-
-                // Evaluation Mechanisms
-                registerEvaluation: (key, plugin) => this.sendSync("evaluations.register", { key, plugin }),
-                onEvaluationToggle: (callback) => this.on(`evaluations.toggle`, (_, key, enabled) => callback(key, enabled)),
-
-                // Settings
-                onSaveSettings: (callback) => this.on("settings.save", () => callback()),
-                loadSettings: (settings) => this.send("settings.load", settings),
-                enableSettings: (enabled) => this.send("settings.enabled", enabled),
-
                 // Menu Item Management
-                add: (id, options) => {
+                set: (id, options) => {
                     const { onClick, ...rest } = options
-                    const result = this.sendSync("menu.add", { id, options: rest })
+                    const result = this.sendSync("menu.set", { id, options: rest })
                     if (result) managedItems[id] = options // Maintain original context
                     return result
                 },
-                update: (id, options) => {
+
+                setItem: (id, options) => {
                     const { onClick, ...rest } = options
-                    const result = this.sendSync("menu.update", { id, options: rest })
-                    if (result) managedItems[id] = options // Maintain original context
+                    const fullIdentifier = `${id}.${options.id}`
+                    const result = this.sendSync("menu.setItem", { id, options: rest })
+                    if (result) managedItems[fullIdentifier] = options // Maintain original context
                     return result
                 },
-                remove: (id) => {
-                    const result = this.sendSync("menu.remove", id)
-                    if (result) delete managedItems[id]
+
+                setVisibility: (fullId, state = true) => {
+                    const result = this.sendSync("menu.visibility", fullId, state)
                     return result
                 }
             }
@@ -66,20 +56,7 @@ export default ({ name, icons }: MenuInfo) => {
 
                 const tray = new Tray(icon);
 
-                const SUBMENU_IDS = {
-                    evaluations: "evaluations",
-                    outputs: "outputs"
-                }
-
-
-                const template = [
-                    { type: 'separator' },
-                    { id: SUBMENU_IDS.evaluations, label: "Score", submenu: [] },
-                    { id: SUBMENU_IDS.outputs, label: "Outputs", submenu: [] },
-                    { id: "settings", label: "Save Settings", enabled: false, click: () => this.send("settings.save") },
-                    { type: 'separator' },
-                    { label: 'Quit', role: 'quit' }
-                ]
+                const template = structuredClone(inputTemplate) // Clone the template to avoid mutation
 
                 const rebuildMenu = () => {
 
@@ -93,7 +70,7 @@ export default ({ name, icons }: MenuInfo) => {
                     // Remove settings menu item if no submenu is active
                     const anyActiveSubmenus = templateWithoutEmptySubmenus.some(item => item.submenu)
                     if (!anyActiveSubmenus) {
-                        const settingsIdx = templateWithoutEmptySubmenus.findIndex(item => item.id === "settings")
+                        const settingsIdx = templateWithoutEmptySubmenus.findIndex(item => item.id === "saveSettings")
                         if (settingsIdx > -1) templateWithoutEmptySubmenus.splice(settingsIdx, 1)
                     }
                         
@@ -113,147 +90,76 @@ export default ({ name, icons }: MenuInfo) => {
                 tray.setToolTip(name);
                 tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
 
-                this.on("connection.toggle", (_, on) => toggleConnection(on))
-
-                this.on("settings.enabled", (_, enabled) => {
-                    const idx = template.findIndex(item => item.id === "settings")
-                    template[idx].enabled = enabled
-                    updateContextMenu()
-                })
-
-                const REGISTERED = { outputs: {}, evaluations: {} }
-                const sendState = (id, key, enabled) => REGISTERED[id]?.[key] && this.send(`${id}.toggle`, key, enabled)
-                const getAllItems = (id) => template.find(item => item.id === id)?.submenu ?? []
-                const updateAllStates = (id) => getAllItems(id).forEach(item => sendState(id, item.id, item.checked))
-
                 const registerNewSubItem = (
-                    id,
-                    key = id,
-                    options
+                    id: string,
+                    key: string,
+                    options: Record<string, any>
                 ) => {
 
-                    const registered = REGISTERED[id] ?? (REGISTERED[id] = {})
-                    if (registered[key]) return false
+                    const fullId = `${id}.${key}`
 
                     const foundItem = template.find(item => item.id === id)
                     if (!foundItem) return
 
                     const submenu = foundItem.submenu as any[]
 
+                    const sendState = () => this.send("menu.click", fullId, { id: key, enabled: item.checked }) // send settings
+
                     const item = new MenuItem({
                         id: key,
                         ...options,
-                        click: () => options.onClick && options.onClick(item)
+                        click: sendState
                     })
 
                     submenu.push(item)
                     updateContextMenu()
 
-                    registered[key] = true
+                    // Update with initial state
+                    sendState()
 
                     return true
                 }
 
-                const registerNewItem = (id, options) => {
-                    const foundItemIdx = template.findIndex(item => item.id === id)
-                    if (foundItemIdx > -1) template.splice(foundItemIdx, 1) // Remove the item if it already exists
-
-                    const indexOfFirstSeparator = template.findIndex(item => item.type === 'separator')
-                    const insertIdx = indexOfFirstSeparator > -1 ? indexOfFirstSeparator : template.length - 1
-
-                    const item = new MenuItem({
-                        id,
-                        ...options,
-                        click: () => options.onClick && options.onClick(item)
-                    })
-
-                    template.splice(insertIdx, 0, item)
-                    
-                    updateContextMenu()
-
-                    return true
-                }
-
-                const updateMenuItem = (id, options) => {
+                const setMenuItem = (id, options) => {
                     const foundItem = template.find(item => item.id === id)
-                    if (!foundItem) return false
-                    Object.assign(foundItem, options)
+                    if (!foundItem) return false // Cannot spontaneously add a new item
+
+
+                    Object.assign(foundItem, {
+                        ...options,
+                        click: () => this.send("menu.click", id) // Send clicks. No state to send
+                    })
+
                     updateContextMenu()
                     return true
                 }
 
-                // ------------------------- Define Setting Options ------------------------- \\
-                this.on("outputs.register", (ev, { key, plugin }) => {
-                    const { enabled = false, ...options } = plugin
-
-                    const success = registerNewSubItem(SUBMENU_IDS.outputs, key, { 
-                        type: 'checkbox', 
-                        checked: enabled, 
-                        onClick: (item) => sendState(SUBMENU_IDS.outputs, key, item.checked),
-                        ...options 
-                    })
-
+                this.on("menu.set", (ev, { id, options }) => {
+                    const success = setMenuItem(
+                        id, 
+                        options
+                    )
                     ev.returnValue = success
                 })
 
-                this.on("evaluations.register", (ev, { key, plugin }) => {
-                    const { enabled = false, ...options } = plugin
-
-                    const success = registerNewSubItem(SUBMENU_IDS.evaluations, key, { 
-                        type: 'radio', 
-                        checked: enabled, 
-                        onClick: () =>  updateAllStates(SUBMENU_IDS.evaluations),
-                        ...options 
-                    })
-
+                this.on("menu.setItem", (ev, { id, options }) => {
+                    const key = options.id
+                    const fullId = `${id}.${key}`
+                    const success = registerNewSubItem(id, key, {  ...options,  onClick: () => this.send("menu.click", fullId)  })
                     ev.returnValue = success
                 })
 
-                // ------------------------- Allow Configuration based on Settings ------------------------- \\
+                this.on("menu.visibility", (ev, fullId, visible) => {
 
-                this.on("settings.load", (_, settings) => {
+                    const [ id, subId ] = fullId.split('.')
 
-                    for (const [id, registered] of Object.entries(REGISTERED)) {
-                        const categorySettings = settings[id] ?? {}
-                        const itemMetadata = Object.entries(registered).map(([key, _]) => {
-                            const itemSettings = categorySettings[key] ?? {}
-                            const { enabled = false } = itemSettings
-
-                            const actualMenuItem = template.find(item => item.id === id).submenu.find(item => item.id === key)
-                            if (actualMenuItem) {
-                                const isRadio = actualMenuItem.type === "radio"
-                                if (!isRadio || enabled) actualMenuItem.checked = enabled
-                                return { radio: isRadio, item: actualMenuItem, enabled }
-                            }
-                        })
-
-                        // Enable the first radio item by default, if none are enabled
-                        const radioItems = itemMetadata.filter(item => item?.radio)
-                        if (radioItems.length && !radioItems.find(item => item?.enabled)) radioItems[0].item.checked = true
-
-                        updateAllStates(id) // Update all other states in case any changed
-                    }
-
-                    updateContextMenu()
-                })
-
-                this.on("menu.add", (ev, { id, options }) => {
-                    const success = registerNewItem(id, { ...options, onClick: () => this.send("menu.click", id) })
-                    ev.returnValue = success
-                })
-
-                this.on("menu.update", (ev, { id, options }) => {
-                    const success = updateMenuItem(id, { ...options })
-                    ev.returnValue = success
-                })
-
-                this.on("menu.remove", (ev, id) => {
                     const foundItem = template.find(item => item.id === id)
                     if (!foundItem) return ev.returnValue = false
 
                     const submenu = foundItem.submenu as any[]
-                    const idx = submenu.findIndex(item => item.id === id)
-                    if (idx > -1) submenu.splice(idx, 1)
+                    const item = submenu.find(item => item.id === subId)
+                    if (!item) return ev.returnValue = false
+                    item.hidden = visible
 
                     updateContextMenu()
                     ev.returnValue = true

@@ -107,6 +107,8 @@ export class Protocol {
             if (plugin) acc.push(plugin)
             return acc
         }, []) // Use protocol settings to get active evaluation plugins
+
+        console.log('Active evaluation plugins:', plugins, this.evaluations)
         
         if (!plugins.length) return null // No evaluation plugin active
         if (plugins.length > 1) console.warn('Only one evaluation plugin is supported for now')
@@ -122,6 +124,9 @@ export class Protocol {
             const settings = featureSettings[id]
             calculatedFeatures[id] = await features.calculate(plugin, settings, client)
         }
+
+        console.log('Calculated features:', calculatedFeatures)
+
     
         // Calculate a score from the provided features
         const evaluatedMetric = await evaluate(plugin, calculatedFeatures)
