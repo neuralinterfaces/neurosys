@@ -15,7 +15,7 @@ const volume = new Output({
                 minimum: 0,
                 maximum: 100,
                 multipleOf: 1,
-                default: 10
+                default: 20
             },
             maxVolume: {
                 title: "Maximum Volume",
@@ -23,7 +23,7 @@ const volume = new Output({
                 minimum: 0,
                 maximum: 100,
                 multipleOf: 1,
-                default: 75,
+                default: 60,
             }
         },
         required: [ "minVolume", "maxVolume" ],
