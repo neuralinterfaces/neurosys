@@ -39,7 +39,8 @@ const config = {
         
         // Allow for managing and saving the active protocol
         settings: system.settings({
-            evaluations: { heg: { enabled: true } },
+            // evaluations: { heg: { enabled: true } },
+            evaluations: { alpha: { enabled: true } },
             outputs: { 
                 inspect: { enabled: true },
                 // 'volume:volume': { settings: { range: [ 0.3, 0.9 ] } }

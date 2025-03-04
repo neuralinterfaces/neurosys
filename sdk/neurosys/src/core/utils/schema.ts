@@ -1,4 +1,4 @@
-import { Draft07, draft07Config, JsonValidator } from "json-schema-library";
+import { Draft07 } from "json-schema-library";
 
 export const getTemplate = (schema: Record<string, any>, data = {}) => {
     const copy = JSON.parse(JSON.stringify(schema));

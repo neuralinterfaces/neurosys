@@ -12,6 +12,8 @@ export * as evaluation from './evaluation'
 export * as features from './features'
 export * as devices from './devices'
 
+export * as utils from './utils'
+
 export { System } from "./system"
 
 // SSPs

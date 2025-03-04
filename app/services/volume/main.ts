@@ -12,22 +12,38 @@ const volume = new Output({
             minVolume: {
                 title: "Minimum Volume",
                 type: "number",
-                default: 0.1
+                minimum: 0,
+                maximum: 100,
+                multipleOf: 1,
+                default: 10
             },
             maxVolume: {
                 title: "Maximum Volume",
                 type: "number",
-                max: 1,
-                default: 0.75,
+                minimum: 0,
+                maximum: 100,
+                multipleOf: 1,
+                default: 75,
             }
         },
-        required: [ "minVolume", "maxVolume" ]
+        required: [ "minVolume", "maxVolume" ],
+
+        __uiSchema: {
+            minVolume: { "ui:widget": "range" },
+            maxVolume: { "ui:widget": "range" }
+        }
     },
     start: () => console.log('Volume plugin started'),
     stop: () => console.log('Volume plugin stopped'),
     async set({ score }) {
-        const { minVolume = 0, maxVolume = 1 } = this.settings
+        
+        const { minVolume: _min = 0, maxVolume: _max = 100 } = this.settings
+        const minVolume = _min / 100
+        const maxVolume = _max / 100
         const level = minVolume + (maxVolume - minVolume) * score // Normalize in level
+
+        console.log(level, _min, _max)
+
         return setVolume(level)
     }
 });

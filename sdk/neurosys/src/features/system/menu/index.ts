@@ -12,8 +12,8 @@ export default (icons: Icon) => {
             const managedItems = {}
 
             this.on("menu.click", (_, id) => {  
-                const onClick = managedItems[id]
-                if (onClick) onClick()
+                const item = managedItems[id]
+                if (item.onClick) item.onClick() // Maintain context
             })
 
             return {
@@ -35,13 +35,13 @@ export default (icons: Icon) => {
                 add: (id, options) => {
                     const { onClick, ...rest } = options
                     const result = this.sendSync("menu.add", { id, options: rest })
-                    if (result) managedItems[id] = onClick
+                    if (result) managedItems[id] = options // Maintain original context
                     return result
                 },
                 update: (id, options) => {
                     const { onClick, ...rest } = options
                     const result = this.sendSync("menu.update", { id, options: rest })
-                    if (result) managedItems[id] = onClick
+                    if (result) managedItems[id] = options // Maintain original context
                     return result
                 },
                 remove: (id) => {

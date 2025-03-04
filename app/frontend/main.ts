@@ -2,6 +2,7 @@ import './style.css'
 
 import { getAllServerSidePlugins, System, devices, Recording, Client } from 'neurosys'
 import { DeviceList, DeviceDiscoveryList, createModal } from './ui'
+import { JSONSchemaForm } from './ui/JSONSchemaForm'
 // import { JSONSchemaForm } from './ui/JSONSchemaForm'
 
 
@@ -138,73 +139,110 @@ const MENU_STATES = {
     save: {
       label: 'Edit Plugin Settings',
 
-      onClick: async () => {
+      async onClick() {
+
+          if (this.open) return
+
+          const allProtocols = neurosys.getAll()
 
            const allOutputPlugins = neurosys.plugins.output
-           const elements = Object.entries(allOutputPlugins).map(([ key, plugin ]) => {
+           const aggregatedInfo = Object.entries(allOutputPlugins)
+           .sort(([ _, a ], [ __, b ]) => {
+              const aProps = a.settings?.properties
+              const bProps = b.settings?.properties
+              if (aProps && bProps) return a.label.localeCompare(b.label)
+              if (aProps) return -1
+              if (bProps) return 1
+              return 0
+           })
+           
+           .reduce((acc, [ key, plugin ]) => {
 
-              const { label } = plugin
+              const { label, settings: schema } = plugin
 
-              const formContainer = document.createElement('div')
-              formContainer.style.display = 'flex'
-              formContainer.style.flexDirection = 'column'
-              formContainer.style.gap = '10px'
-              formContainer.style.padding = '10px'
+              const { __uiSchema = {}, ...rest } = schema
 
-              const header = document.createElement('h3')
-              header.textContent = label
-              formContainer.append(header)
+              const info = { type: 'object', title: label, properties: {}, ...rest }
+              if (Object.keys(info.properties).length === 0) Object.assign(info, { description: 'No settings available' })
 
-              const { settings: schema = {} } = plugin
-              const hasProperties = Object.keys(schema.properties || {}).length > 0
+              const data = allProtocols.reduce((acc, protocol, i) => {
+                const { settings = {} } = protocol.outputs[key] ?? {}
+                return { ...acc, [i]: settings }
+              }, {})
 
-              if (hasProperties) {
-                // const form = new JSONSchemaForm({ data: {}, schema })
-                const form = document.createElement('form')
-                form.textContent = 'Cannot generate form yet...'
-                formContainer.append(form)
+
+              return {
+                properties: { 
+                  ...acc.properties, 
+                  [key]: {
+                    type: 'object',
+                    title: label,
+                    properties: allProtocols.reduce((acc, _, i) => ({ 
+                      ...acc, 
+                      [i]: {
+                        ...info,
+                        title: `Protocol ${i + 1}`
+                      }
+                    }), {})
+                  }
+                },
+                uiSchema: { 
+                  ...acc.uiSchema, 
+                  [key]: allProtocols.reduce((acc, _, i) => ({ ...acc,  [i]: __uiSchema }), {}) 
+                },
+                data: { ...acc.data, [key]: data }
               }
 
-              else {
-                const message = document.createElement('small')
-                message.textContent = 'No settings available'
-                formContainer.append(message)
+            }, { properties: {}, uiSchema: {}, data: {} })
+            
+           const form = new JSONSchemaForm({ 
+              data: aggregatedInfo.data, 
+              schema: { type: "object", properties: aggregatedInfo.properties },
+              ui: aggregatedInfo.uiSchema 
+            })
+
+           form.addEventListener("submit", async () => {
+
+              let hasSaveableChange = false
+              for (const pluginName in form.data) {
+
+                const plugin = neurosys.plugins.output[pluginName]
+                if (!plugin) continue
+
+                for (const protocolIdx in form.data[pluginName]) {
+                  const data = form.data[pluginName][protocolIdx]
+
+                  const protocol = allProtocols[protocolIdx]
+                  if (!protocol) continue
+
+                  const { changed } = protocol.update('outputs', pluginName, { settings: data })
+                  if (changed) hasSaveableChange = true
+                }
               }
 
+              if (hasSaveableChange) {
+                const { menu } = await READY
+                menu.enableSettings(true)
+              }
 
-              return formContainer
-           })
+              modal.close()
 
-           // Sort by has form
-           .sort((a, b) => {  
-              const hasFormA = a.querySelector('form')
-              const hasFormB = b.querySelector('form')
-              return hasFormA && !hasFormB ? -1 : 1
-           })
+            })
 
-
-          //  const allProtocols = neurosys.getAll()
-          //  allProtocols.forEach((protocol) => {
-          //   const outputPlugins = protocol.outputs
-          //   const evaluationPlugins = protocol.evaluations
-          //   console.log(outputPlugins, evaluationPlugins)
-          // })
-
-          const container = document.createElement('div')
-          container.style.display = 'flex'
-          container.style.flexDirection = 'column'
-          container.style.gap = '10px'
-          container.append(...elements)
-        
           const modal = createModal({ 
             title: 'Plugin Settings', 
-            content: container
+            content: form
           })
 
           document.body.append(modal)
           modal.showModal()
 
-          modal.addEventListener('close', () => modal.remove())
+          modal.addEventListener('close', () => {
+            modal.remove()
+            this.open = false
+          })
+
+          this.open = true
 
       }
     }

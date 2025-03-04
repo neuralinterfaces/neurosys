@@ -1,78 +1,91 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, unsafeCSS } from 'lit';
 
-import '@jsfe/form';
-import type { JSONSchema7 } from '@jsfe/form';
+// Styling for light and dark themes
+import '@jsfe/shoelace';
+import lightCSS from '@shoelace-style/shoelace/dist/themes/light.css?raw'
+import darkCSS from '@shoelace-style/shoelace/dist/themes/dark.css?raw'
+
+import { utils } from 'neurosys'
+
+import type { JSONSchema7, UiSchema } from '@jsfe/shoelace';
+
+import Ajv from "ajv";
+const ajv = new Ajv({ 
+	allErrors: true, 
+	$data: true
+});
 
 // -----------------------------------------------------------------------------
-function assertValidData(data: unknown): boolean {
-	// Use your AJV or other schema checker here, if you need thorough validation
-    console.log("validate data", data)
-	return true;
+function assertValidData(data: any, schema: any) {
+	const validate = ajv.compile(schema);
+	const valid = validate(data);
+	
+	return {
+		valid,
+		errors: validate.errors
+	}
 }
 
 export type FormProps = {
-    data: any
-    schema: JSONSchema7
+    data?: any
+    schema: JSONSchema7,
+	ui?: UiSchema
 }
 
 export class JSONSchemaForm extends LitElement {
 
-    declare data: FormProps['data']
-    declare schema: FormProps['schema']
-
 	static get styles() {
 		return css`
-			json-schema-form {
-				margin: 2rem;
-				width: calc(50rem + 5vw);
+			${unsafeCSS(lightCSS)}
+			@media (prefers-color-scheme: dark) {
+				${unsafeCSS(darkCSS)}
 			}
 		`;
 	}
 
+    declare data: any
+    declare schema: FormProps['schema']
+	declare ui: FormProps['ui']
+
     static get properties() {
         return {
             data: { type: Object },
-            schema: { type: Object }
+            schema: { type: Object },
+			ui: { type: Object }
         }
     }
 
-    constructor({ data, schema }: FormProps) {
+    constructor({ data = {}, schema, ui }: FormProps) {
         super()
         this.schema = schema
         this.data = data
+		this.ui = ui || {}
     }
 
 
-
 	override render() {
-		console.log('Rendering JSONSchemaForm...', this.schema, this.data);
-		return html`
-			<json-schema-form
-				.schema=${this.schema}
-				.uiSchema=${{
-					bar: {
-						'ui:widget': 'switch',
-					},
-				}}
-				.data=${this.data}
-				.dataChangeCallback=${(newData: unknown) => {
-					console.log({ 'Data from Lit': newData });
 
-					if (assertValidData(newData)) this.data = newData;
-					else console.error('Invalid data!');
+		const schema = utils.schema.resolveSchema(this.schema, this.data);
+		const data = utils.schema.getTemplate(schema, this.data);
+
+		return html`
+			<jsf-shoelace
+				.schema=${schema}
+				.data=${data}
+				.uiSchema=${this.ui}
+				.dataChangeCallback=${(newData: unknown) => {
+					const validation = assertValidData(newData, schema)
+					if (validation.valid) this.data = newData
+					else console.error('Invalid data:', validation.errors, structuredClone(newData))
 				}}
 				.submitCallback=${(newData: unknown, valid: boolean) => {
-					console.log({ 'Submitted from Lit!': newData, valid });
-
-					if (assertValidData(newData)) {
-						// Do stuff...
-					}
+					if (!valid) return 
+					const schema = utils.schema.resolveSchema(this.schema, newData);
+					const validation = assertValidData(newData, schema)
+					if (!validation.valid) return console.error('Invalid data:', validation.errors, structuredClone(newData))
+					this.dispatchEvent(new CustomEvent('submit'))
 				}}
-
-				
-			></json-schema-form>
-
-			<pre>${JSON.stringify({ data: this.data }, null, 2)}</pre>
+			></jsf-shoelace>
 		`;
 	}
 }

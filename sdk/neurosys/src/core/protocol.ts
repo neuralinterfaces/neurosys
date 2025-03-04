@@ -11,7 +11,7 @@ import type { EnhancedOutputPlugin } from "./outputs"
 // Utilities
 import { calculate as evaluate } from './evaluation'
 import { Score } from "./score"
-import { getTemplate, resolveSchema } from "./plugins/utils"
+import { getTemplate, resolveSchema } from "./utils/schema"
 
 type OutputSettings = Record<string, EnhancedOutputPlugin>
 type EvaluationSettings = Record<string, EnhancedEvaluatePlugin>
@@ -28,7 +28,7 @@ export class Protocol {
     outputs: OutputSettings = {}
     evaluations: EvaluationSettings = {}
 
-    settings: Record<string, Record<string, any>> = {}
+    #settings: Record<string, Record<string, any>> = {}
 
     #system: System
     #score = new Score() // The score normalizer
@@ -45,6 +45,10 @@ export class Protocol {
         this.#refreshSettings()
     }
 
+    get (type: keyof ProtocolSettings, plugin: string) {
+        return this[type][plugin]
+    }
+
     update(
         type: keyof ProtocolSettings, 
         plugin: string, 
@@ -54,10 +58,14 @@ export class Protocol {
         const collection = this[type]
         const oldSettings = structuredClone(collection[plugin])
 
-        Object.assign(collection[plugin] ?? (collection[plugin] = {}), settings)
+        if (!collection[plugin]) collection[plugin] = {}
+
+        const resolved = collection[plugin]
+
+        Object.assign(resolved, settings)
 
         // Delete from the collection if the plugin is only disabled
-        const isOnlyDisabled = typeof collection[plugin] === 'object' && Object.keys(collection[plugin]).length <= 1 && !collection[plugin].enabled
+        const isOnlyDisabled = typeof resolved === 'object' && Object.keys(resolved).length <= 1 && resolved.enabled == false // Must be explicitly disabled
         if (isOnlyDisabled) delete collection[plugin]     
         
         const newSettings = collection[plugin]
@@ -72,9 +80,10 @@ export class Protocol {
         }
     }
 
+    // ONLY OUTPUTS HAVE SETTINGS FOR NOW
     #refreshSettings = () => {
-        this.settings = {
-            oututs: Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
+        this.#settings = {
+            outputs: Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
                 const plugin = this.#system.plugins.output[key]
                 if (!plugin) return acc
     
@@ -129,7 +138,7 @@ export class Protocol {
             const plugin = allPlugins.output[key]
             if (!plugin) return
 
-            const settings = this.settings.output[key]
+            const settings = this.#settings.outputs[key]
 
             plugin.__ctx.settings = settings // Set the settings in the context
 

@@ -31,8 +31,8 @@ dialog:modal {
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  width: clamp(0px, 100%, 400px);
-  max-height: clamp(0px, 100%, 400px);
+  width: clamp(0px, calc(100% - 100px), 600px);
+  max-height: clamp(0px, calc(100% - 100px), 600px);
   border-radius: 10px;
   border: none;
   padding: 0;

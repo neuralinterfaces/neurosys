@@ -410,7 +410,7 @@ export default {
           "MyCustomWidgetRte": {
             "title": "Rich Text Editor",
             "type": "string"
-          }
+          },
         }
       }
     }
