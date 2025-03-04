@@ -1,9 +1,14 @@
-type Icon = {
+type Icons = {
     icon: string
     [key: string]: string
 }
 
-export default (icons: Icon) => {
+type MenuInfo = {
+    name: string
+    icons: Icons,
+}
+
+export default ({ name, icons }: MenuInfo) => {
     return {
         assets: icons,
         load() {
@@ -105,7 +110,7 @@ export default (icons: Icon) => {
 
                 const updateContextMenu = () => tray.setContextMenu(rebuildMenu())
 
-                tray.setToolTip('neurosys');
+                tray.setToolTip(name);
                 tray.on('click', () => tray.popUpContextMenu()); // On Windows, it's ideal to open something from the app here...
 
                 this.on("connection.toggle", (_, on) => toggleConnection(on))

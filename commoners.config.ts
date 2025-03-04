@@ -17,6 +17,8 @@ const examples = {
 // const DEBUG = false
 const DEBUG = true
 
+const shorthandName = 'neurosys'
+
 const config = {
     name: "Neurosys",
     target: "electron",
@@ -35,16 +37,24 @@ const config = {
 
         // // --------------------------------- Required Plugins --------------------------------- //
         overlay: system.overlay({ debug: DEBUG }),
-        menu: system.menu({ icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }), // Control the application through a system tray
+
+        // Control the application through a system tray
+        menu: system.menu({
+            name: shorthandName,
+            icons: { icon: "./app/assets/iconTemplate.png", icon2x: "./app/assets/iconTemplate@2x.png" }
+        }),
         
         // Allow for managing and saving the active protocol
         settings: system.settings({
-            // evaluations: { heg: { enabled: true } },
-            evaluations: { alpha: { enabled: true } },
-            outputs: { 
-                inspect: { enabled: true },
-                // 'volume:volume': { settings: { range: [ 0.3, 0.9 ] } }
-            },
+            directory: shorthandName,
+            defaultContent: {
+                // evaluations: { heg: { enabled: true } },
+                evaluations: { alpha: { enabled: true } },
+                outputs: { 
+                    inspect: { enabled: true },
+                    // 'volume:volume': { settings: { range: [ 0.3, 0.9 ] } }
+                },
+            }
         }),
         
         bluetooth: system.bluetooth, // For Desktop Support

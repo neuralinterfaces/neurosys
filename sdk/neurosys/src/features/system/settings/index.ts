@@ -1,4 +1,9 @@
-export default (defaultSettingsContent = {}) => ({
+type SettingsOptions = {
+    directory: string
+    defaultContent?: any
+}
+
+export default ({ defaultContent, directory }: SettingsOptions) => ({
     
     load() {
         return {
@@ -13,7 +18,7 @@ export default (defaultSettingsContent = {}) => ({
             const fs = require('fs')
             const path = require('path')
 
-            const homeDir = path.join(require('os').homedir(), 'neurosys')
+            const homeDir = path.join(require('os').homedir(), directory)
             const protocolsDir = path.join(homeDir, 'protocols')
 
             const getProtocolsPath = (name: string) => path.join(protocolsDir, `${name}.json`)
@@ -27,7 +32,7 @@ export default (defaultSettingsContent = {}) => ({
 
             this.on('get', (event, name) => {
                 const filePath = getProtocolsPath(name)
-                if (!fs.existsSync(filePath)) return event.returnValue = defaultSettingsContent
+                if (!fs.existsSync(filePath)) return event.returnValue = defaultContent
                 const data = fs.readFileSync(filePath)
                 const parsed = JSON.parse(data)
                 return event.returnValue = parsed
