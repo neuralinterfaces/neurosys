@@ -1,5 +1,7 @@
 # Neurosys SDK
-`neurosys` is a software development kit for creating neurofeedback applications that support multiple devices (EEG, fNIRS, HEG, etc.) and provide system-level neurofeedback.
+`neurosys` is a software development kit for system-level neurofeedback applications that support multiple devices (EEG, fNIRS, HEG, etc.).
+
+![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
 
 ### Why It Matters
 Most neurofeedback systems ask you to interrupt your routine for a dedicated session—but **the Neurosys SDK seeks to meet people where they’re at**. 
@@ -12,14 +14,9 @@ Applications built on `neurosys` allow you to leverage your daily activities for
 3. **System Tray Integration:** Easily connect and disconnect devices, change evaluation metrics, and select outputs without leaving your current task.
 4. **Modular Architecture:** Easily extend and customize the system with new devices, features, evaluations, and outputs.
 
-### Applications
-- **[Neurosys Starter Kit](https://github.com/neuralinterfaces/neurosys-starter-kit)**: A template application for providing system-level neurofeedback.
-- **[HEGBeta](https://github.com/garrettmflynn/HEGBeta)**: An HEGduino-focused release for training your HEG ratio.
-
-## Getting Started
-The Neurosys SDK has a modular architecture that allows for easy extension and customization.
-
-![Neurosys Architecture](./docs/assets/NeurosysArchitecture.png)
+### Featured Applications
+1. **[Neurosys Starter Kit](https://github.com/neuralinterfaces/neurosys-starter-kit)** is a template application for providing system-level neurofeedback.
+2. **[HEGBeta](https://github.com/garrettmflynn/HEGBeta)** is an HEGduino-focused build for training your HEG ratio.
 
 ## Installation
 You will need to have [Node.js](https://nodejs.org/en/) installed on your machine.
@@ -34,9 +31,9 @@ Install all dependencies by running the following command:
 pnpm install
 ```
 
-Finally, build the SDK by running:
+Finally, build all SDK packages by running:
 ```bash
-pnpm build:sdk
+pnpm build
 ```
 
 ## Plugin Design
