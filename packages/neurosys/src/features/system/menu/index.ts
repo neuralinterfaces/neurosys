@@ -32,12 +32,33 @@ export default ({ name, icons, template: inputTemplate = [] }: MenuInfo) => {
                     return result
                 },
 
-                setItem: (id, options) => {
-                    const { onClick, ...rest } = options
-                    const fullIdentifier = `${id}.${options.id}`
-                    const result = this.sendSync("menu.setItem", { id, options: rest })
-                    if (result) managedItems[fullIdentifier] = options // Maintain original context
+                setItem: (id, item) => {
+                    const { onClick, ...rest } = item
+                    const fullIdentifier = `${id}.${item.id}`
+                    const result = this.sendSync("menu.setItem", id, rest)
+                    if (result) managedItems[fullIdentifier] = item // Maintain original context
                     return result
+                },
+
+                setItems: (id, items) => {
+
+                    const sanitized = items.map((item) => {
+                        const { onClick, ...rest } = item
+                        return rest
+                    })
+
+                    const itemsById = items.reduce((acc, item) => { 
+                        acc[item.id] = item
+                        return acc
+                    }, {})
+
+                    const results = this.sendSync("menu.setItems", id, sanitized)
+
+                    for (const [ idx, result ] of results.entries()) {
+                        if (result) managedItems[`${id}.${items[idx].id}`] = itemsById[items[idx].id] // Maintain original context
+                    }
+
+                    return results
                 },
 
                 setVisibility: (fullId, state = true) => {
@@ -99,11 +120,13 @@ export default ({ name, icons, template: inputTemplate = [] }: MenuInfo) => {
                     const fullId = `${id}.${key}`
 
                     const foundItem = template.find(item => item.id === id)
-                    if (!foundItem) return
+                    if (!foundItem) return { success: false }
 
                     const submenu = foundItem.submenu as any[]
 
-                    const sendState = () => this.send("menu.click", fullId, { id: key, enabled: item.checked }) // send settings
+                    const foundSubitemIdx = submenu.findIndex(item => item.id === key)
+
+                    const sendState = () => this.send("menu.click", fullId, { id: key, enabled: !!item.checked }) // send settings
 
                     const item = new MenuItem({
                         id: key,
@@ -111,13 +134,15 @@ export default ({ name, icons, template: inputTemplate = [] }: MenuInfo) => {
                         click: sendState
                     })
 
-                    submenu.push(item)
+                    if (foundSubitemIdx > -1)  submenu[foundSubitemIdx] = item
+                    else submenu.push(item)
+                    
                     updateContextMenu()
 
-                    // Update with initial state
-                    sendState()
-
-                    return true
+                    return  { 
+                        success: true, 
+                        update: () => sendState() // Defer updating frontend with the current state
+                    }
                 }
 
                 const setMenuItem = (id, options) => {
@@ -142,11 +167,21 @@ export default ({ name, icons, template: inputTemplate = [] }: MenuInfo) => {
                     ev.returnValue = success
                 })
 
-                this.on("menu.setItem", (ev, { id, options }) => {
-                    const key = options.id
-                    const fullId = `${id}.${key}`
-                    const success = registerNewSubItem(id, key, {  ...options,  onClick: () => this.send("menu.click", fullId)  })
+                this.on("menu.setItem", (ev, id, item) => {
+                    const key = item.id
+                    const { success, update } = registerNewSubItem(id, key, item)
+                    if (success && update) update()
                     ev.returnValue = success
+                })
+
+                this.on("menu.setItems", (ev, id, items) => {
+
+                    const results = items.map(item => registerNewSubItem(id, item.id, item))
+
+                    ev.returnValue = results.map(({ success, update }) => {
+                        if (success && update) update() // Update the frontend after all items are registered
+                        return success
+                    })
                 })
 
                 this.on("menu.visibility", (ev, fullId, visible) => {

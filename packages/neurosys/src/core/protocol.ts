@@ -12,9 +12,11 @@ import type { EnhancedOutputPlugin } from "./outputs"
 import { calculate as evaluate } from './evaluation'
 import { Score } from "./score"
 import { getTemplate, resolveSchema } from "./utils/schema"
+import { ExclusiveGroup, StandardGroup } from "./groups"
 
 type OutputSettings = Record<string, EnhancedOutputPlugin>
 type EvaluationSettings = Record<string, EnhancedEvaluatePlugin>
+
 
 export type CalculationOutput = { score: number, __score: Score, [key: string]: any }
 
@@ -25,17 +27,19 @@ export type ProtocolSettings = {
 
 export class Protocol {
 
-    outputs: OutputSettings = {}
-    evaluations: EvaluationSettings = {}
+    outputs: StandardGroup<EnhancedOutputPlugin>
+    evaluations: ExclusiveGroup<EnhancedEvaluatePlugin>
 
     #settings: Record<string, Record<string, any>> = {}
 
     #system: System
     #score = new Score() // The score normalizer
     
-
     constructor(settings: ProtocolSettings, system: System) {
-        Object.assign(this, settings)
+
+        this.outputs = new StandardGroup(settings.outputs)
+        this.evaluations = new ExclusiveGroup(settings.evaluations)
+
         this.#system = system
         this.reset()
     }
@@ -46,29 +50,28 @@ export class Protocol {
     }
 
     get (type: keyof ProtocolSettings, plugin: string) {
-        return this[type][plugin]
+        return this[type].get(plugin)
+    }
+
+    export() {
+        return {
+            outputs: this.outputs.export(),
+            evaluations: this.evaluations.export()
+        }
     }
 
     update(
         type: keyof ProtocolSettings, 
         plugin: string, 
-        settings = {}
+        settings: any = {}
     ) {
 
         const collection = this[type]
-        const oldSettings = structuredClone(collection[plugin])
+        if (!collection.has(plugin)) collection.set(plugin, settings)
 
-        if (!collection[plugin]) collection[plugin] = {}
+        const oldSettings = structuredClone(collection.get(plugin))
+        const newSettings = collection.set(plugin, settings)
 
-        const resolved = collection[plugin]
-
-        Object.assign(resolved, settings)
-
-        // Delete from the collection if the plugin is only disabled
-        const isOnlyDisabled = typeof resolved === 'object' && Object.keys(resolved).length <= 1 && resolved.enabled == false // Must be explicitly disabled
-        if (isOnlyDisabled) delete collection[plugin]     
-        
-        const newSettings = collection[plugin]
         const hasChanged = JSON.stringify(oldSettings) !== JSON.stringify(newSettings)
 
         if (type === 'evaluations' && hasChanged) this.reset() // Reset the score if the evaluation has changed
@@ -76,14 +79,15 @@ export class Protocol {
 
         return {
             changed: hasChanged,
-            value: collection[plugin]
+            value: newSettings
         }
     }
 
     // ONLY OUTPUTS HAVE SETTINGS FOR NOW
     #refreshSettings = () => {
+        const outputs = this.outputs.export()
         this.#settings = {
-            outputs: Object.entries(this.outputs).reduce((acc, [ key, { settings = {} } ]) => {
+            outputs: Object.entries(outputs).reduce((acc, [ key, { settings = {} } ]) => {
                 const plugin = this.#system.plugins.output[key]
                 if (!plugin) return acc
     
@@ -100,15 +104,14 @@ export class Protocol {
         if (!client) return null // No client connected
 
         const allPlugins = this.#system.plugins
+        const evaluations = this.evaluations.export()
 
-        const activeEvaluations = Object.entries(this.evaluations).filter(([ _, value ]) => value.enabled).map(([key]) => key)
+        const activeEvaluations = Object.entries(evaluations).filter(([ _, value ]) => value.enabled).map(([key]) => key)
         const plugins = activeEvaluations.reduce((acc, key) => {
             const plugin = allPlugins.evaluation[key]
             if (plugin) acc.push(plugin)
             return acc
         }, []) // Use protocol settings to get active evaluation plugins
-
-        console.log('Active evaluation plugins:', plugins, this.evaluations)
         
         if (!plugins.length) return null // No evaluation plugin active
         if (plugins.length > 1) console.warn('Only one evaluation plugin is supported for now')
@@ -124,16 +127,14 @@ export class Protocol {
             const settings = featureSettings[id]
             calculatedFeatures[id] = await features.calculate(plugin, settings, client)
         }
-
-        console.log('Calculated features:', calculatedFeatures)
-
     
         // Calculate a score from the provided features
         const evaluatedMetric = await evaluate(plugin, calculatedFeatures)
         const normalizedScore = this.#score.update(evaluatedMetric)
 
         // Get active outputs
-        const activeOutputPluginKeys = Object.entries(this.outputs).filter(([ _, value ]) => value.enabled).map(([key]) => key)
+        const outputs = this.outputs.export()
+        const activeOutputPluginKeys = Object.entries(outputs).filter(([ _, value ]) => value.enabled).map(([key]) => key)
 
         // Set the feedback from the calculated score and features
         const inputs = { score: normalizedScore, __score: this.#score, ...calculatedFeatures }
