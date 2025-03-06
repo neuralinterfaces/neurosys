@@ -9,6 +9,9 @@ import { Device } from '../../../core/plugins'
 
 export default new Device({
     name: 'Muse',
+
+    // NOTE: Add settings like in B@P so that you can decide to enable/disable PPG and AUX
+
     protocols: {
         ble: { label: 'Bluetooth' },
     },
