@@ -44,6 +44,23 @@ export class Protocol {
         this.reset()
     }
 
+    #runStateChangeCallbacks = async (key: string) => {
+        const pluginState = this.outputs.get(key)
+        const enabled = pluginState.enabled
+        const __callback = enabled ? 'start' : 'stop'
+        const ref = this.#system.plugins.output[key]
+        const callback = ref[__callback]
+        if (callback) return await callback.call(ref.__ctx)
+        
+    }
+
+    initialize = async () => {
+        const exportedOutputs = this.outputs.export()
+        const outputKeys = Object.keys(exportedOutputs)
+        await Promise.all(outputKeys.map(this.#runStateChangeCallbacks))
+    }
+      
+
     reset() {
         this.#score = new Score()
         this.#refreshSettings()
@@ -75,7 +92,10 @@ export class Protocol {
         const hasChanged = JSON.stringify(oldSettings) !== JSON.stringify(newSettings)
 
         if (type === 'evaluations' && hasChanged) this.reset() // Reset the score if the evaluation has changed
-        else if (hasChanged) this.#refreshSettings() // Update the settings for the output plugins
+        else if (hasChanged) {
+            this.#runStateChangeCallbacks(plugin)
+            this.#refreshSettings() // Update the settings for the output plugins
+        }
 
         return {
             changed: hasChanged,

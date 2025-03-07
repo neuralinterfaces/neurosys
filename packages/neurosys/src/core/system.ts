@@ -89,7 +89,11 @@ export class System {
   #getAllProtocolIds = () => [ ...Object.getOwnPropertySymbols(this.#protocols), ...Object.keys(this.#protocols) ]
   getAll = () => this.#getAllProtocolIds().map(id => this.#protocols[id])
 
-  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) =>this.#protocols[id] = new Protocol(settings, this)
+  load = async (settings: ProtocolSettings, id: ProtocolIdentifier = defaulKey) => {
+    const protocol = this.#protocols[id] = new Protocol(settings, this)
+    await protocol.initialize()
+    return protocol
+  }
 
   async calculate(client: any) {
 
