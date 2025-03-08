@@ -26,15 +26,17 @@ export default new Feature({
             return Object.entries(data).reduce((acc, [ch, chData]) => {
 
                 const sliced = window ? chData.slice(...window) : chData
-                const powers = calculateBandPower(
+                const { bands: bandsData, total } = calculateBandPower(
                     sliced,
                     sfreq,
-                    Object.values(bands),
-                    { relative: true }
+                    Object.values(bands)
                 )
 
                 acc[ch] = Object.keys(bands).reduce((acc, identifier, idx) => {
-                    acc[identifier] = powers[idx]
+                    acc[identifier] = {
+                        value: bandsData[idx],
+                        total: total
+                    }
                     return acc
                 }, {}) as Record<string, number>
 

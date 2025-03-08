@@ -1,15 +1,12 @@
 import { periodogram } from './periodogram.js';
 import { integrate, nextpow2 } from './utils.js';
 
-type Band = [number, number]
-
 export function bandpower(
     samples: number[],
     sample_rate: number,
-    bands: Array<string | Band>,
+    bands: [number, number][],
     options?: {
         fftSize?: number, 
-        relative?: boolean, 
         window?: 'hann' | 'rectangular'
     }
 ) {
@@ -17,9 +14,8 @@ export function bandpower(
     const signal_length = samples.length;
 
     // Handle default options
-    const { fftSize, relative, window } = Object.assign({
+    const { fftSize, window } = Object.assign({
         fftSize: Math.pow(2, nextpow2(signal_length)),
-        relative: false,
         window: 'hann'
     }, options);
 
@@ -29,14 +25,19 @@ export function bandpower(
    
     // Calculate the total power for relative power calculation if selected in options
     const dx = sample_rate / fftSize;
-    const total_power = relative ? integrate(psd.estimates, dx) : 1;
+    const total_power = integrate(psd.estimates, dx) 
 
     // Calculate area in each band
-    return bands.map((band) => {
+    const output = bands.map((band) => {
         const low_index = Math.floor(band[0] / sample_rate * fftSize);
         const high_index = Math.min(Math.ceil(band[1] / sample_rate * fftSize), psd.estimates.length - 1);
         const psd_band = psd.estimates.slice(low_index, high_index + 1);
         if (psd_band.length < 2) throw new Error('Unable to calculate power in specified bands. Please increase fftSize or sample length');
-        return integrate(psd_band, dx) / total_power;
+        return integrate(psd_band, dx);
     })
+
+    return {
+        total: total_power, // Return total power for relative power calculation
+        bands: output
+    };
 }

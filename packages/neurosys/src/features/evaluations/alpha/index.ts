@@ -18,6 +18,6 @@ export default new Evaluate({
         }
     },
     get({ bands = {} }) {
-        return Object.values(bands).reduce((acc, { alpha }) => acc + alpha, 0) / Object.keys(bands).length
+        return Object.values(bands).reduce((acc, { alpha }) => acc + alpha.value, 0) / Object.keys(bands).length // Get average total bandoower
     }
 })
