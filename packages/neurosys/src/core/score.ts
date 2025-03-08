@@ -15,6 +15,7 @@ export class Score {
     #target: Target
     target: boolean
 
+    #retentionPeriod: number = 10 // Retention period in seconds
     #history: number[] = []
 
     constructor({ 
@@ -42,16 +43,22 @@ export class Score {
         this.min = isNaN(this.min) ? value : (value < this.min ? value : this.min);
         this.max = isNaN(this.max) ? value : (value > this.max ? value : this.max);
 
+        // Filter out old values
+        const now = performance.now()
+        this.#history = this.#history.filter(({ timestamp }) => now - timestamp < this.#retentionPeriod * 1000)
+        
         // Update the target values
-        if (!isNaN(value)) this.#history.push(value)
+        if (!isNaN(value)) this.#history.push({ value, timestamp: now })
+
 
         // Mean value
-        const mean = this.#history.reduce((acc, value) => acc + value, 0) / this.#history.length
-        const std = Math.sqrt(this.#history.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0) / this.#history.length)
+        const mean = this.#history.reduce((acc, { value }) => acc + value, 0) / this.#history.length
+        const std = Math.sqrt(this.#history.reduce((acc, { value }) => acc + Math.pow(value - mean, 2), 0) / this.#history.length)
 
+        // Reward at 50% for maintaining the mean value
         this.#target = [ 
-            mean,
-            mean + std
+            mean - 2*std, 
+            mean + 2*std
         ]
 
         return this.normalize(value)
@@ -65,9 +72,13 @@ export class Score {
         return this.raw >= this.#target[0] && this.raw <= this.#target[1]
     }
 
-    normalize(value: number) {        
+    normalize(
+        value: number,
+        bounds: false | Target = this.target ? this.#target : false
+    ) {        
         this.raw = value
-        const [ min, max ] = this.target ? this.#target : [ this.min, this.max ]
+        const resolvedBounds = !bounds ? [ this.min, this.max ] : bounds
+        const [ min, max ] = resolvedBounds
         return Math.max(0, Math.min(1, (value - min) / (max - min))) // Clamp at 0/1 while togging between target and min/max norm
     }
 }
